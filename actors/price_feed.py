@@ -216,7 +216,16 @@ class SQLiteFeed(PriceFeed):
         Para rangos muy grandes (>50k velas) preferir iter_candles().
         """
         start_ms = to_epoch_s(start) * 1000
-        end_ms   = to_epoch_s(end)   * 1000
+        # Incluir el día completo: si end es una fecha sin hora (00:00:00),
+        # extender al último segundo del día (23:59:59) para que el rango
+        # sea consistente con FECHA_FIN='2022-11-22' → hasta las 23:59:59.
+        end_epoch = to_epoch_s(end)
+        # Detectar si el timestamp apunta exactamente al inicio del día (medianoche)
+        from datetime import datetime, timezone
+        end_dt = datetime.fromtimestamp(end_epoch, tz=timezone.utc)
+        if end_dt.hour == 0 and end_dt.minute == 0 and end_dt.second == 0:
+            end_epoch += 86399   # +23h 59m 59s → fin del día completo
+        end_ms = end_epoch * 1000
 
         rows = self._query(start_ms, end_ms)
         candles = [self._row_to_candle(r) for r in rows]

@@ -174,7 +174,8 @@ class MemoryWallet(Wallet):
 
     def __init__(self, usdt_inicial: float, max_posiciones: int) -> None:
         self._usdt:          float          = usdt_inicial
-        self._btc_libre:     float          = 0.0
+        self._btc_libre:          float          = 0.0
+        self._btc_acumulado_total: float          = 0.0   # BTC total vendido históricamente
         self._posiciones:    deque[Position] = deque()
         self._max_pos:       int            = max_posiciones
         self._slot_usdt:     float          = usdt_inicial / max_posiciones
@@ -185,6 +186,7 @@ class MemoryWallet(Wallet):
 
     def get_usdt_balance(self)  -> float:           return self._usdt
     def get_btc_balance(self)   -> float:           return self._btc_libre
+    def get_btc_acumulado(self) -> float:           return self._btc_acumulado_total
     def get_positions(self)     -> List[Position]:  return list(self._posiciones)
     def get_slot_usdt(self)     -> float:           return self._slot_usdt
     def get_btc_por_venta(self) -> float:           return self._btc_por_venta
@@ -204,7 +206,9 @@ class MemoryWallet(Wallet):
 
         elif trade.side == "SELL":
             self._usdt += (trade.usdt_received or 0.0)
-            self._reducir_posiciones_fifo(trade.btc_sold or 0.0)
+            btc_vendido = trade.btc_sold or 0.0
+            self._reducir_posiciones_fifo(btc_vendido)
+            self._btc_acumulado_total += btc_vendido
             # Recalcular slot si la cartera quedó vacía
             if self.positions_count == 0:
                 self._recalcular_slot()
@@ -213,6 +217,7 @@ class MemoryWallet(Wallet):
         return {
             "usdt_balance":               round(self._usdt, 8),
             "btc_libre":                  round(self._btc_libre, 10),
+            "btc_acumulado_total":        round(self._btc_acumulado_total, 10),
             "btc_en_posiciones":          round(self.btc_en_posiciones(), 10),
             "positions_count":            self.positions_count,
             "precio_promedio_posiciones": round(self.precio_promedio_posiciones(), 8),
@@ -228,7 +233,8 @@ class MemoryWallet(Wallet):
     def reset(self) -> None:
         """Reinicia la billetera al estado inicial — útil entre runs del grid."""
         self._usdt          = self._usdt_inicial
-        self._btc_libre     = 0.0
+        self._btc_libre            = 0.0
+        self._btc_acumulado_total  = 0.0
         self._posiciones    = deque()
         self._slot_usdt     = self._usdt_inicial / self._max_pos
         self._btc_por_venta = 0.0

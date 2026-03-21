@@ -214,7 +214,7 @@ def main(use_cache: bool = True, clear_cache: bool = False) -> None:
         "saldo_inicial_usdt":       CL.SALDO_USDT_INICIAL,
         "usdt_balance_final":       round(wallet.get_usdt_balance(), 8),
         "btc_balance_final":        round(wallet.get_btc_balance(), 10),
-        "btc_acumulado_total":      round(wallet.get_btc_balance(), 10),
+        "btc_acumulado_total":      round(wallet.get_btc_acumulado(), 10),
         "btc_en_posiciones_final":  round(wallet.btc_en_posiciones(), 10),
         "precio_promedio_final":    round(wallet.precio_promedio_posiciones(), 8),
         "portfolio_value_final":    round(port_final, 4),

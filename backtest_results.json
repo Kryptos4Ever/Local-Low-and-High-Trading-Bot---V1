@@ -6,13 +6,13 @@
     "saldo_inicial_usdt": 1000.0,
     "usdt_balance_final": 2060.72183949,
     "btc_balance_final": 0.0,
-    "btc_acumulado_total": 0.0,
+    "btc_acumulado_total": 4.2717977167,
     "btc_en_posiciones_final": 0.1600019311,
     "precio_promedio_final": 16327.82390911,
-    "portfolio_value_final": 4599.3893,
-    "pnl_pct": 359.9389,
-    "buy_hold_pnl_pct": -76.3176,
-    "alpha_vs_bh": 436.2565,
+    "portfolio_value_final": 4657.0636,
+    "pnl_pct": 365.7064,
+    "buy_hold_pnl_pct": -75.7795,
+    "alpha_vs_bh": 441.4859,
     "precio_min_comprado": 15588.0,
     "precio_max_vendido": 66401.82,
     "atl_final": 15476.0,
@@ -20,11 +20,11 @@
     "total_trades_ejecutados": 575,
     "total_compras": 281,
     "total_ventas": 294,
-    "total_ignorados": 40,
+    "total_ignorados": 41,
     "ordenes_canceladas": 0,
     "ignorados_por_motivo": {
       "sin_posiciones": 4,
-      "max_posiciones(5)": 36
+      "max_posiciones(5)": 37
     },
     "positions_count_final": 5,
     "usdt_reserva_aplicada": 0.0,
@@ -49,7 +49,7 @@
   },
   "trade_history": [
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-11T00:00:00Z",
       "type": "SELL",
       "price": 69000.0,
       "score_bot": null,
@@ -71,7 +71,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-11T07:00:00Z",
       "type": "BUY",
       "price": 62822.9,
       "score_bot": null,
@@ -93,7 +93,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-11T19:00:00Z",
       "type": "SELL",
       "price": 65600.07,
       "score_bot": null,
@@ -115,7 +115,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-12T12:00:00Z",
       "type": "SELL",
       "price": 65450.7,
       "score_bot": null,
@@ -137,7 +137,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-13T02:00:00Z",
       "type": "BUY",
       "price": 62278.0,
       "score_bot": null,
@@ -159,7 +159,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-13T06:00:00Z",
       "type": "SELL",
       "price": 64890.0,
       "score_bot": null,
@@ -181,7 +181,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-13T19:00:00Z",
       "type": "BUY",
       "price": 63360.22,
       "score_bot": null,
@@ -203,7 +203,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-14T10:00:00Z",
       "type": "SELL",
       "price": 65320.0,
       "score_bot": null,
@@ -225,7 +225,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-15T02:00:00Z",
       "type": "BUY",
       "price": 63576.27,
       "score_bot": null,
@@ -247,7 +247,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-15T19:00:00Z",
       "type": "SELL",
       "price": 66401.82,
       "score_bot": null,
@@ -269,7 +269,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-16T20:00:00Z",
       "type": "BUY",
       "price": 58574.07,
       "score_bot": null,
@@ -291,7 +291,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-17T20:00:00Z",
       "type": "BUY",
       "price": 58373.0,
       "score_bot": null,
@@ -313,7 +313,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-17T21:00:00Z",
       "type": "SELL",
       "price": 60840.23,
       "score_bot": null,
@@ -335,7 +335,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-18T11:00:00Z",
       "type": "SELL",
       "price": 60976.0,
       "score_bot": null,
@@ -357,7 +357,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-19T13:00:00Z",
       "type": "BUY",
       "price": 55600.0,
       "score_bot": null,
@@ -379,7 +379,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-20T12:00:00Z",
       "type": "SELL",
       "price": 58979.97,
       "score_bot": null,
@@ -401,7 +401,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-21T02:00:00Z",
       "type": "BUY",
       "price": 57353.0,
       "score_bot": null,
@@ -423,7 +423,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-21T09:00:00Z",
       "type": "SELL",
       "price": 59845.0,
       "score_bot": null,
@@ -445,7 +445,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-21T20:00:00Z",
       "type": "BUY",
       "price": 58486.65,
       "score_bot": null,
@@ -467,7 +467,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-22T03:00:00Z",
       "type": "SELL",
       "price": 60029.76,
       "score_bot": null,
@@ -489,7 +489,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-22T23:00:00Z",
       "type": "SELL",
       "price": 59444.0,
       "score_bot": null,
@@ -511,7 +511,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-23T07:00:00Z",
       "type": "BUY",
       "price": 55610.0,
       "score_bot": null,
@@ -533,7 +533,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-23T19:00:00Z",
       "type": "BUY",
       "price": 55317.0,
       "score_bot": null,
@@ -555,7 +555,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-23T20:00:00Z",
       "type": "SELL",
       "price": 58009.99,
       "score_bot": null,
@@ -577,7 +577,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-24T12:00:00Z",
       "type": "BUY",
       "price": 56136.0,
       "score_bot": null,
@@ -599,7 +599,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-25T00:00:00Z",
       "type": "BUY",
       "price": 55837.0,
       "score_bot": null,
@@ -621,7 +621,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-26T09:00:00Z",
       "type": "SELL",
       "price": 59398.9,
       "score_bot": null,
@@ -643,7 +643,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-26T22:00:00Z",
       "type": "BUY",
       "price": 53500.0,
       "score_bot": null,
@@ -665,7 +665,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-27T09:00:00Z",
       "type": "BUY",
       "price": 53521.0,
       "score_bot": null,
@@ -687,7 +687,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-27T18:00:00Z",
       "type": "SELL",
       "price": 55280.0,
       "score_bot": null,
@@ -709,7 +709,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-28T12:00:00Z",
       "type": "BUY",
       "price": 53666.6,
       "score_bot": null,
@@ -731,7 +731,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-29T04:00:00Z",
       "type": "BUY",
       "price": 53256.64,
       "score_bot": null,
@@ -753,7 +753,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-29T11:00:00Z",
       "type": "SELL",
       "price": 58242.09,
       "score_bot": null,
@@ -775,7 +775,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-30T04:00:00Z",
       "type": "SELL",
       "price": 58865.97,
       "score_bot": null,
@@ -797,7 +797,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-11-30T16:00:00Z",
       "type": "BUY",
       "price": 55875.55,
       "score_bot": null,
@@ -819,7 +819,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-01T01:00:00Z",
       "type": "SELL",
       "price": 59176.99,
       "score_bot": null,
@@ -841,7 +841,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-02T02:00:00Z",
       "type": "SELL",
       "price": 59053.55,
       "score_bot": null,
@@ -863,7 +863,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-02T13:00:00Z",
       "type": "BUY",
       "price": 55777.77,
       "score_bot": null,
@@ -885,7 +885,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-03T01:00:00Z",
       "type": "SELL",
       "price": 57367.67,
       "score_bot": null,
@@ -907,7 +907,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-03T02:00:00Z",
       "type": "BUY",
       "price": 56001.0,
       "score_bot": null,
@@ -929,7 +929,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-03T23:00:00Z",
       "type": "SELL",
       "price": 57600.0,
       "score_bot": null,
@@ -951,7 +951,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-04T15:00:00Z",
       "type": "BUY",
       "price": 42000.3,
       "score_bot": null,
@@ -973,7 +973,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-05T10:00:00Z",
       "type": "SELL",
       "price": 49699.0,
       "score_bot": null,
@@ -995,7 +995,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-05T22:00:00Z",
       "type": "SELL",
       "price": 49699.05,
       "score_bot": null,
@@ -1017,7 +1017,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-06T01:00:00Z",
       "type": "BUY",
       "price": 47727.21,
       "score_bot": null,
@@ -1039,7 +1039,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-06T09:00:00Z",
       "type": "SELL",
       "price": 49546.69,
       "score_bot": null,
@@ -1061,7 +1061,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-06T19:00:00Z",
       "type": "BUY",
       "price": 47100.0,
       "score_bot": null,
@@ -1083,7 +1083,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-08T01:00:00Z",
       "type": "SELL",
       "price": 51936.33,
       "score_bot": null,
@@ -1105,7 +1105,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-08T08:00:00Z",
       "type": "BUY",
       "price": 50039.74,
       "score_bot": null,
@@ -1127,7 +1127,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-08T22:00:00Z",
       "type": "BUY",
       "price": 48600.0,
       "score_bot": null,
@@ -1149,7 +1149,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-09T01:00:00Z",
       "type": "SELL",
       "price": 51200.0,
       "score_bot": null,
@@ -1171,7 +1171,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-10T06:00:00Z",
       "type": "BUY",
       "price": 47320.0,
       "score_bot": null,
@@ -1193,7 +1193,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-10T23:00:00Z",
       "type": "SELL",
       "price": 50125.0,
       "score_bot": null,
@@ -1215,7 +1215,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-11T10:00:00Z",
       "type": "BUY",
       "price": 46751.0,
       "score_bot": null,
@@ -1237,7 +1237,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-12T10:00:00Z",
       "type": "SELL",
       "price": 49699.95,
       "score_bot": null,
@@ -1259,7 +1259,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-12T20:00:00Z",
       "type": "BUY",
       "price": 48638.0,
       "score_bot": null,
@@ -1281,7 +1281,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-13T04:00:00Z",
       "type": "SELL",
       "price": 50777.0,
       "score_bot": null,
@@ -1303,7 +1303,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-14T05:00:00Z",
       "type": "BUY",
       "price": 45672.75,
       "score_bot": null,
@@ -1325,7 +1325,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-15T04:00:00Z",
       "type": "BUY",
       "price": 46429.88,
       "score_bot": null,
@@ -1347,7 +1347,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-15T18:00:00Z",
       "type": "SELL",
       "price": 48850.0,
       "score_bot": null,
@@ -1369,7 +1369,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-16T02:00:00Z",
       "type": "BUY",
       "price": 46547.0,
       "score_bot": null,
@@ -1391,7 +1391,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-16T06:00:00Z",
       "type": "SELL",
       "price": 49500.0,
       "score_bot": null,
@@ -1413,7 +1413,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-16T21:00:00Z",
       "type": "SELL",
       "price": 49436.43,
       "score_bot": null,
@@ -1435,7 +1435,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-18T01:00:00Z",
       "type": "BUY",
       "price": 45456.0,
       "score_bot": null,
@@ -1457,7 +1457,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-18T12:00:00Z",
       "type": "BUY",
       "price": 45500.0,
       "score_bot": null,
@@ -1479,7 +1479,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-18T20:00:00Z",
       "type": "SELL",
       "price": 47392.37,
       "score_bot": null,
@@ -1501,7 +1501,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-19T05:00:00Z",
       "type": "BUY",
       "price": 46325.61,
       "score_bot": null,
@@ -1523,7 +1523,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-20T00:00:00Z",
       "type": "SELL",
       "price": 48300.01,
       "score_bot": null,
@@ -1545,7 +1545,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-21T00:00:00Z",
       "type": "BUY",
       "price": 45558.85,
       "score_bot": null,
@@ -1567,7 +1567,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-21T22:00:00Z",
       "type": "SELL",
       "price": 49328.96,
       "score_bot": null,
@@ -1589,7 +1589,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-22T01:00:00Z",
       "type": "BUY",
       "price": 48265.24,
       "score_bot": null,
@@ -1611,7 +1611,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-22T12:00:00Z",
       "type": "SELL",
       "price": 49576.13,
       "score_bot": null,
@@ -1633,7 +1633,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-22T23:00:00Z",
       "type": "BUY",
       "price": 48421.87,
       "score_bot": null,
@@ -1655,7 +1655,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-23T10:00:00Z",
       "type": "BUY",
       "price": 47920.42,
       "score_bot": null,
@@ -1677,7 +1677,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-25T01:00:00Z",
       "type": "BUY",
       "price": 50384.43,
       "score_bot": null,
@@ -1699,7 +1699,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-25T05:00:00Z",
       "type": "SELL",
       "price": 51810.0,
       "score_bot": null,
@@ -1721,7 +1721,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-26T04:00:00Z",
       "type": "SELL",
       "price": 51156.23,
       "score_bot": null,
@@ -1743,7 +1743,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-26T21:00:00Z",
       "type": "BUY",
       "price": 49412.0,
       "score_bot": null,
@@ -1765,7 +1765,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-27T08:00:00Z",
       "type": "SELL",
       "price": 51280.0,
       "score_bot": null,
@@ -1787,7 +1787,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-28T03:00:00Z",
       "type": "SELL",
       "price": 52088.0,
       "score_bot": null,
@@ -1809,7 +1809,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-29T05:00:00Z",
       "type": "BUY",
       "price": 47313.01,
       "score_bot": null,
@@ -1831,7 +1831,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-30T10:00:00Z",
       "type": "BUY",
       "price": 45900.0,
       "score_bot": null,
@@ -1853,7 +1853,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-31T05:00:00Z",
       "type": "SELL",
       "price": 47900.0,
       "score_bot": null,
@@ -1875,7 +1875,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-31T08:00:00Z",
       "type": "BUY",
       "price": 46729.0,
       "score_bot": null,
@@ -1897,7 +1897,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-31T18:00:00Z",
       "type": "SELL",
       "price": 48548.26,
       "score_bot": null,
@@ -1919,7 +1919,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2021-12-31T19:00:00Z",
       "type": "SELL",
       "price": 48548.26,
       "score_bot": null,
@@ -1941,7 +1941,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-01T06:00:00Z",
       "type": "BUY",
       "price": 45678.0,
       "score_bot": null,
@@ -1963,7 +1963,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-01T15:00:00Z",
       "type": "SELL",
       "price": 47555.55,
       "score_bot": null,
@@ -1985,7 +1985,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-02T03:00:00Z",
       "type": "SELL",
       "price": 47954.63,
       "score_bot": null,
@@ -2007,7 +2007,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-02T14:00:00Z",
       "type": "BUY",
       "price": 46770.23,
       "score_bot": null,
@@ -2029,7 +2029,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-03T03:00:00Z",
       "type": "SELL",
       "price": 47990.0,
       "score_bot": null,
@@ -2051,7 +2051,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-03T04:00:00Z",
       "type": "BUY",
       "price": 46654.0,
       "score_bot": null,
@@ -2073,7 +2073,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-03T22:00:00Z",
       "type": "SELL",
       "price": 47570.0,
       "score_bot": null,
@@ -2095,7 +2095,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-04T06:00:00Z",
       "type": "BUY",
       "price": 45696.0,
       "score_bot": null,
@@ -2117,7 +2117,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-05T01:00:00Z",
       "type": "SELL",
       "price": 47557.54,
       "score_bot": null,
@@ -2139,7 +2139,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-05T04:00:00Z",
       "type": "BUY",
       "price": 45500.0,
       "score_bot": null,
@@ -2161,7 +2161,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-05T20:00:00Z",
       "type": "SELL",
       "price": 47070.0,
       "score_bot": null,
@@ -2183,7 +2183,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-06T08:00:00Z",
       "type": "BUY",
       "price": 42500.0,
       "score_bot": null,
@@ -2205,7 +2205,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-06T19:00:00Z",
       "type": "BUY",
       "price": 42430.58,
       "score_bot": null,
@@ -2227,7 +2227,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-07T06:00:00Z",
       "type": "SELL",
       "price": 43581.3,
       "score_bot": null,
@@ -2249,7 +2249,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-07T14:00:00Z",
       "type": "BUY",
       "price": 41000.0,
       "score_bot": null,
@@ -2271,7 +2271,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-08T01:00:00Z",
       "type": "BUY",
       "price": 40610.0,
       "score_bot": null,
@@ -2293,7 +2293,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-09T04:00:00Z",
       "type": "BUY",
       "price": 40501.0,
       "score_bot": null,
@@ -2315,7 +2315,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-09T08:00:00Z",
       "type": "SELL",
       "price": 42300.0,
       "score_bot": null,
@@ -2337,7 +2337,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-10T01:00:00Z",
       "type": "BUY",
       "price": 41200.02,
       "score_bot": null,
@@ -2359,7 +2359,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-10T06:00:00Z",
       "type": "SELL",
       "price": 42786.7,
       "score_bot": null,
@@ -2381,7 +2381,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-11T00:00:00Z",
       "type": "BUY",
       "price": 39650.0,
       "score_bot": null,
@@ -2403,7 +2403,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-12T00:00:00Z",
       "type": "BUY",
       "price": 41268.93,
       "score_bot": null,
@@ -2425,7 +2425,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-12T03:00:00Z",
       "type": "SELL",
       "price": 43100.0,
       "score_bot": null,
@@ -2447,7 +2447,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-13T07:00:00Z",
       "type": "SELL",
       "price": 44322.0,
       "score_bot": null,
@@ -2469,7 +2469,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-13T13:00:00Z",
       "type": "BUY",
       "price": 43422.72,
       "score_bot": null,
@@ -2491,7 +2491,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-14T00:00:00Z",
       "type": "SELL",
       "price": 44500.0,
       "score_bot": null,
@@ -2513,7 +2513,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-14T06:00:00Z",
       "type": "BUY",
       "price": 42311.22,
       "score_bot": null,
@@ -2535,7 +2535,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-14T22:00:00Z",
       "type": "BUY",
       "price": 41725.95,
       "score_bot": null,
@@ -2557,7 +2557,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-15T07:00:00Z",
       "type": "SELL",
       "price": 43448.78,
       "score_bot": null,
@@ -2579,7 +2579,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-15T22:00:00Z",
       "type": "BUY",
       "price": 42555.0,
       "score_bot": null,
@@ -2601,7 +2601,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-16T06:00:00Z",
       "type": "SELL",
       "price": 43800.0,
       "score_bot": null,
@@ -2623,7 +2623,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-16T23:00:00Z",
       "type": "BUY",
       "price": 42581.79,
       "score_bot": null,
@@ -2645,7 +2645,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-17T02:00:00Z",
       "type": "SELL",
       "price": 43475.0,
       "score_bot": null,
@@ -2667,7 +2667,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-17T15:00:00Z",
       "type": "BUY",
       "price": 42300.0,
       "score_bot": null,
@@ -2689,7 +2689,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-18T08:00:00Z",
       "type": "BUY",
       "price": 41540.42,
       "score_bot": null,
@@ -2711,7 +2711,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-19T00:00:00Z",
       "type": "BUY",
       "price": 41250.0,
       "score_bot": null,
@@ -2733,7 +2733,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-19T08:00:00Z",
       "type": "SELL",
       "price": 42691.0,
       "score_bot": null,
@@ -2755,7 +2755,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-19T18:00:00Z",
       "type": "BUY",
       "price": 41138.56,
       "score_bot": null,
@@ -2777,7 +2777,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-20T00:00:00Z",
       "type": "SELL",
       "price": 42559.13,
       "score_bot": null,
@@ -2799,7 +2799,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-21T02:00:00Z",
       "type": "SELL",
       "price": 43505.0,
       "score_bot": null,
@@ -2821,7 +2821,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-22T20:00:00Z",
       "type": "BUY",
       "price": 34008.0,
       "score_bot": null,
@@ -2843,7 +2843,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-23T19:00:00Z",
       "type": "SELL",
       "price": 36150.76,
       "score_bot": null,
@@ -2865,7 +2865,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-24T05:00:00Z",
       "type": "BUY",
       "price": 34601.01,
       "score_bot": null,
@@ -2887,7 +2887,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-24T09:00:00Z",
       "type": "SELL",
       "price": 36499.0,
       "score_bot": null,
@@ -2909,7 +2909,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-24T23:00:00Z",
       "type": "BUY",
       "price": 32917.17,
       "score_bot": null,
@@ -2931,7 +2931,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-25T06:00:00Z",
       "type": "SELL",
       "price": 37550.0,
       "score_bot": null,
@@ -2953,7 +2953,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-25T17:00:00Z",
       "type": "BUY",
       "price": 35701.0,
       "score_bot": null,
@@ -2975,7 +2975,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-27T05:00:00Z",
       "type": "SELL",
       "price": 38919.98,
       "score_bot": null,
@@ -2997,7 +2997,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-27T13:00:00Z",
       "type": "BUY",
       "price": 35507.01,
       "score_bot": null,
@@ -3019,7 +3019,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-28T07:00:00Z",
       "type": "BUY",
       "price": 35538.75,
       "score_bot": null,
@@ -3041,7 +3041,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-28T16:00:00Z",
       "type": "SELL",
       "price": 37500.0,
       "score_bot": null,
@@ -3063,7 +3063,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-28T22:00:00Z",
       "type": "BUY",
       "price": 36155.01,
       "score_bot": null,
@@ -3085,7 +3085,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-29T07:00:00Z",
       "type": "SELL",
       "price": 38000.0,
       "score_bot": null,
@@ -3107,7 +3107,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-30T01:00:00Z",
       "type": "BUY",
       "price": 37268.44,
       "score_bot": null,
@@ -3129,7 +3129,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-30T07:00:00Z",
       "type": "SELL",
       "price": 38720.74,
       "score_bot": null,
@@ -3151,7 +3151,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-31T09:00:00Z",
       "type": "SELL",
       "price": 38230.0,
       "score_bot": null,
@@ -3173,7 +3173,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-31T12:00:00Z",
       "type": "BUY",
       "price": 36632.61,
       "score_bot": null,
@@ -3195,7 +3195,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-01-31T23:00:00Z",
       "type": "BUY",
       "price": 36724.0,
       "score_bot": null,
@@ -3217,7 +3217,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-01T05:00:00Z",
       "type": "SELL",
       "price": 38744.0,
       "score_bot": null,
@@ -3239,7 +3239,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-01T20:00:00Z",
       "type": "BUY",
       "price": 38000.0,
       "score_bot": null,
@@ -3261,7 +3261,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-02T02:00:00Z",
       "type": "SELL",
       "price": 39265.2,
       "score_bot": null,
@@ -3283,7 +3283,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-02T22:00:00Z",
       "type": "SELL",
       "price": 38773.41,
       "score_bot": null,
@@ -3305,7 +3305,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-03T07:00:00Z",
       "type": "BUY",
       "price": 36586.95,
       "score_bot": null,
@@ -3327,7 +3327,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-03T22:00:00Z",
       "type": "BUY",
       "price": 36250.0,
       "score_bot": null,
@@ -3349,7 +3349,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-05T10:00:00Z",
       "type": "SELL",
       "price": 41913.69,
       "score_bot": null,
@@ -3371,7 +3371,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-06T01:00:00Z",
       "type": "SELL",
       "price": 41899.54,
       "score_bot": null,
@@ -3393,7 +3393,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-06T03:00:00Z",
       "type": "BUY",
       "price": 40843.01,
       "score_bot": null,
@@ -3415,7 +3415,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-07T01:00:00Z",
       "type": "BUY",
       "price": 41116.56,
       "score_bot": null,
@@ -3437,7 +3437,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-08T04:00:00Z",
       "type": "SELL",
       "price": 44500.5,
       "score_bot": null,
@@ -3459,7 +3459,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-08T16:00:00Z",
       "type": "SELL",
       "price": 45492.0,
       "score_bot": null,
@@ -3481,7 +3481,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-09T03:00:00Z",
       "type": "BUY",
       "price": 42666.0,
       "score_bot": null,
@@ -3503,7 +3503,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-09T07:00:00Z",
       "type": "SELL",
       "price": 44393.36,
       "score_bot": null,
@@ -3525,7 +3525,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-10T06:00:00Z",
       "type": "SELL",
       "price": 44799.0,
       "score_bot": null,
@@ -3547,7 +3547,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-10T07:00:00Z",
       "type": "SELL",
       "price": 44799.0,
       "score_bot": null,
@@ -3569,7 +3569,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-10T13:00:00Z",
       "type": "BUY",
       "price": 43542.14,
       "score_bot": null,
@@ -3591,7 +3591,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-11T03:00:00Z",
       "type": "SELL",
       "price": 45821.0,
       "score_bot": null,
@@ -3613,7 +3613,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-11T10:00:00Z",
       "type": "BUY",
       "price": 42600.0,
       "score_bot": null,
@@ -3635,7 +3635,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-12T00:00:00Z",
       "type": "SELL",
       "price": 43920.0,
       "score_bot": null,
@@ -3657,7 +3657,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-12T16:00:00Z",
       "type": "BUY",
       "price": 41688.88,
       "score_bot": null,
@@ -3679,7 +3679,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-13T04:00:00Z",
       "type": "SELL",
       "price": 43079.49,
       "score_bot": null,
@@ -3701,7 +3701,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-13T07:00:00Z",
       "type": "BUY",
       "price": 41700.0,
       "score_bot": null,
@@ -3723,7 +3723,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-14T01:00:00Z",
       "type": "SELL",
       "price": 42760.0,
       "score_bot": null,
@@ -3745,7 +3745,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-14T11:00:00Z",
       "type": "BUY",
       "price": 41550.56,
       "score_bot": null,
@@ -3767,7 +3767,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-15T00:00:00Z",
       "type": "SELL",
       "price": 42842.4,
       "score_bot": null,
@@ -3789,7 +3789,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-15T05:00:00Z",
       "type": "BUY",
       "price": 41803.17,
       "score_bot": null,
@@ -3811,7 +3811,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-16T09:00:00Z",
       "type": "SELL",
       "price": 44751.4,
       "score_bot": null,
@@ -3833,7 +3833,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-17T00:00:00Z",
       "type": "BUY",
       "price": 43307.0,
       "score_bot": null,
@@ -3855,7 +3855,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-17T06:00:00Z",
       "type": "SELL",
       "price": 44376.58,
       "score_bot": null,
@@ -3877,7 +3877,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-18T07:00:00Z",
       "type": "BUY",
       "price": 40073.21,
       "score_bot": null,
@@ -3899,7 +3899,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-18T18:00:00Z",
       "type": "SELL",
       "price": 40959.88,
       "score_bot": null,
@@ -3921,7 +3921,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-19T02:00:00Z",
       "type": "BUY",
       "price": 39450.0,
       "score_bot": null,
@@ -3943,7 +3943,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-19T16:00:00Z",
       "type": "SELL",
       "price": 40444.32,
       "score_bot": null,
@@ -3965,7 +3965,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-19T23:00:00Z",
       "type": "BUY",
       "price": 39639.03,
       "score_bot": null,
@@ -3987,7 +3987,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-20T19:00:00Z",
       "type": "BUY",
       "price": 38000.0,
       "score_bot": null,
@@ -4009,7 +4009,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-21T15:00:00Z",
       "type": "SELL",
       "price": 39494.35,
       "score_bot": null,
@@ -4031,7 +4031,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-22T13:00:00Z",
       "type": "BUY",
       "price": 36350.0,
       "score_bot": null,
@@ -4053,7 +4053,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-23T23:00:00Z",
       "type": "SELL",
       "price": 39249.93,
       "score_bot": null,
@@ -4075,7 +4075,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-24T15:00:00Z",
       "type": "BUY",
       "price": 34322.28,
       "score_bot": null,
@@ -4097,7 +4097,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-25T06:00:00Z",
       "type": "SELL",
       "price": 39843.0,
       "score_bot": null,
@@ -4119,7 +4119,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-25T23:00:00Z",
       "type": "SELL",
       "price": 39683.53,
       "score_bot": null,
@@ -4141,7 +4141,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-26T10:00:00Z",
       "type": "SELL",
       "price": 40348.45,
       "score_bot": null,
@@ -4163,7 +4163,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-26T19:00:00Z",
       "type": "BUY",
       "price": 38573.18,
       "score_bot": null,
@@ -4185,7 +4185,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-27T07:00:00Z",
       "type": "SELL",
       "price": 39700.0,
       "score_bot": null,
@@ -4207,7 +4207,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-27T12:00:00Z",
       "type": "BUY",
       "price": 38189.19,
       "score_bot": null,
@@ -4229,7 +4229,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-27T22:00:00Z",
       "type": "SELL",
       "price": 39855.7,
       "score_bot": null,
@@ -4251,7 +4251,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-02-28T07:00:00Z",
       "type": "BUY",
       "price": 37000.0,
       "score_bot": null,
@@ -4273,7 +4273,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-01T08:00:00Z",
       "type": "SELL",
       "price": 44225.84,
       "score_bot": null,
@@ -4295,7 +4295,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-01T20:00:00Z",
       "type": "BUY",
       "price": 42809.98,
       "score_bot": null,
@@ -4317,7 +4317,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-01T23:00:00Z",
       "type": "SELL",
       "price": 44949.0,
       "score_bot": null,
@@ -4339,7 +4339,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-02T10:00:00Z",
       "type": "SELL",
       "price": 44750.0,
       "score_bot": null,
@@ -4361,7 +4361,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-02T23:00:00Z",
       "type": "BUY",
       "price": 43334.09,
       "score_bot": null,
@@ -4383,7 +4383,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-03T01:00:00Z",
       "type": "SELL",
       "price": 45400.0,
       "score_bot": null,
@@ -4405,7 +4405,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-04T00:00:00Z",
       "type": "SELL",
       "price": 44101.12,
       "score_bot": null,
@@ -4427,7 +4427,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-04T21:00:00Z",
       "type": "SELL",
       "price": 41904.88,
       "score_bot": null,
@@ -4449,7 +4449,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-05T14:00:00Z",
       "type": "BUY",
       "price": 38407.59,
       "score_bot": null,
@@ -4471,7 +4471,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-06T10:00:00Z",
       "type": "SELL",
       "price": 39693.87,
       "score_bot": null,
@@ -4493,7 +4493,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-06T21:00:00Z",
       "type": "BUY",
       "price": 38088.57,
       "score_bot": null,
@@ -4515,7 +4515,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-07T13:00:00Z",
       "type": "BUY",
       "price": 37578.03,
       "score_bot": null,
@@ -4537,7 +4537,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-08T02:00:00Z",
       "type": "SELL",
       "price": 39547.57,
       "score_bot": null,
@@ -4559,7 +4559,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-08T06:00:00Z",
       "type": "BUY",
       "price": 37155.0,
       "score_bot": null,
@@ -4581,7 +4581,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-10T01:00:00Z",
       "type": "SELL",
       "price": 42594.06,
       "score_bot": null,
@@ -4603,7 +4603,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-10T23:00:00Z",
       "type": "BUY",
       "price": 38539.73,
       "score_bot": null,
@@ -4625,7 +4625,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-11T12:00:00Z",
       "type": "BUY",
       "price": 38223.6,
       "score_bot": null,
@@ -4647,7 +4647,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-11T22:00:00Z",
       "type": "SELL",
       "price": 40236.26,
       "score_bot": null,
@@ -4669,7 +4669,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-12T06:00:00Z",
       "type": "BUY",
       "price": 38308.83,
       "score_bot": null,
@@ -4691,7 +4691,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-12T11:00:00Z",
       "type": "SELL",
       "price": 39327.99,
       "score_bot": null,
@@ -4713,7 +4713,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-13T00:00:00Z",
       "type": "BUY",
       "price": 38678.22,
       "score_bot": null,
@@ -4735,7 +4735,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-13T03:00:00Z",
       "type": "SELL",
       "price": 39486.71,
       "score_bot": null,
@@ -4757,7 +4757,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-13T14:00:00Z",
       "type": "SELL",
       "price": 39310.0,
       "score_bot": null,
@@ -4779,7 +4779,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-14T10:00:00Z",
       "type": "BUY",
       "price": 37555.0,
       "score_bot": null,
@@ -4801,7 +4801,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-14T19:00:00Z",
       "type": "SELL",
       "price": 39299.98,
       "score_bot": null,
@@ -4823,7 +4823,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-15T04:00:00Z",
       "type": "BUY",
       "price": 38415.4,
       "score_bot": null,
@@ -4845,7 +4845,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-15T08:00:00Z",
       "type": "SELL",
       "price": 39947.12,
       "score_bot": null,
@@ -4867,7 +4867,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-15T17:00:00Z",
       "type": "BUY",
       "price": 38098.33,
       "score_bot": null,
@@ -4889,7 +4889,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-16T12:00:00Z",
       "type": "SELL",
       "price": 41718.0,
       "score_bot": null,
@@ -4911,7 +4911,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-16T13:00:00Z",
       "type": "BUY",
       "price": 38828.48,
       "score_bot": null,
@@ -4933,7 +4933,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-17T04:00:00Z",
       "type": "BUY",
       "price": 39311.53,
       "score_bot": null,
@@ -4955,7 +4955,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-17T15:00:00Z",
       "type": "SELL",
       "price": 41478.82,
       "score_bot": null,
@@ -4977,7 +4977,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-17T20:00:00Z",
       "type": "BUY",
       "price": 40500.0,
       "score_bot": null,
@@ -4999,7 +4999,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-18T10:00:00Z",
       "type": "BUY",
       "price": 40215.59,
       "score_bot": null,
@@ -5021,7 +5021,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-18T21:00:00Z",
       "type": "BUY",
       "price": 40135.04,
       "score_bot": null,
@@ -5043,7 +5043,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-19T06:00:00Z",
       "type": "SELL",
       "price": 42325.02,
       "score_bot": null,
@@ -5065,7 +5065,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-20T06:00:00Z",
       "type": "SELL",
       "price": 42400.0,
       "score_bot": null,
@@ -5087,7 +5087,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-21T12:00:00Z",
       "type": "BUY",
       "price": 40467.94,
       "score_bot": null,
@@ -5109,7 +5109,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-21T23:00:00Z",
       "type": "SELL",
       "price": 41544.22,
       "score_bot": null,
@@ -5131,7 +5131,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-22T14:00:00Z",
       "type": "SELL",
       "price": 43361.0,
       "score_bot": null,
@@ -5153,7 +5153,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-23T14:00:00Z",
       "type": "BUY",
       "price": 41751.47,
       "score_bot": null,
@@ -5175,7 +5175,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-24T23:00:00Z",
       "type": "BUY",
       "price": 42560.46,
       "score_bot": null,
@@ -5197,7 +5197,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-25T18:00:00Z",
       "type": "BUY",
       "price": 43579.0,
       "score_bot": null,
@@ -5219,7 +5219,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-26T00:00:00Z",
       "type": "SELL",
       "price": 45094.14,
       "score_bot": null,
@@ -5241,7 +5241,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-26T18:00:00Z",
       "type": "SELL",
       "price": 44578.0,
       "score_bot": null,
@@ -5263,7 +5263,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-27T02:00:00Z",
       "type": "BUY",
       "price": 44140.76,
       "score_bot": null,
@@ -5285,7 +5285,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-27T12:00:00Z",
       "type": "SELL",
       "price": 44950.0,
       "score_bot": null,
@@ -5307,7 +5307,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-27T23:00:00Z",
       "type": "BUY",
       "price": 44421.46,
       "score_bot": null,
@@ -5329,7 +5329,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-28T10:00:00Z",
       "type": "SELL",
       "price": 47650.0,
       "score_bot": null,
@@ -5351,7 +5351,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-29T05:00:00Z",
       "type": "SELL",
       "price": 48189.84,
       "score_bot": null,
@@ -5373,7 +5373,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-29T09:00:00Z",
       "type": "BUY",
       "price": 46885.44,
       "score_bot": null,
@@ -5395,7 +5395,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-29T22:00:00Z",
       "type": "SELL",
       "price": 48096.47,
       "score_bot": null,
@@ -5417,7 +5417,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-30T11:00:00Z",
       "type": "BUY",
       "price": 46445.42,
       "score_bot": null,
@@ -5439,7 +5439,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-31T03:00:00Z",
       "type": "SELL",
       "price": 47700.22,
       "score_bot": null,
@@ -5461,7 +5461,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-31T05:00:00Z",
       "type": "BUY",
       "price": 46831.81,
       "score_bot": null,
@@ -5483,7 +5483,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-03-31T23:00:00Z",
       "type": "SELL",
       "price": 47600.0,
       "score_bot": null,
@@ -5505,7 +5505,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-01T12:00:00Z",
       "type": "BUY",
       "price": 44200.0,
       "score_bot": null,
@@ -5527,7 +5527,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-02T10:00:00Z",
       "type": "SELL",
       "price": 47213.0,
       "score_bot": null,
@@ -5549,7 +5549,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-02T23:00:00Z",
       "type": "SELL",
       "price": 46941.11,
       "score_bot": null,
@@ -5571,7 +5571,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-03T11:00:00Z",
       "type": "BUY",
       "price": 45530.92,
       "score_bot": null,
@@ -5593,7 +5593,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-04T08:00:00Z",
       "type": "SELL",
       "price": 47444.11,
       "score_bot": null,
@@ -5615,7 +5615,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-04T10:00:00Z",
       "type": "BUY",
       "price": 45744.77,
       "score_bot": null,
@@ -5637,7 +5637,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-05T04:00:00Z",
       "type": "BUY",
       "price": 45118.0,
       "score_bot": null,
@@ -5659,7 +5659,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-05T09:00:00Z",
       "type": "SELL",
       "price": 46890.71,
       "score_bot": null,
@@ -5681,7 +5681,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-05T22:00:00Z",
       "type": "SELL",
       "price": 47200.0,
       "score_bot": null,
@@ -5703,7 +5703,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-06T10:00:00Z",
       "type": "BUY",
       "price": 44412.0,
       "score_bot": null,
@@ -5725,7 +5725,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-07T10:00:00Z",
       "type": "BUY",
       "price": 42727.35,
       "score_bot": null,
@@ -5747,7 +5747,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-07T22:00:00Z",
       "type": "SELL",
       "price": 43900.99,
       "score_bot": null,
@@ -5769,7 +5769,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-08T01:00:00Z",
       "type": "BUY",
       "price": 43024.86,
       "score_bot": null,
@@ -5791,7 +5791,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-08T18:00:00Z",
       "type": "SELL",
       "price": 43970.62,
       "score_bot": null,
@@ -5813,7 +5813,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-09T09:00:00Z",
       "type": "BUY",
       "price": 42107.14,
       "score_bot": null,
@@ -5835,7 +5835,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-10T01:00:00Z",
       "type": "BUY",
       "price": 42158.67,
       "score_bot": null,
@@ -5857,7 +5857,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-10T12:00:00Z",
       "type": "SELL",
       "price": 42896.64,
       "score_bot": null,
@@ -5879,7 +5879,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-10T20:00:00Z",
       "type": "BUY",
       "price": 42433.49,
       "score_bot": null,
@@ -5901,7 +5901,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-11T06:00:00Z",
       "type": "SELL",
       "price": 43410.3,
       "score_bot": null,
@@ -5923,7 +5923,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-12T08:00:00Z",
       "type": "BUY",
       "price": 39200.0,
       "score_bot": null,
@@ -5945,7 +5945,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-12T22:00:00Z",
       "type": "SELL",
       "price": 40699.0,
       "score_bot": null,
@@ -5967,7 +5967,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-13T06:00:00Z",
       "type": "BUY",
       "price": 39254.63,
       "score_bot": null,
@@ -5989,7 +5989,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-13T23:00:00Z",
       "type": "BUY",
       "price": 39622.87,
       "score_bot": null,
@@ -6011,7 +6011,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-14T05:00:00Z",
       "type": "SELL",
       "price": 41561.31,
       "score_bot": null,
@@ -6033,7 +6033,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-15T05:00:00Z",
       "type": "BUY",
       "price": 39551.94,
       "score_bot": null,
@@ -6055,7 +6055,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-16T00:00:00Z",
       "type": "BUY",
       "price": 39900.0,
       "score_bot": null,
@@ -6077,7 +6077,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-16T11:00:00Z",
       "type": "SELL",
       "price": 40709.35,
       "score_bot": null,
@@ -6099,7 +6099,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-17T01:00:00Z",
       "type": "BUY",
       "price": 39991.55,
       "score_bot": null,
@@ -6121,7 +6121,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-17T08:00:00Z",
       "type": "SELL",
       "price": 40699.55,
       "score_bot": null,
@@ -6143,7 +6143,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-17T23:00:00Z",
       "type": "SELL",
       "price": 40595.67,
       "score_bot": null,
@@ -6165,7 +6165,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-18T15:00:00Z",
       "type": "BUY",
       "price": 38536.51,
       "score_bot": null,
@@ -6187,7 +6187,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-19T10:00:00Z",
       "type": "SELL",
       "price": 41263.43,
       "score_bot": null,
@@ -6209,7 +6209,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-19T17:00:00Z",
       "type": "BUY",
       "price": 40571.0,
       "score_bot": null,
@@ -6231,7 +6231,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-20T01:00:00Z",
       "type": "SELL",
       "price": 41760.0,
       "score_bot": null,
@@ -6253,7 +6253,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-20T21:00:00Z",
       "type": "SELL",
       "price": 42199.0,
       "score_bot": null,
@@ -6275,7 +6275,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-21T04:00:00Z",
       "type": "BUY",
       "price": 40820.0,
       "score_bot": null,
@@ -6297,7 +6297,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-21T23:00:00Z",
       "type": "SELL",
       "price": 42976.0,
       "score_bot": null,
@@ -6319,7 +6319,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-22T08:00:00Z",
       "type": "BUY",
       "price": 39751.0,
       "score_bot": null,
@@ -6341,7 +6341,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-23T02:00:00Z",
       "type": "BUY",
       "price": 39177.0,
       "score_bot": null,
@@ -6363,7 +6363,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-24T02:00:00Z",
       "type": "SELL",
       "price": 39980.0,
       "score_bot": null,
@@ -6385,7 +6385,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-24T09:00:00Z",
       "type": "BUY",
       "price": 39327.58,
       "score_bot": null,
@@ -6407,7 +6407,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-25T00:00:00Z",
       "type": "SELL",
       "price": 39940.0,
       "score_bot": null,
@@ -6429,7 +6429,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-25T17:00:00Z",
       "type": "BUY",
       "price": 38200.0,
       "score_bot": null,
@@ -6451,7 +6451,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-26T18:00:00Z",
       "type": "SELL",
       "price": 40797.31,
       "score_bot": null,
@@ -6473,7 +6473,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-27T09:00:00Z",
       "type": "BUY",
       "price": 37702.26,
       "score_bot": null,
@@ -6495,7 +6495,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-27T23:00:00Z",
       "type": "SELL",
       "price": 39474.72,
       "score_bot": null,
@@ -6517,7 +6517,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-29T00:00:00Z",
       "type": "BUY",
       "price": 38881.43,
       "score_bot": null,
@@ -6539,7 +6539,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-29T04:00:00Z",
       "type": "SELL",
       "price": 40372.63,
       "score_bot": null,
@@ -6561,7 +6561,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-04-30T05:00:00Z",
       "type": "BUY",
       "price": 38175.0,
       "score_bot": null,
@@ -6583,7 +6583,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-01T11:00:00Z",
       "type": "BUY",
       "price": 37386.38,
       "score_bot": null,
@@ -6605,7 +6605,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-02T06:00:00Z",
       "type": "BUY",
       "price": 37686.26,
       "score_bot": null,
@@ -6627,7 +6627,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-02T16:00:00Z",
       "type": "SELL",
       "price": 39167.34,
       "score_bot": null,
@@ -6649,7 +6649,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-03T04:00:00Z",
       "type": "BUY",
       "price": 38052.0,
       "score_bot": null,
@@ -6671,7 +6671,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-04T05:00:00Z",
       "type": "BUY",
       "price": 37517.8,
       "score_bot": null,
@@ -6693,7 +6693,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-05T04:00:00Z",
       "type": "BUY",
       "price": 38590.97,
       "score_bot": null,
@@ -6715,7 +6715,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-05T05:00:00Z",
       "type": "SELL",
       "price": 40023.77,
       "score_bot": null,
@@ -6737,7 +6737,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-06T05:00:00Z",
       "type": "BUY",
       "price": 35571.9,
       "score_bot": null,
@@ -6759,7 +6759,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-06T23:00:00Z",
       "type": "BUY",
       "price": 35258.0,
       "score_bot": null,
@@ -6781,7 +6781,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-07T15:00:00Z",
       "type": "BUY",
       "price": 35722.24,
       "score_bot": null,
@@ -6803,7 +6803,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-07T21:00:00Z",
       "type": "SELL",
       "price": 36146.3,
       "score_bot": null,
@@ -6825,7 +6825,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-08T13:00:00Z",
       "type": "BUY",
       "price": 34210.0,
       "score_bot": null,
@@ -6847,7 +6847,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-10T10:00:00Z",
       "type": "BUY",
       "price": 29730.4,
       "score_bot": null,
@@ -6869,7 +6869,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-10T16:00:00Z",
       "type": "SELL",
       "price": 32658.99,
       "score_bot": null,
@@ -6891,7 +6891,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-11T08:00:00Z",
       "type": "BUY",
       "price": 30147.78,
       "score_bot": null,
@@ -6913,7 +6913,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-11T20:00:00Z",
       "type": "SELL",
       "price": 32162.59,
       "score_bot": null,
@@ -6935,7 +6935,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-12T15:00:00Z",
       "type": "BUY",
       "price": 26700.0,
       "score_bot": null,
@@ -6957,7 +6957,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-13T15:00:00Z",
       "type": "SELL",
       "price": 31083.37,
       "score_bot": null,
@@ -6979,7 +6979,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-14T09:00:00Z",
       "type": "BUY",
       "price": 29200.0,
       "score_bot": null,
@@ -7001,7 +7001,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-15T02:00:00Z",
       "type": "BUY",
       "price": 28630.0,
       "score_bot": null,
@@ -7023,7 +7023,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-15T08:00:00Z",
       "type": "SELL",
       "price": 30343.27,
       "score_bot": null,
@@ -7045,7 +7045,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-16T08:00:00Z",
       "type": "SELL",
       "price": 31460.0,
       "score_bot": null,
@@ -7067,7 +7067,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-17T02:00:00Z",
       "type": "BUY",
       "price": 29087.04,
       "score_bot": null,
@@ -7089,7 +7089,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-17T18:00:00Z",
       "type": "SELL",
       "price": 30788.37,
       "score_bot": null,
@@ -7111,7 +7111,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-18T04:00:00Z",
       "type": "BUY",
       "price": 29450.38,
       "score_bot": null,
@@ -7133,7 +7133,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-18T10:00:00Z",
       "type": "SELL",
       "price": 30709.99,
       "score_bot": null,
@@ -7155,7 +7155,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-19T09:00:00Z",
       "type": "BUY",
       "price": 28654.47,
       "score_bot": null,
@@ -7177,7 +7177,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-20T11:00:00Z",
       "type": "SELL",
       "price": 30777.33,
       "score_bot": null,
@@ -7199,7 +7199,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-21T02:00:00Z",
       "type": "BUY",
       "price": 28730.0,
       "score_bot": null,
@@ -7221,7 +7221,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-22T02:00:00Z",
       "type": "SELL",
       "price": 29656.18,
       "score_bot": null,
@@ -7243,7 +7243,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-22T14:00:00Z",
       "type": "BUY",
       "price": 29255.11,
       "score_bot": null,
@@ -7265,7 +7265,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-22T20:00:00Z",
       "type": "SELL",
       "price": 30311.31,
       "score_bot": null,
@@ -7287,7 +7287,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-23T17:00:00Z",
       "type": "SELL",
       "price": 30670.51,
       "score_bot": null,
@@ -7309,7 +7309,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-24T09:00:00Z",
       "type": "BUY",
       "price": 28866.35,
       "score_bot": null,
@@ -7331,7 +7331,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-25T00:00:00Z",
       "type": "BUY",
       "price": 28669.0,
       "score_bot": null,
@@ -7353,7 +7353,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-25T14:00:00Z",
       "type": "SELL",
       "price": 30223.74,
       "score_bot": null,
@@ -7375,7 +7375,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-25T21:00:00Z",
       "type": "BUY",
       "price": 29294.21,
       "score_bot": null,
@@ -7397,7 +7397,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-26T04:00:00Z",
       "type": "SELL",
       "price": 30034.37,
       "score_bot": null,
@@ -7419,7 +7419,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-26T23:00:00Z",
       "type": "BUY",
       "price": 28019.56,
       "score_bot": null,
@@ -7441,7 +7441,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-27T02:00:00Z",
       "type": "SELL",
       "price": 29787.69,
       "score_bot": null,
@@ -7463,7 +7463,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-27T22:00:00Z",
       "type": "SELL",
       "price": 29397.66,
       "score_bot": null,
@@ -7485,7 +7485,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-28T04:00:00Z",
       "type": "BUY",
       "price": 28282.9,
       "score_bot": null,
@@ -7507,7 +7507,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-28T23:00:00Z",
       "type": "SELL",
       "price": 29266.0,
       "score_bot": null,
@@ -7529,7 +7529,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-31T07:00:00Z",
       "type": "SELL",
       "price": 32222.0,
       "score_bot": null,
@@ -7551,7 +7551,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-05-31T23:00:00Z",
       "type": "BUY",
       "price": 31200.01,
       "score_bot": null,
@@ -7573,7 +7573,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-01T02:00:00Z",
       "type": "SELL",
       "price": 32399.0,
       "score_bot": null,
@@ -7595,7 +7595,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-01T23:00:00Z",
       "type": "SELL",
       "price": 31901.34,
       "score_bot": null,
@@ -7617,7 +7617,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-02T06:00:00Z",
       "type": "BUY",
       "price": 29301.0,
       "score_bot": null,
@@ -7639,7 +7639,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-02T23:00:00Z",
       "type": "BUY",
       "price": 29597.01,
       "score_bot": null,
@@ -7661,7 +7661,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-03T11:00:00Z",
       "type": "SELL",
       "price": 30699.0,
       "score_bot": null,
@@ -7683,7 +7683,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-04T00:00:00Z",
       "type": "BUY",
       "price": 29282.36,
       "score_bot": null,
@@ -7705,7 +7705,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-05T00:00:00Z",
       "type": "BUY",
       "price": 29485.0,
       "score_bot": null,
@@ -7727,7 +7727,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-05T19:00:00Z",
       "type": "BUY",
       "price": 29531.42,
       "score_bot": null,
@@ -7749,7 +7749,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-07T00:00:00Z",
       "type": "SELL",
       "price": 31765.64,
       "score_bot": null,
@@ -7771,7 +7771,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-07T12:00:00Z",
       "type": "BUY",
       "price": 29218.96,
       "score_bot": null,
@@ -7793,7 +7793,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-08T06:00:00Z",
       "type": "SELL",
       "price": 31589.6,
       "score_bot": null,
@@ -7815,7 +7815,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-08T13:00:00Z",
       "type": "BUY",
       "price": 29843.88,
       "score_bot": null,
@@ -7837,7 +7837,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-09T04:00:00Z",
       "type": "BUY",
       "price": 29916.45,
       "score_bot": null,
@@ -7859,7 +7859,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-09T19:00:00Z",
       "type": "SELL",
       "price": 30700.0,
       "score_bot": null,
@@ -7881,7 +7881,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-09T23:00:00Z",
       "type": "BUY",
       "price": 29944.1,
       "score_bot": null,
@@ -7903,7 +7903,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-10T10:00:00Z",
       "type": "BUY",
       "price": 29578.96,
       "score_bot": null,
@@ -7925,7 +7925,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-11T02:00:00Z",
       "type": "BUY",
       "price": 28850.0,
       "score_bot": null,
@@ -7947,7 +7947,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-11T15:00:00Z",
       "type": "SELL",
       "price": 29440.41,
       "score_bot": null,
@@ -7969,7 +7969,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-13T01:00:00Z",
       "type": "SELL",
       "price": 28347.89,
       "score_bot": null,
@@ -7991,7 +7991,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-14T12:00:00Z",
       "type": "BUY",
       "price": 20846.0,
       "score_bot": null,
@@ -8013,7 +8013,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-15T19:00:00Z",
       "type": "BUY",
       "price": 20111.62,
       "score_bot": null,
@@ -8035,7 +8035,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-16T11:00:00Z",
       "type": "SELL",
       "price": 22995.73,
       "score_bot": null,
@@ -8057,7 +8057,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-17T09:00:00Z",
       "type": "BUY",
       "price": 20232.0,
       "score_bot": null,
@@ -8079,7 +8079,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-17T18:00:00Z",
       "type": "SELL",
       "price": 21365.43,
       "score_bot": null,
@@ -8101,7 +8101,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-19T06:00:00Z",
       "type": "BUY",
       "price": 17622.0,
       "score_bot": null,
@@ -8123,7 +8123,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-19T08:00:00Z",
       "type": "SELL",
       "price": 19493.23,
       "score_bot": null,
@@ -8145,7 +8145,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-20T08:00:00Z",
       "type": "SELL",
       "price": 20815.95,
       "score_bot": null,
@@ -8167,7 +8167,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-21T01:00:00Z",
       "type": "SELL",
       "price": 21090.0,
       "score_bot": null,
@@ -8189,7 +8189,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-21T04:00:00Z",
       "type": "BUY",
       "price": 19832.95,
       "score_bot": null,
@@ -8211,7 +8211,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-22T00:00:00Z",
       "type": "SELL",
       "price": 21723.0,
       "score_bot": null,
@@ -8233,7 +8233,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-23T00:00:00Z",
       "type": "SELL",
       "price": 20900.0,
       "score_bot": null,
@@ -8255,7 +8255,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-23T06:00:00Z",
       "type": "BUY",
       "price": 19770.51,
       "score_bot": null,
@@ -8277,7 +8277,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-24T03:00:00Z",
       "type": "BUY",
       "price": 20170.0,
       "score_bot": null,
@@ -8299,7 +8299,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-25T17:00:00Z",
       "type": "SELL",
       "price": 21614.5,
       "score_bot": null,
@@ -8321,7 +8321,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-26T01:00:00Z",
       "type": "BUY",
       "price": 20906.62,
       "score_bot": null,
@@ -8343,7 +8343,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-26T09:00:00Z",
       "type": "SELL",
       "price": 21588.43,
       "score_bot": null,
@@ -8365,7 +8365,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-26T22:00:00Z",
       "type": "SELL",
       "price": 21888.0,
       "score_bot": null,
@@ -8387,7 +8387,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-27T11:00:00Z",
       "type": "BUY",
       "price": 20926.01,
       "score_bot": null,
@@ -8409,7 +8409,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-27T18:00:00Z",
       "type": "SELL",
       "price": 21539.85,
       "score_bot": null,
@@ -8431,7 +8431,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-28T04:00:00Z",
       "type": "BUY",
       "price": 20510.0,
       "score_bot": null,
@@ -8453,7 +8453,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-28T12:00:00Z",
       "type": "BUY",
       "price": 20510.0,
       "score_bot": null,
@@ -8475,7 +8475,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-28T19:00:00Z",
       "type": "SELL",
       "price": 21212.1,
       "score_bot": null,
@@ -8497,7 +8497,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-29T21:00:00Z",
       "type": "BUY",
       "price": 19854.92,
       "score_bot": null,
@@ -8519,7 +8519,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-06-30T06:00:00Z",
       "type": "SELL",
       "price": 20432.31,
       "score_bot": null,
@@ -8541,7 +8541,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-01T06:00:00Z",
       "type": "BUY",
       "price": 18626.0,
       "score_bot": null,
@@ -8563,7 +8563,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-01T10:00:00Z",
       "type": "SELL",
       "price": 20918.35,
       "score_bot": null,
@@ -8585,7 +8585,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-01T21:00:00Z",
       "type": "BUY",
       "price": 18975.0,
       "score_bot": null,
@@ -8607,7 +8607,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-02T06:00:00Z",
       "type": "SELL",
       "price": 19686.71,
       "score_bot": null,
@@ -8629,7 +8629,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-02T19:00:00Z",
       "type": "BUY",
       "price": 18977.01,
       "score_bot": null,
@@ -8651,7 +8651,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-02T22:00:00Z",
       "type": "SELL",
       "price": 19467.39,
       "score_bot": null,
@@ -8673,7 +8673,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-03T14:00:00Z",
       "type": "BUY",
       "price": 18781.0,
       "score_bot": null,
@@ -8695,7 +8695,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-04T06:00:00Z",
       "type": "SELL",
       "price": 19647.63,
       "score_bot": null,
@@ -8717,7 +8717,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-04T13:00:00Z",
       "type": "BUY",
       "price": 19055.31,
       "score_bot": null,
@@ -8739,7 +8739,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-05T10:00:00Z",
       "type": "SELL",
       "price": 20478.4,
       "score_bot": null,
@@ -8761,7 +8761,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-05T23:00:00Z",
       "type": "BUY",
       "price": 19304.4,
       "score_bot": null,
@@ -8783,7 +8783,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-06T06:00:00Z",
       "type": "SELL",
       "price": 20750.0,
       "score_bot": null,
@@ -8805,7 +8805,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-07T09:00:00Z",
       "type": "SELL",
       "price": 20675.22,
       "score_bot": null,
@@ -8827,7 +8827,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-07T15:00:00Z",
       "type": "BUY",
       "price": 20251.68,
       "score_bot": null,
@@ -8849,7 +8849,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-08T11:00:00Z",
       "type": "SELL",
       "price": 22527.37,
       "score_bot": null,
@@ -8871,7 +8871,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-08T22:00:00Z",
       "type": "BUY",
       "price": 21189.26,
       "score_bot": null,
@@ -8893,7 +8893,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-09T01:00:00Z",
       "type": "SELL",
       "price": 22130.0,
       "score_bot": null,
@@ -8915,7 +8915,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-09T21:00:00Z",
       "type": "BUY",
       "price": 21322.12,
       "score_bot": null,
@@ -8937,7 +8937,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-10T03:00:00Z",
       "type": "SELL",
       "price": 21980.0,
       "score_bot": null,
@@ -8959,7 +8959,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-10T12:00:00Z",
       "type": "BUY",
       "price": 21091.81,
       "score_bot": null,
@@ -8981,7 +8981,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-11T23:00:00Z",
       "type": "SELL",
       "price": 20762.02,
       "score_bot": null,
@@ -9003,7 +9003,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-13T08:00:00Z",
       "type": "BUY",
       "price": 19240.0,
       "score_bot": null,
@@ -9025,7 +9025,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-13T22:00:00Z",
       "type": "BUY",
       "price": 18910.94,
       "score_bot": null,
@@ -9047,7 +9047,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-14T11:00:00Z",
       "type": "SELL",
       "price": 20435.72,
       "score_bot": null,
@@ -9069,7 +9069,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-14T22:00:00Z",
       "type": "BUY",
       "price": 19616.07,
       "score_bot": null,
@@ -9091,7 +9091,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-15T05:00:00Z",
       "type": "SELL",
       "price": 20900.0,
       "score_bot": null,
@@ -9113,7 +9113,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-16T06:00:00Z",
       "type": "SELL",
       "price": 21200.0,
       "score_bot": null,
@@ -9135,7 +9135,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-16T16:00:00Z",
       "type": "BUY",
       "price": 20478.61,
       "score_bot": null,
@@ -9157,7 +9157,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-17T03:00:00Z",
       "type": "SELL",
       "price": 21588.94,
       "score_bot": null,
@@ -9179,7 +9179,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-17T17:00:00Z",
       "type": "SELL",
       "price": 21684.54,
       "score_bot": null,
@@ -9201,7 +9201,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-18T09:00:00Z",
       "type": "BUY",
       "price": 20750.01,
       "score_bot": null,
@@ -9223,7 +9223,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-19T05:00:00Z",
       "type": "BUY",
       "price": 21388.0,
       "score_bot": null,
@@ -9245,7 +9245,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-19T10:00:00Z",
       "type": "SELL",
       "price": 22961.72,
       "score_bot": null,
@@ -9267,7 +9267,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-21T01:00:00Z",
       "type": "SELL",
       "price": 24276.74,
       "score_bot": null,
@@ -9289,7 +9289,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-22T00:00:00Z",
       "type": "BUY",
       "price": 22341.46,
       "score_bot": null,
@@ -9311,7 +9311,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-22T14:00:00Z",
       "type": "BUY",
       "price": 22805.89,
       "score_bot": null,
@@ -9333,7 +9333,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-22T23:00:00Z",
       "type": "SELL",
       "price": 23756.49,
       "score_bot": null,
@@ -9355,7 +9355,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-23T06:00:00Z",
       "type": "BUY",
       "price": 22500.0,
       "score_bot": null,
@@ -9377,7 +9377,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-24T04:00:00Z",
       "type": "BUY",
       "price": 21934.57,
       "score_bot": null,
@@ -9399,7 +9399,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-25T08:00:00Z",
       "type": "SELL",
       "price": 23014.64,
       "score_bot": null,
@@ -9421,7 +9421,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-26T06:00:00Z",
       "type": "SELL",
       "price": 22259.98,
       "score_bot": null,
@@ -9443,7 +9443,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-27T01:00:00Z",
       "type": "BUY",
       "price": 20706.5,
       "score_bot": null,
@@ -9465,7 +9465,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-28T12:00:00Z",
       "type": "SELL",
       "price": 23460.58,
       "score_bot": null,
@@ -9487,7 +9487,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-28T22:00:00Z",
       "type": "BUY",
       "price": 22582.13,
       "score_bot": null,
@@ -9509,7 +9509,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-29T16:00:00Z",
       "type": "SELL",
       "price": 24442.66,
       "score_bot": null,
@@ -9531,7 +9531,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-29T23:00:00Z",
       "type": "BUY",
       "price": 23414.03,
       "score_bot": null,
@@ -9553,7 +9553,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-30T14:00:00Z",
       "type": "BUY",
       "price": 23650.0,
       "score_bot": null,
@@ -9575,7 +9575,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-30T23:00:00Z",
       "type": "SELL",
       "price": 24668.0,
       "score_bot": null,
@@ -9597,7 +9597,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-07-31T08:00:00Z",
       "type": "BUY",
       "price": 23502.25,
       "score_bot": null,
@@ -9619,7 +9619,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-01T04:00:00Z",
       "type": "SELL",
       "price": 24194.82,
       "score_bot": null,
@@ -9641,7 +9641,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-02T00:00:00Z",
       "type": "SELL",
       "price": 23509.68,
       "score_bot": null,
@@ -9663,7 +9663,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-02T19:00:00Z",
       "type": "BUY",
       "price": 22654.37,
       "score_bot": null,
@@ -9685,7 +9685,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-03T02:00:00Z",
       "type": "SELL",
       "price": 23459.89,
       "score_bot": null,
@@ -9707,7 +9707,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-03T11:00:00Z",
       "type": "BUY",
       "price": 22681.22,
       "score_bot": null,
@@ -9729,7 +9729,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-03T22:00:00Z",
       "type": "SELL",
       "price": 23647.68,
       "score_bot": null,
@@ -9751,7 +9751,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-04T09:00:00Z",
       "type": "BUY",
       "price": 22720.0,
       "score_bot": null,
@@ -9773,7 +9773,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-05T04:00:00Z",
       "type": "BUY",
       "price": 22400.0,
       "score_bot": null,
@@ -9795,7 +9795,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-05T22:00:00Z",
       "type": "SELL",
       "price": 23472.86,
       "score_bot": null,
@@ -9817,7 +9817,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-06T04:00:00Z",
       "type": "BUY",
       "price": 22754.13,
       "score_bot": null,
@@ -9839,7 +9839,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-07T10:00:00Z",
       "type": "BUY",
       "price": 22844.62,
       "score_bot": null,
@@ -9861,7 +9861,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-08T22:00:00Z",
       "type": "SELL",
       "price": 24245.0,
       "score_bot": null,
@@ -9883,7 +9883,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-10T10:00:00Z",
       "type": "BUY",
       "price": 22664.69,
       "score_bot": null,
@@ -9905,7 +9905,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-11T22:00:00Z",
       "type": "SELL",
       "price": 24918.54,
       "score_bot": null,
@@ -9927,7 +9927,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-12T21:00:00Z",
       "type": "BUY",
       "price": 23583.0,
       "score_bot": null,
@@ -9949,7 +9949,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-13T16:00:00Z",
       "type": "SELL",
       "price": 24888.0,
       "score_bot": null,
@@ -9971,7 +9971,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-13T21:00:00Z",
       "type": "BUY",
       "price": 24291.22,
       "score_bot": null,
@@ -9993,7 +9993,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-14T17:00:00Z",
       "type": "SELL",
       "price": 25047.56,
       "score_bot": null,
@@ -10015,7 +10015,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-15T04:00:00Z",
       "type": "BUY",
       "price": 24144.0,
       "score_bot": null,
@@ -10037,7 +10037,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-15T13:00:00Z",
       "type": "SELL",
       "price": 25211.32,
       "score_bot": null,
@@ -10059,7 +10059,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-15T18:00:00Z",
       "type": "BUY",
       "price": 23869.46,
       "score_bot": null,
@@ -10081,7 +10081,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-16T09:00:00Z",
       "type": "BUY",
       "price": 23773.22,
       "score_bot": null,
@@ -10103,7 +10103,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-17T01:00:00Z",
       "type": "BUY",
       "price": 23671.22,
       "score_bot": null,
@@ -10125,7 +10125,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-17T16:00:00Z",
       "type": "SELL",
       "price": 24446.71,
       "score_bot": null,
@@ -10147,7 +10147,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-18T06:00:00Z",
       "type": "BUY",
       "price": 23180.4,
       "score_bot": null,
@@ -10169,7 +10169,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-18T22:00:00Z",
       "type": "SELL",
       "price": 23600.0,
       "score_bot": null,
@@ -10191,7 +10191,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-20T09:00:00Z",
       "type": "BUY",
       "price": 20783.57,
       "score_bot": null,
@@ -10213,7 +10213,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-20T22:00:00Z",
       "type": "SELL",
       "price": 21382.85,
       "score_bot": null,
@@ -10235,7 +10235,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-21T07:00:00Z",
       "type": "BUY",
       "price": 20761.9,
       "score_bot": null,
@@ -10257,7 +10257,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-22T06:00:00Z",
       "type": "SELL",
       "price": 21800.0,
       "score_bot": null,
@@ -10279,7 +10279,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-22T18:00:00Z",
       "type": "BUY",
       "price": 20890.18,
       "score_bot": null,
@@ -10301,7 +10301,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-23T02:00:00Z",
       "type": "SELL",
       "price": 21548.71,
       "score_bot": null,
@@ -10323,7 +10323,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-23T16:00:00Z",
       "type": "BUY",
       "price": 20890.14,
       "score_bot": null,
@@ -10345,7 +10345,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-24T00:00:00Z",
       "type": "SELL",
       "price": 21684.87,
       "score_bot": null,
@@ -10367,7 +10367,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-24T12:00:00Z",
       "type": "BUY",
       "price": 21145.0,
       "score_bot": null,
@@ -10389,7 +10389,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-25T02:00:00Z",
       "type": "SELL",
       "price": 21900.0,
       "score_bot": null,
@@ -10411,7 +10411,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-25T10:00:00Z",
       "type": "BUY",
       "price": 21310.15,
       "score_bot": null,
@@ -10433,7 +10433,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-25T18:00:00Z",
       "type": "SELL",
       "price": 21819.88,
       "score_bot": null,
@@ -10455,7 +10455,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-26T02:00:00Z",
       "type": "BUY",
       "price": 21422.43,
       "score_bot": null,
@@ -10477,7 +10477,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-26T23:00:00Z",
       "type": "SELL",
       "price": 21886.77,
       "score_bot": null,
@@ -10499,7 +10499,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-28T01:00:00Z",
       "type": "BUY",
       "price": 19800.0,
       "score_bot": null,
@@ -10521,7 +10521,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-28T12:00:00Z",
       "type": "SELL",
       "price": 20171.18,
       "score_bot": null,
@@ -10543,7 +10543,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-29T02:00:00Z",
       "type": "SELL",
       "price": 20155.62,
       "score_bot": null,
@@ -10565,7 +10565,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-29T09:00:00Z",
       "type": "BUY",
       "price": 19520.0,
       "score_bot": null,
@@ -10587,7 +10587,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-30T02:00:00Z",
       "type": "SELL",
       "price": 20433.62,
       "score_bot": null,
@@ -10609,7 +10609,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-30T17:00:00Z",
       "type": "SELL",
       "price": 20576.25,
       "score_bot": null,
@@ -10631,7 +10631,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-31T02:00:00Z",
       "type": "BUY",
       "price": 19540.0,
       "score_bot": null,
@@ -10653,7 +10653,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-08-31T16:00:00Z",
       "type": "SELL",
       "price": 20490.0,
       "score_bot": null,
@@ -10675,7 +10675,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-01T01:00:00Z",
       "type": "BUY",
       "price": 19870.0,
       "score_bot": null,
@@ -10697,7 +10697,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-02T02:00:00Z",
       "type": "BUY",
       "price": 19565.66,
       "score_bot": null,
@@ -10719,7 +10719,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-03T00:00:00Z",
       "type": "SELL",
       "price": 20441.26,
       "score_bot": null,
@@ -10741,7 +10741,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-03T04:00:00Z",
       "type": "BUY",
       "price": 19755.29,
       "score_bot": null,
@@ -10763,7 +10763,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-04T05:00:00Z",
       "type": "BUY",
       "price": 19652.72,
       "score_bot": null,
@@ -10785,7 +10785,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-04T18:00:00Z",
       "type": "BUY",
       "price": 19583.1,
       "score_bot": null,
@@ -10807,7 +10807,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-05T10:00:00Z",
       "type": "SELL",
       "price": 20057.27,
       "score_bot": null,
@@ -10829,7 +10829,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-05T21:00:00Z",
       "type": "BUY",
       "price": 19633.83,
       "score_bot": null,
@@ -10851,7 +10851,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-06T11:00:00Z",
       "type": "SELL",
       "price": 20180.0,
       "score_bot": null,
@@ -10873,7 +10873,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-07T12:00:00Z",
       "type": "BUY",
       "price": 18510.77,
       "score_bot": null,
@@ -10895,7 +10895,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-08T07:00:00Z",
       "type": "SELL",
       "price": 19464.06,
       "score_bot": null,
@@ -10917,7 +10917,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-08T23:00:00Z",
       "type": "BUY",
       "price": 19012.0,
       "score_bot": null,
@@ -10939,7 +10939,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-10T15:00:00Z",
       "type": "SELL",
       "price": 21672.24,
       "score_bot": null,
@@ -10961,7 +10961,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-11T00:00:00Z",
       "type": "BUY",
       "price": 21111.13,
       "score_bot": null,
@@ -10983,7 +10983,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-11T08:00:00Z",
       "type": "SELL",
       "price": 21810.8,
       "score_bot": null,
@@ -11005,7 +11005,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-11T16:00:00Z",
       "type": "BUY",
       "price": 21350.0,
       "score_bot": null,
@@ -11027,7 +11027,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-13T00:00:00Z",
       "type": "SELL",
       "price": 22488.0,
       "score_bot": null,
@@ -11049,7 +11049,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-13T22:00:00Z",
       "type": "SELL",
       "price": 22799.0,
       "score_bot": null,
@@ -11071,7 +11071,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-14T07:00:00Z",
       "type": "BUY",
       "price": 19860.0,
       "score_bot": null,
@@ -11093,7 +11093,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-15T04:00:00Z",
       "type": "BUY",
       "price": 19617.62,
       "score_bot": null,
@@ -11115,7 +11115,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-15T08:00:00Z",
       "type": "SELL",
       "price": 20393.37,
       "score_bot": null,
@@ -11137,7 +11137,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-16T01:00:00Z",
       "type": "BUY",
       "price": 19497.0,
       "score_bot": null,
@@ -11159,7 +11159,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-16T21:00:00Z",
       "type": "SELL",
       "price": 19890.0,
       "score_bot": null,
@@ -11181,7 +11181,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-17T03:00:00Z",
       "type": "BUY",
       "price": 19320.01,
       "score_bot": null,
@@ -11203,7 +11203,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-17T10:00:00Z",
       "type": "SELL",
       "price": 20071.09,
       "score_bot": null,
@@ -11225,7 +11225,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-17T22:00:00Z",
       "type": "BUY",
       "price": 19748.08,
       "score_bot": null,
@@ -11247,7 +11247,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-18T02:00:00Z",
       "type": "SELL",
       "price": 20189.0,
       "score_bot": null,
@@ -11269,7 +11269,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-19T16:00:00Z",
       "type": "BUY",
       "price": 18232.56,
       "score_bot": null,
@@ -11291,7 +11291,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-20T07:00:00Z",
       "type": "SELL",
       "price": 19686.2,
       "score_bot": null,
@@ -11313,7 +11313,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-21T03:00:00Z",
       "type": "BUY",
       "price": 18711.87,
       "score_bot": null,
@@ -11335,7 +11335,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-22T04:00:00Z",
       "type": "SELL",
       "price": 19956.0,
       "score_bot": null,
@@ -11357,7 +11357,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-22T08:00:00Z",
       "type": "BUY",
       "price": 18125.98,
       "score_bot": null,
@@ -11379,7 +11379,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-23T09:00:00Z",
       "type": "SELL",
       "price": 19550.17,
       "score_bot": null,
@@ -11401,7 +11401,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-24T00:00:00Z",
       "type": "BUY",
       "price": 18531.42,
       "score_bot": null,
@@ -11423,7 +11423,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-24T09:00:00Z",
       "type": "SELL",
       "price": 19406.73,
       "score_bot": null,
@@ -11445,7 +11445,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-24T23:00:00Z",
       "type": "SELL",
       "price": 19225.92,
       "score_bot": null,
@@ -11467,7 +11467,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-25T08:00:00Z",
       "type": "BUY",
       "price": 18805.34,
       "score_bot": null,
@@ -11489,7 +11489,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-25T21:00:00Z",
       "type": "SELL",
       "price": 19180.21,
       "score_bot": null,
@@ -11511,7 +11511,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-26T08:00:00Z",
       "type": "BUY",
       "price": 18629.2,
       "score_bot": null,
@@ -11533,7 +11533,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-26T19:00:00Z",
       "type": "SELL",
       "price": 19318.96,
       "score_bot": null,
@@ -11555,7 +11555,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-27T22:00:00Z",
       "type": "SELL",
       "price": 20385.86,
       "score_bot": null,
@@ -11577,7 +11577,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-28T12:00:00Z",
       "type": "BUY",
       "price": 18471.28,
       "score_bot": null,
@@ -11599,7 +11599,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-29T07:00:00Z",
       "type": "SELL",
       "price": 19790.0,
       "score_bot": null,
@@ -11621,7 +11621,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-30T00:00:00Z",
       "type": "BUY",
       "price": 18843.01,
       "score_bot": null,
@@ -11643,7 +11643,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-30T10:00:00Z",
       "type": "SELL",
       "price": 19700.0,
       "score_bot": null,
@@ -11665,7 +11665,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-09-30T22:00:00Z",
       "type": "BUY",
       "price": 19155.36,
       "score_bot": null,
@@ -11687,7 +11687,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-01T01:00:00Z",
       "type": "SELL",
       "price": 20185.0,
       "score_bot": null,
@@ -11709,7 +11709,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-01T21:00:00Z",
       "type": "BUY",
       "price": 19159.42,
       "score_bot": null,
@@ -11731,7 +11731,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-02T15:00:00Z",
       "type": "SELL",
       "price": 19395.91,
       "score_bot": null,
@@ -11753,7 +11753,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-02T20:00:00Z",
       "type": "BUY",
       "price": 19036.0,
       "score_bot": null,
@@ -11775,7 +11775,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-03T05:00:00Z",
       "type": "SELL",
       "price": 19341.58,
       "score_bot": null,
@@ -11797,7 +11797,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-03T09:00:00Z",
       "type": "BUY",
       "price": 18920.35,
       "score_bot": null,
@@ -11819,7 +11819,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-05T06:00:00Z",
       "type": "SELL",
       "price": 20475.0,
       "score_bot": null,
@@ -11841,7 +11841,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-06T00:00:00Z",
       "type": "BUY",
       "price": 19730.0,
       "score_bot": null,
@@ -11863,7 +11863,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-06T14:00:00Z",
       "type": "SELL",
       "price": 20456.6,
       "score_bot": null,
@@ -11885,7 +11885,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-07T22:00:00Z",
       "type": "SELL",
       "price": 20068.82,
       "score_bot": null,
@@ -11907,7 +11907,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-08T02:00:00Z",
       "type": "BUY",
       "price": 19320.0,
       "score_bot": null,
@@ -11929,7 +11929,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-09T07:00:00Z",
       "type": "BUY",
       "price": 19237.14,
       "score_bot": null,
@@ -11951,7 +11951,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-09T21:00:00Z",
       "type": "SELL",
       "price": 19558.0,
       "score_bot": null,
@@ -11973,7 +11973,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-10T05:00:00Z",
       "type": "BUY",
       "price": 19353.0,
       "score_bot": null,
@@ -11995,7 +11995,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-11T10:00:00Z",
       "type": "BUY",
       "price": 18950.01,
       "score_bot": null,
@@ -12017,7 +12017,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-11T22:00:00Z",
       "type": "SELL",
       "price": 19268.09,
       "score_bot": null,
@@ -12039,7 +12039,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-12T00:00:00Z",
       "type": "BUY",
       "price": 18860.0,
       "score_bot": null,
@@ -12061,7 +12061,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-12T16:00:00Z",
       "type": "SELL",
       "price": 19203.14,
       "score_bot": null,
@@ -12083,7 +12083,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-12T22:00:00Z",
       "type": "BUY",
       "price": 18965.88,
       "score_bot": null,
@@ -12105,7 +12105,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-13T08:00:00Z",
       "type": "SELL",
       "price": 19238.31,
       "score_bot": null,
@@ -12127,7 +12127,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-13T22:00:00Z",
       "type": "BUY",
       "price": 18190.0,
       "score_bot": null,
@@ -12149,7 +12149,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-14T11:00:00Z",
       "type": "SELL",
       "price": 19951.87,
       "score_bot": null,
@@ -12171,7 +12171,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-15T07:00:00Z",
       "type": "BUY",
       "price": 19070.37,
       "score_bot": null,
@@ -12193,7 +12193,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-15T18:00:00Z",
       "type": "BUY",
       "price": 19037.39,
       "score_bot": null,
@@ -12215,7 +12215,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-16T09:00:00Z",
       "type": "BUY",
       "price": 18975.18,
       "score_bot": null,
@@ -12237,7 +12237,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-16T18:00:00Z",
       "type": "SELL",
       "price": 19195.0,
       "score_bot": null,
@@ -12259,7 +12259,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-17T06:00:00Z",
       "type": "SELL",
       "price": 19425.84,
       "score_bot": null,
@@ -12281,7 +12281,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-17T07:00:00Z",
       "type": "BUY",
       "price": 19101.0,
       "score_bot": null,
@@ -12303,7 +12303,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-17T23:00:00Z",
       "type": "SELL",
       "price": 19676.96,
       "score_bot": null,
@@ -12325,7 +12325,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-18T16:00:00Z",
       "type": "SELL",
       "price": 19706.66,
       "score_bot": null,
@@ -12347,7 +12347,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-19T05:00:00Z",
       "type": "BUY",
       "price": 19091.0,
       "score_bot": null,
@@ -12369,7 +12369,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-19T23:00:00Z",
       "type": "BUY",
       "price": 19065.97,
       "score_bot": null,
@@ -12391,7 +12391,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-20T10:00:00Z",
       "type": "BUY",
       "price": 18900.0,
       "score_bot": null,
@@ -12413,7 +12413,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-21T00:00:00Z",
       "type": "SELL",
       "price": 19347.82,
       "score_bot": null,
@@ -12435,7 +12435,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-21T06:00:00Z",
       "type": "BUY",
       "price": 18929.38,
       "score_bot": null,
@@ -12457,7 +12457,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-21T22:00:00Z",
       "type": "BUY",
       "price": 18650.0,
       "score_bot": null,
@@ -12479,7 +12479,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-22T05:00:00Z",
       "type": "SELL",
       "price": 19250.0,
       "score_bot": null,
@@ -12501,7 +12501,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-22T23:00:00Z",
       "type": "SELL",
       "price": 19257.0,
       "score_bot": null,
@@ -12523,7 +12523,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-23T01:00:00Z",
       "type": "SELL",
       "price": 19257.0,
       "score_bot": null,
@@ -12545,7 +12545,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-23T04:00:00Z",
       "type": "BUY",
       "price": 19134.0,
       "score_bot": null,
@@ -12567,7 +12567,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-23T22:00:00Z",
       "type": "BUY",
       "price": 19070.11,
       "score_bot": null,
@@ -12589,7 +12589,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-24T08:00:00Z",
       "type": "SELL",
       "price": 19695.0,
       "score_bot": null,
@@ -12611,7 +12611,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-25T00:00:00Z",
       "type": "BUY",
       "price": 19157.0,
       "score_bot": null,
@@ -12633,7 +12633,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-25T20:00:00Z",
       "type": "BUY",
       "price": 19237.0,
       "score_bot": null,
@@ -12655,7 +12655,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-26T05:00:00Z",
       "type": "SELL",
       "price": 20415.87,
       "score_bot": null,
@@ -12677,7 +12677,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-27T00:00:00Z",
       "type": "SELL",
       "price": 21020.0,
       "score_bot": null,
@@ -12699,7 +12699,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-28T22:00:00Z",
       "type": "BUY",
       "price": 20000.09,
       "score_bot": null,
@@ -12721,7 +12721,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-29T20:00:00Z",
       "type": "SELL",
       "price": 21085.0,
       "score_bot": null,
@@ -12743,7 +12743,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-30T17:00:00Z",
       "type": "SELL",
       "price": 20931.21,
       "score_bot": null,
@@ -12765,7 +12765,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-31T12:00:00Z",
       "type": "BUY",
       "price": 20427.23,
       "score_bot": null,
@@ -12787,7 +12787,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-10-31T20:00:00Z",
       "type": "SELL",
       "price": 20845.92,
       "score_bot": null,
@@ -12809,7 +12809,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-01T00:00:00Z",
       "type": "BUY",
       "price": 20237.95,
       "score_bot": null,
@@ -12831,7 +12831,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-01T19:00:00Z",
       "type": "SELL",
       "price": 20700.0,
       "score_bot": null,
@@ -12853,7 +12853,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-02T00:00:00Z",
       "type": "BUY",
       "price": 20330.74,
       "score_bot": null,
@@ -12875,7 +12875,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-02T15:00:00Z",
       "type": "SELL",
       "price": 20563.36,
       "score_bot": null,
@@ -12897,7 +12897,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-03T04:00:00Z",
       "type": "SELL",
       "price": 20800.0,
       "score_bot": null,
@@ -12919,7 +12919,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-03T05:00:00Z",
       "type": "BUY",
       "price": 20048.04,
       "score_bot": null,
@@ -12941,7 +12941,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-03T22:00:00Z",
       "type": "BUY",
       "price": 20031.24,
       "score_bot": null,
@@ -12963,7 +12963,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-05T13:00:00Z",
       "type": "SELL",
       "price": 21480.65,
       "score_bot": null,
@@ -12985,7 +12985,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-06T00:00:00Z",
       "type": "BUY",
       "price": 21210.98,
       "score_bot": null,
@@ -13007,7 +13007,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-06T15:00:00Z",
       "type": "BUY",
       "price": 21143.27,
       "score_bot": null,
@@ -13029,7 +13029,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-07T18:00:00Z",
       "type": "BUY",
       "price": 20571.52,
       "score_bot": null,
@@ -13051,7 +13051,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-08T05:00:00Z",
       "type": "SELL",
       "price": 20892.04,
       "score_bot": null,
@@ -13073,7 +13073,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-09T02:00:00Z",
       "type": "SELL",
       "price": 20700.88,
       "score_bot": null,
@@ -13095,7 +13095,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-09T05:00:00Z",
       "type": "BUY",
       "price": 17166.83,
       "score_bot": null,
@@ -13117,7 +13117,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-10T09:00:00Z",
       "type": "BUY",
       "price": 15588.0,
       "score_bot": null,
@@ -13139,7 +13139,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-11T06:00:00Z",
       "type": "SELL",
       "price": 18199.0,
       "score_bot": null,
@@ -13161,7 +13161,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-11T13:00:00Z",
       "type": "BUY",
       "price": 16888.76,
       "score_bot": null,
@@ -13183,7 +13183,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-11T23:00:00Z",
       "type": "SELL",
       "price": 17544.9,
       "score_bot": null,
@@ -13205,7 +13205,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-12T00:00:00Z",
       "type": "BUY",
       "price": 16361.6,
       "score_bot": null,
@@ -13227,7 +13227,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-13T01:00:00Z",
       "type": "SELL",
       "price": 16996.35,
       "score_bot": null,
@@ -13249,7 +13249,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-13T13:00:00Z",
       "type": "SELL",
       "price": 16954.28,
       "score_bot": null,
@@ -13271,7 +13271,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-13T19:00:00Z",
       "type": "BUY",
       "price": 16435.23,
       "score_bot": null,
@@ -13293,7 +13293,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-14T15:00:00Z",
       "type": "BUY",
       "price": 15815.21,
       "score_bot": null,
@@ -13315,7 +13315,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-14T23:00:00Z",
       "type": "SELL",
       "price": 17190.0,
       "score_bot": null,
@@ -13337,7 +13337,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-15T05:00:00Z",
       "type": "BUY",
       "price": 16181.0,
       "score_bot": null,
@@ -13359,7 +13359,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-15T23:00:00Z",
       "type": "SELL",
       "price": 17134.69,
       "score_bot": null,
@@ -13381,7 +13381,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-16T05:00:00Z",
       "type": "BUY",
       "price": 16614.61,
       "score_bot": null,
@@ -13403,7 +13403,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-17T01:00:00Z",
       "type": "BUY",
       "price": 16378.61,
       "score_bot": null,
@@ -13425,7 +13425,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-17T09:00:00Z",
       "type": "SELL",
       "price": 16773.09,
       "score_bot": null,
@@ -13447,7 +13447,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-17T14:00:00Z",
       "type": "BUY",
       "price": 16410.74,
       "score_bot": null,
@@ -13469,7 +13469,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-18T11:00:00Z",
       "type": "SELL",
       "price": 17011.0,
       "score_bot": null,
@@ -13491,7 +13491,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-19T04:00:00Z",
       "type": "BUY",
       "price": 16546.04,
       "score_bot": null,
@@ -13513,7 +13513,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-19T15:00:00Z",
       "type": "BUY",
       "price": 16553.53,
       "score_bot": null,
@@ -13535,7 +13535,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-20T08:00:00Z",
       "type": "SELL",
       "price": 16822.41,
       "score_bot": null,
@@ -13557,7 +13557,7 @@
       "pct_capital_usado": null
     },
     {
-      "datetime": "2026-03-20T14:11:09Z",
+      "datetime": "2022-11-21T13:00:00Z",
       "type": "BUY",
       "price": 15897.15,
       "score_bot": null,
@@ -13572,6 +13572,28 @@
       "usdt_spent": 530.7769192,
       "btc_bought": 0.0333547927,
       "commission_usdt": 0.53077692,
+      "btc_sold": null,
+      "btc_accumulated": 0.0,
+      "usdt_received": null,
+      "ganancia_usdt": null,
+      "pct_capital_usado": null
+    },
+    {
+      "datetime": "2022-11-22T07:00:00Z",
+      "type": "BUY",
+      "price": 15476.0,
+      "score_bot": null,
+      "score_top": null,
+      "usdt_balance": 2060.72183949,
+      "btc_balance": 0.0,
+      "btc_en_posiciones": 0.1600019311,
+      "positions_count": 5,
+      "precio_promedio_posiciones": 16327.82390911,
+      "ignorado": true,
+      "motivo_ignorado": "max_posiciones(5)",
+      "usdt_spent": null,
+      "btc_bought": null,
+      "commission_usdt": null,
       "btc_sold": null,
       "btc_accumulated": 0.0,
       "usdt_received": null,
