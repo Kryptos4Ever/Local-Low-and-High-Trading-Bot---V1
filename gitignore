@@ -37,6 +37,7 @@ logs/
 
 # ── Cache de cómputo (scores, features cacheados) ────────────────────────────
 .cache_compuesto/
+.cache_local_reversal/
 score_cache/
 *.npy
 *.pkl

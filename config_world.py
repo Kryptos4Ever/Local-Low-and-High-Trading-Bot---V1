@@ -13,7 +13,7 @@ USE_TESTNET           = True    # True = testnet, False = producción real
 
 # ── Binance WebSocket ──────────────────────────────────────────────────────────
 BINANCE_WS_URL        = "wss://stream.binance.com:9443/ws"
-BINANCE_WS_TESTNET    = "wss://testnet.binance.vision/ws"
+BINANCE_WS_TESTNET = "wss://stream.testnet.binance.vision/ws"
 
 # ── Timeouts y reintentos ──────────────────────────────────────────────────────
 REQUEST_TIMEOUT_S     = 10      # timeout por request REST (segundos)

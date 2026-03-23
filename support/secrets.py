@@ -92,10 +92,16 @@ class SecretsManager:
     @property
     def binance_api_key(self) -> str:
         return self.get("BINANCE_API_KEY")
+    @property
+    def binance_testnet_api_key(self) -> str:
+        return self.get("BINANCE_TESTNET_API_KEY")
 
     @property
     def binance_secret(self) -> str:
         return self.get("BINANCE_SECRET")
+    @property
+    def binance_testnet_secret(self) -> str:
+        return self.get("BINANCE_TESTNET_SECRET")
 
     @property
     def has_binance_credentials(self) -> bool:
