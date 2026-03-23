@@ -1,32 +1,27 @@
-<!DOCTYPE html><html lang="es"><head>
-<meta charset="UTF-8">
-<meta http-equiv="refresh" content="10">
-<title>Live Dashboard — Local Reversal</title>
+<!DOCTYPE html><html lang='es'><head>
+<meta charset='UTF-8'>
+<meta http-equiv='refresh' content='10'>
+<title>Live Dashboard</title>
+<script src='https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.1.1/dist/chartjs-chart-financial.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1/dist/chartjs-adapter-luxon.umd.min.js'></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f172a;
-     color:#e2e8f0;padding:20px;font-size:14px;line-height:1.6}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;padding:20px;font-size:14px;line-height:1.6}
 h1{font-size:18px;font-weight:600;color:#f8fafc}
-h2{font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;
-    letter-spacing:.06em;margin:20px 0 8px}
-.hdr{display:flex;justify-content:space-between;align-items:flex-start;
-      margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #1e293b}
+h2{font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin:20px 0 8px}
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #1e293b}
 .ts{font-size:11px;color:#64748b;text-align:right}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
-       gap:10px;margin-bottom:4px}
-.card{background:#1e293b;border-radius:10px;padding:14px 18px;
-       border:1px solid #334155}
-.card .lbl{font-size:10px;color:#64748b;text-transform:uppercase;
-            letter-spacing:.06em}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:4px}
+.card{background:#1e293b;border-radius:10px;padding:14px 18px;border:1px solid #334155}
+.card .lbl{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.06em}
 .card .val{font-size:20px;font-weight:700;color:#f8fafc;margin-top:2px}
 .card .sub{font-size:11px;color:#94a3b8;margin-top:1px}
 .pnl{color:#ef4444}
-.sec{background:#1e293b;border-radius:10px;padding:14px 18px;
-      border:1px solid #334155;margin-bottom:10px}
+.sec{background:#1e293b;border-radius:10px;padding:14px 18px;border:1px solid #334155;margin-bottom:10px}
 table{width:100%;border-collapse:collapse}
-th{font-size:10px;color:#64748b;text-transform:uppercase;
-    letter-spacing:.06em;padding:5px 8px;text-align:left;
-    border-bottom:1px solid #0f172a}
+th{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.06em;padding:5px 8px;text-align:left;border-bottom:1px solid #0f172a}
 td{padding:7px 8px;border-bottom:1px solid #0f172a;color:#cbd5e1}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#243044}
@@ -35,91 +30,90 @@ tr:hover td{background:#243044}
 .bar-trk{flex:1;background:#0f172a;border-radius:3px;height:7px;overflow:hidden}
 .bar-fil{height:100%;border-radius:3px;transition:width .4s}
 .bar-val{width:40px;text-align:right;font-size:11px;font-weight:600}
-.badge{display:inline-block;padding:2px 10px;border-radius:20px;
-        font-size:11px;font-weight:700}
+.badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700}
 .buy{background:#14532d;color:#86efac}
 .sell{background:#450a0a;color:#fca5a5}
 .hold{background:#1e293b;color:#94a3b8}
 .cd{font-size:26px;font-weight:700;color:#38bdf8;font-variant-numeric:tabular-nums}
 .muted{color:#475569;font-style:italic;font-size:12px}
+.cw{position:relative;height:280px;margin-bottom:0}
+.cws{position:relative;height:130px}
+.legend{display:flex;gap:16px;margin-top:8px;font-size:11px;color:#64748b;flex-wrap:wrap;padding:0 4px}
+.leg-dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.leg-line{width:18px;height:2px;display:inline-block}
+.leg-dash{width:18px;height:0;display:inline-block;border-top:2px dashed currentColor}
 </style></head><body>
-
-<div class="hdr">
+<div class='hdr'>
   <div><h1>Local Reversal — Live Testnet</h1>
-    <div class="ts" style="text-align:left;margin-top:4px">
-      THR_B=0.5 · THR_T=0.45 · Max pos=5 · BTCUSDT
-    </div>
-  </div>
-  <div class="ts">Actualizado: 2026-03-23 12:17:21 UTC<br>
-    <span style="color:#475569">Auto-refresca cada 10s</span>
+  <div class='ts' style='text-align:left;margin-top:4px'>THR_B=0.5 · THR_T=0.5 · Max pos=5 · BTCUSDT</div></div>
+  <div class='ts'>Actualizado: 2026-03-23 22:59:42 UTC<br>  <span style='color:#475569'>Auto-refresca cada 10s</span></div>
+</div>
+<div class='grid'>
+  <div class='card'><div class='lbl'>Portfolio total</div><div class='val'>$79,937.90</div><div class='sub'>Inicial: $79,937.90</div></div>
+  <div class='card'><div class='lbl'>P&amp;L sesión</div><div class='val pnl'>-0.00%</div><div class='sub pnl'>$-0.00 USDT</div></div>
+  <div class='card'><div class='lbl'>USDT libre</div><div class='val'>$79,937.90</div><div class='sub'>Slot: $15,987.58</div></div>
+  <div class='card'><div class='lbl'>Posiciones</div><div class='val'>0 / 5</div><div class='sub'>BTC @ $70,797.88</div></div>
+  <div class='card'><div class='lbl'>Operaciones</div><div class='val'>0</div><div class='sub'>Buy 0 · Sell 0 · Ign 0</div></div>
+  <div class='card'><div class='lbl'>Próxima vela en</div><div class='cd'>00:00:18</div><div class='sub'>Último tick: 22:00 UTC</div></div>
+</div>
+<h2>Gráfico BTC/USDT — últimas 1 velas horarias</h2>
+<div class='sec' style='padding:12px 14px'>
+  
+  <div class='cw'><canvas id='cc'></canvas></div>
+  <div style='height:8px'></div>
+  <div class='cws'><canvas id='pc'></canvas></div>
+  <div class='legend'>
+    <span style='display:flex;align-items:center;gap:5px'><span class='leg-dot' style='background:#22c55e'></span>BUY señal</span>
+    <span style='display:flex;align-items:center;gap:5px'><span class='leg-dot' style='background:#ef4444'></span>SELL señal</span>
+    <span style='display:flex;align-items:center;gap:5px'><span class='leg-line' style='background:#22c55e;height:2px'></span>prob_bottom</span>
+    <span style='display:flex;align-items:center;gap:5px'><span class='leg-line' style='background:#ef4444;height:2px'></span>prob_top</span>
+    <span style='display:flex;align-items:center;gap:5px'><span class='leg-dash' style='color:#94a3b8'></span>umbrales</span>
   </div>
 </div>
-
-<div class="grid">
-  <div class="card">
-    <div class="lbl">Portfolio total</div>
-    <div class="val">$79,937.90</div>
-    <div class="sub">Inicial: $79,937.90</div>
-  </div>
-  <div class="card">
-    <div class="lbl">P&amp;L sesión</div>
-    <div class="val pnl">-0.00%</div>
-    <div class="sub pnl">$-0.00 USDT</div>
-  </div>
-  <div class="card">
-    <div class="lbl">USDT libre</div>
-    <div class="val">$79,937.90</div>
-    <div class="sub">Slot: $15,987.58</div>
-  </div>
-  <div class="card">
-    <div class="lbl">Posiciones</div>
-    <div class="val">0 / 5</div>
-    <div class="sub">BTC @ $0.00</div>
-  </div>
-  <div class="card">
-    <div class="lbl">Operaciones</div>
-    <div class="val">0</div>
-    <div class="sub">Buy 0 · Sell 0 · Ign 0</div>
-  </div>
-  <div class="card">
-    <div class="lbl">Próxima vela en</div>
-    <div class="cd">00:42:39</div>
-    <div class="sub">Último tick: —</div>
-  </div>
-</div>
-
 <h2>Señal del modelo — último tick</h2>
-<div class="sec">
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-    <span>Señal emitida:</span>
-    <span class="badge hold">—</span>
-    <span style="color:#64748b;font-size:11px">Close: $0.00</span>
-  </div>
-  <div class="bar-row">
-    <span class="bar-lbl">prob_bottom</span>
-    <div class="bar-trk">
-      <div class="bar-fil" style="width:0.0%;background:#6b7280"></div></div>
-    <span class="bar-val" style="color:#6b7280">0.000</span>
-  </div>
-  <div style="font-size:10px;color:#475569;margin:0 0 6px 96px">umbral BUY = 0.5</div>
-  <div class="bar-row">
-    <span class="bar-lbl">prob_top</span>
-    <div class="bar-trk">
-      <div class="bar-fil" style="width:0.0%;background:#6b7280"></div></div>
-    <span class="bar-val" style="color:#6b7280">0.000</span>
-  </div>
-  <div style="font-size:10px;color:#475569;margin-top:2px;margin-left:96px">
-    umbral SELL = 0.45</div>
+<div class='sec'>
+  <div style='display:flex;align-items:center;gap:10px;margin-bottom:10px'>
+    <span>Señal emitida:</span><span class='badge hold'>HOLD</span>
+    <span style='color:#64748b;font-size:11px'>Close: $70,797.88</span></div>
+  <div class='bar-row'><span class='bar-lbl'>prob_bottom</span>
+    <div class='bar-trk'><div class='bar-fil' style='width:0.0%;background:#6b7280'></div></div>
+    <span class='bar-val' style='color:#6b7280'>0.000</span></div>
+  <div style='font-size:10px;color:#475569;margin:0 0 6px 96px'>umbral BUY = 0.5</div>
+  <div class='bar-row'><span class='bar-lbl'>prob_top</span>
+    <div class='bar-trk'><div class='bar-fil' style='width:0.0%;background:#6b7280'></div></div>
+    <span class='bar-val' style='color:#6b7280'>0.000</span></div>
+  <div style='font-size:10px;color:#475569;margin-top:2px;margin-left:96px'>umbral SELL = 0.5</div>
 </div>
-
 <h2>Posiciones abiertas (0)</h2>
-<div class="sec"><p class='muted'>Sin posiciones abiertas</p></div>
-
+<div class='sec'><p class='muted'>Sin posiciones abiertas</p></div>
 <h2>Últimas operaciones (buy=0 sell=0 ign=0)</h2>
-<div class="sec">
-  <table><thead><tr>
-    <th>Hora</th><th>Tipo</th><th>Precio</th><th>Cantidad</th><th>Info</th>
-  </tr></thead><tbody><tr><td colspan='5' class='muted'>Sin operaciones aún</td></tr></tbody></table>
-</div>
-
-</body></html>
+<div class='sec'><table><thead><tr><th>Hora</th><th>Tipo</th><th>Precio</th><th>Cantidad</th><th>Info</th></tr></thead><tbody><tr><td colspan='5' class='muted'>Sin operaciones aún</td></tr></tbody></table></div>
+<script>
+const OHLC=[{"x": 1774303200000, "o": 70827.66, "h": 70980.57, "l": 70529.3, "c": 70797.88}];
+const PBD=[{"x": 1774303200000, "y": 0.0}];
+const PTD=[{"x": 1774303200000, "y": 0.0}];
+const BUY_M=[];
+const SELL_M=[];
+const TBL=[{"x": 1774303200000, "y": 0.5}];
+const TTL=[{"x": 1774303200000, "y": 0.5}];
+const GR={grid:'rgba(255,255,255,0.06)',tick:'#64748b',border:'#1e293b'};
+const XS={type:'time',time:{unit:'hour',displayFormats:{hour:'dd HH:mm'}},grid:{color:GR.grid},ticks:{color:GR.tick,maxTicksLimit:8,maxRotation:0},border:{color:GR.border}};
+const OPT={responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}}};
+const cc=document.getElementById('cc');
+if(cc&&OHLC.length>0){
+  new Chart(cc,{type:'candlestick',data:{datasets:[
+    {label:'BTCUSDT',data:OHLC,color:{up:'#22c55e',down:'#ef4444',unchanged:'#94a3b8'},borderColor:{up:'#22c55e',down:'#ef4444',unchanged:'#94a3b8'}},
+    {type:'scatter',data:BUY_M,pointStyle:'triangle',rotation:0,pointRadius:9,pointHoverRadius:11,backgroundColor:'#22c55e',borderColor:'#16a34a',borderWidth:1.5},
+    {type:'scatter',data:SELL_M,pointStyle:'triangle',rotation:180,pointRadius:9,pointHoverRadius:11,backgroundColor:'#ef4444',borderColor:'#dc2626',borderWidth:1.5},
+  ]},options:{...OPT,scales:{x:XS,y:{position:'right',grid:{color:GR.grid},ticks:{color:GR.tick,callback:v=>'$'+v.toLocaleString('en',{maximumFractionDigits:0})},border:{color:GR.border}}}}});
+}
+const pc=document.getElementById('pc');
+if(pc&&PBD.length>0){
+  new Chart(pc,{type:'line',data:{datasets:[
+    {label:'pb',data:PBD,borderColor:'#22c55e',fill:false,borderWidth:1.5,pointRadius:2,tension:0.3},
+    {label:'pt',data:PTD,borderColor:'#ef4444',fill:false,borderWidth:1.5,pointRadius:2,tension:0.3},
+    {label:'thr_b',data:TBL,borderColor:'rgba(34,197,94,.4)',borderWidth:1,borderDash:[4,4],pointRadius:0,fill:false,tension:0},
+    {label:'thr_t',data:TTL,borderColor:'rgba(239,68,68,.4)',borderWidth:1,borderDash:[4,4],pointRadius:0,fill:false,tension:0},
+  ]},options:{...OPT,scales:{x:XS,y:{position:'right',min:0,max:1,grid:{color:GR.grid},ticks:{color:GR.tick,stepSize:.25,callback:v=>v.toFixed(2)},border:{color:GR.border}}}}});
+}
+</script></body></html>
