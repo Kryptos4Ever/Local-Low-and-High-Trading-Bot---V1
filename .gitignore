@@ -1,7 +1,6 @@
 # ── Credenciales (NUNCA commitear) ────────────────────────────────────────────
 .env
 .env.*
-!.env.example
 
 # ── Python ────────────────────────────────────────────────────────────────────
 __pycache__/
@@ -22,6 +21,7 @@ ENV/
 
 # ── Datos y bases de datos ────────────────────────────────────────────────────
 *.db
+*.json
 *.sqlite
 *.sqlite3
 
@@ -36,8 +36,7 @@ logs/
 *.jsonl
 
 # ── Cache de cómputo (scores, features cacheados) ────────────────────────────
-.cache_compuesto/
-.cache_local_reversal/
+.cache*/
 score_cache/
 *.npy
 *.pkl
