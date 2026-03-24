@@ -34,7 +34,9 @@ from typing import Optional
 
 from actors.price_feed import Candle
 from actors.wallet     import Wallet
-from actors.order_book import OrderBook, OrderSide
+# FIX: OrderBook y OrderSide eliminados — no se usan en BaseStrategy.
+# Los runners importan OrderSide directamente desde actors.order_book.
+from actors.order_book import OrderSide
 from support.logger    import get_logger
 
 log = get_logger("strategy")

@@ -105,8 +105,6 @@ class BinanceOrderBook(OrderBook):
         self._commission_pct = commission_pct
         self._orders: dict[str, Order] = {}
 
-        # Cargar credenciales del .env via SecretsManager
-        # Testnet usa keys de testnet.binance.vision, no las de producción
         self._api_key = secrets.get("BINANCE_TESTNET_API_KEY")
         self._secret  = secrets.get("BINANCE_TESTNET_SECRET")
 
@@ -145,18 +143,13 @@ class BinanceOrderBook(OrderBook):
             return self._submit_sell(order)
 
     def check(self, order_id: str) -> Order:
-        """
-        Retorna el estado actual de la orden.
-        En el flujo actual submit() ya espera el fill, así que
-        check() simplemente retorna el Order del dict local.
-        """
         return self._orders.get(order_id, Order(
             order_id="unknown", side=OrderSide.BUY, price=0, ts=0,
             status=OrderStatus.REJECTED,
             reject_reason="order_id no encontrado",
         ))
 
-    # ── Guardias (idénticas a SimulatedOrderBook) ─────────────────────────────
+    # ── Guardias ──────────────────────────────────────────────────────────────
 
     def check_buy_guards(self, wallet: Wallet) -> Optional[str]:
         if wallet.positions_count >= self._max_posiciones:
@@ -165,7 +158,7 @@ class BinanceOrderBook(OrderBook):
         if slot > wallet.get_usdt_balance() + 1e-9:
             return (f"usdt_insuficiente("
                     f"slot={slot:.2f}>balance={wallet.get_usdt_balance():.2f})")
-        if slot < 10.0:   # mínimo notional de Binance suele ser ~10 USDT
+        if slot < 10.0:
             return "slot_menor_a_minimo_binance(10 USDT)"
         return None
 
@@ -183,10 +176,6 @@ class BinanceOrderBook(OrderBook):
         wallet:    Wallet,
         candle_ts: int = 0,
     ) -> Order:
-        """
-        Idéntico a SimulatedOrderBook.execute_with_guards():
-        verifica guardias y delega a execute() con candle_ts.
-        """
         reason = (self.check_buy_guards(wallet)
                   if side == OrderSide.BUY
                   else self.check_sell_guards(wallet))
@@ -215,11 +204,6 @@ class BinanceOrderBook(OrderBook):
     # ── Ejecución privada ─────────────────────────────────────────────────────
 
     def _submit_buy(self, order: Order) -> Order:
-        """
-        Coloca orden MARKET BUY en Binance.
-        Binance acepta el parámetro 'quoteOrderQty' para especificar
-        cuánto USDT gastar — exactamente lo que necesitamos.
-        """
         usdt = order.usdt_amount or 0.0
         if usdt < 10.0:
             self._local_reject(order, "notional_insuficiente(<10 USDT)")
@@ -229,7 +213,7 @@ class BinanceOrderBook(OrderBook):
             "symbol":        self._symbol,
             "side":          "BUY",
             "type":          "MARKET",
-            "quoteOrderQty": f"{usdt:.8f}",   # USDT a gastar
+            "quoteOrderQty": f"{usdt:.8f}",
         }
 
         result = self._signed_post("/api/v3/order", params)
@@ -240,16 +224,11 @@ class BinanceOrderBook(OrderBook):
         return self._parse_fill(order, result, "BUY")
 
     def _submit_sell(self, order: Order) -> Order:
-        """
-        Coloca orden MARKET SELL en Binance.
-        Usa 'quantity' (BTC a vender).
-        """
         btc = order.btc_amount or 0.0
         if btc <= 0:
             self._local_reject(order, "btc_cero")
             return order
 
-        # Binance requiere precisión de 5 decimales para BTC en spot
         btc_str = f"{btc:.5f}"
 
         params = {
@@ -267,10 +246,6 @@ class BinanceOrderBook(OrderBook):
         return self._parse_fill(order, result, "SELL")
 
     def _parse_fill(self, order: Order, result: dict, side: str) -> Order:
-        """
-        Extrae precio ejecutado, comisión y cantidades del response de Binance.
-        Binance retorna los fills detallados en result['fills'].
-        """
         try:
             status = result.get("status", "")
             if status not in ("FILLED", "PARTIALLY_FILLED"):
@@ -279,7 +254,6 @@ class BinanceOrderBook(OrderBook):
 
             fills = result.get("fills", [])
             if not fills:
-                # Si no hay fills detallados usar los campos sumarios
                 fills = [{
                     "price":           result.get("price", str(order.price)),
                     "qty":             result.get("executedQty", "0"),
@@ -287,13 +261,11 @@ class BinanceOrderBook(OrderBook):
                     "commissionAsset": "BNB",
                 }]
 
-            # Precio promedio ponderado de todos los fills
             total_qty   = sum(float(f["qty"]) for f in fills)
             avg_price   = (
                 sum(float(f["price"]) * float(f["qty"]) for f in fills) / total_qty
                 if total_qty > 0 else order.price
             )
-            # Comisión total en USDT (si está en BNB se convierte aproximado)
             commission_usdt = sum(
                 float(f["commission"])
                 * (avg_price if f.get("commissionAsset") != "USDT" else 1.0)
@@ -319,7 +291,7 @@ class BinanceOrderBook(OrderBook):
                     usdt=f"{usdt_gastado:.2f}", commission=f"{commission_usdt:.4f}",
                 )
 
-            else:   # SELL
+            else:
                 usdt_recibido = float(result.get("cummulativeQuoteQty", 0)) - commission_usdt
                 btc_vendido   = total_qty
                 order.trade = TradeRecord(
@@ -336,7 +308,6 @@ class BinanceOrderBook(OrderBook):
                     usdt_rec=f"{usdt_recibido:.2f}", commission=f"{commission_usdt:.4f}",
                 )
 
-            # Garantizar consistencia de ts
             if order.trade:
                 order.trade.ts = order.ts
 
@@ -348,7 +319,6 @@ class BinanceOrderBook(OrderBook):
             return order
 
     def _local_reject(self, order: Order, reason: str) -> None:
-        """Marca la orden como rechazada localmente (sin llamada a Binance)."""
         order.status        = OrderStatus.REJECTED
         order.reject_reason = reason
         order.trade = TradeRecord(
@@ -362,8 +332,7 @@ class BinanceOrderBook(OrderBook):
     def _signed_post(self, endpoint: str, params: dict) -> Optional[dict]:
         """
         POST autenticado con firma HMAC-SHA256.
-        Reintenta hasta self._max_retries veces ante errores de red.
-        Retorna el dict de respuesta o None ante error persistente.
+        Usa _ts_ms() para compensar el desfase de reloj vs Binance.
         """
         params["timestamp"]  = _ts_ms(self._base_url)
         params["recvWindow"] = self._recv_window
@@ -385,7 +354,6 @@ class BinanceOrderBook(OrderBook):
                     url, params=params,
                     headers=headers, timeout=self._timeout,
                 )
-                # Errores 4xx de Binance (orden rechazada, saldo insuficiente, etc.)
                 if resp.status_code == 400:
                     err = resp.json()
                     log.error(
@@ -410,8 +378,15 @@ class BinanceOrderBook(OrderBook):
         return None
 
     def _signed_get(self, endpoint: str, params: dict) -> Optional[dict]:
-        """GET autenticado — usado en check() si se necesita polling."""
-        params["timestamp"]  = int(time.time() * 1000)
+        """
+        GET autenticado con firma HMAC-SHA256.
+        Usa _ts_ms() para compensar el desfase de reloj vs Binance.
+
+        FIX: versión anterior usaba int(time.time() * 1000) directamente,
+        lo que causaba error -1021 (timestamp out of recvWindow) cuando
+        el reloj local estaba desfasado respecto al servidor de Binance.
+        """
+        params["timestamp"]  = _ts_ms(self._base_url)  # FIX: era int(time.time() * 1000)
         params["recvWindow"] = self._recv_window
         query_string         = urllib.parse.urlencode(params)
         signature            = hmac.new(

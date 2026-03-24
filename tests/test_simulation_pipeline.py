@@ -7,8 +7,7 @@ AUTÓNOMO: si los artefactos de calibración (oos_v3_test.pkl) no existen,
 este módulo los genera desde la DB antes de correr los tests.
 La primera ejecución tarda ~90s. Las siguientes son instantáneas.
 
-Requiere:
-    /mnt/user-data/uploads/btc_hourly.db
+Requiere DB configurada en config_local.py (DB_PATH).
 
 Si la DB no existe, los tests de integración se marcan SKIP con mensaje.
 
@@ -27,9 +26,16 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Rutas
+# FIX: DB_PATH se lee de config_local en lugar de estar hardcodeada aquí.
+# Antes: DB_PATH = r"C:\Users\Bernardo\Documents\..." (duplicada e inconsistente)
+# Ahora: una única fuente de verdad — cambiar config_local.py es suficiente.
 # ─────────────────────────────────────────────────────────────────────────────
 
-DB_PATH    = r"C:\Users\Bernardo\Documents\CRYPTO\Estrategias de trading automatizado\DB\btc_hourly.db"
+try:
+    from config_local import DB_PATH
+except ImportError:
+    DB_PATH = ""
+
 CACHE_DIR  = Path(__file__).parent.parent / ".cache_tests"
 CACHE_PATH = CACHE_DIR / "oos_v3_test.pkl"
 
@@ -55,10 +61,10 @@ MODEL_PARAMS = dict(
 # ─────────────────────────────────────────────────────────────────────────────
 
 def simular_wallet(prob_b, prob_t, idx_te, thr_b, thr_t, close_arr):
-    usdt      = CAPITAL
+    usdt       = CAPITAL
     posiciones = deque()
-    slot      = usdt / MAX_POS
-    sells_ret = []
+    slot       = usdt / MAX_POS
+    sells_ret  = []
     n_buys = n_sells = 0
 
     for step, gi in enumerate(idx_te):
@@ -223,7 +229,7 @@ def _load_oos():
 
 
 def _db_available():
-    return os.path.exists(DB_PATH)
+    return bool(DB_PATH) and os.path.exists(DB_PATH)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -324,14 +330,10 @@ def test_todos_los_años_oos_son_positivos():
     TEST DE REGRESIÓN PRINCIPAL.
 
     Con thr_b=0.50, thr_t=0.45 (parámetros calibrados),
-    los retornos OOS 2021-2025 deben ser todos positivos:
-      2021: +90.8%  2022: +21.6%  2023: +21.3%  2024: +38.0%  2025: +17.9%
-
-    Si este test falla, el pipeline de calibración fue modificado
-    o los datos de entrada cambiaron.
+    los retornos OOS 2021-2025 deben ser todos positivos.
     """
     if not _db_available():
-        print(f"  SKIP: DB no encontrada en {DB_PATH}")
+        print(f"  SKIP: DB no encontrada en {DB_PATH!r}")
         return
 
     oos, close = _load_oos()
@@ -355,19 +357,14 @@ def test_todos_los_años_oos_son_positivos():
 
     for yr, ret in retornos.items():
         assert ret > 0, (
-            f"REGRESIÓN: Año {yr} retorno {ret:.1%} — esperado positivo. "
-            f"Los parámetros calibrados (thr_b=0.50, thr_t=0.45) "
-            f"dejaron de funcionar en este año."
+            f"REGRESIÓN: Año {yr} retorno {ret:.1%} — esperado positivo."
         )
 
 
 def test_estrategia_supera_buy_hold_en_2022():
-    """
-    2022: BTC -64%. La estrategia debe ser positiva y superar Buy&Hold.
-    Es el año más discriminante del sistema.
-    """
+    """2022: BTC -64%. La estrategia debe ser positiva y superar Buy&Hold."""
     if not _db_available():
-        print(f"  SKIP: DB no encontrada en {DB_PATH}")
+        print(f"  SKIP: DB no encontrada en {DB_PATH!r}")
         return
 
     oos, close = _load_oos()
@@ -403,12 +400,9 @@ def test_estrategia_supera_buy_hold_en_2022():
 
 
 def test_win_rate_mayor_55_pct_en_todos_los_años():
-    """
-    Win rate > 55% en cada año OOS.
-    Un win rate consistente indica que el modelo generaliza bien.
-    """
+    """Win rate > 55% en cada año OOS."""
     if not _db_available():
-        print(f"  SKIP: DB no encontrada en {DB_PATH}")
+        print(f"  SKIP: DB no encontrada en {DB_PATH!r}")
         return
 
     oos, close = _load_oos()
@@ -431,12 +425,9 @@ def test_win_rate_mayor_55_pct_en_todos_los_años():
 
 
 def test_2025_positivo_out_of_sample():
-    """
-    2025 fue reservado desde el inicio, nunca tocado en calibración.
-    Retorno esperado: +17.9%.
-    """
+    """2025 fue reservado desde el inicio, nunca tocado en calibración."""
     if not _db_available():
-        print(f"  SKIP: DB no encontrada en {DB_PATH}")
+        print(f"  SKIP: DB no encontrada en {DB_PATH!r}")
         return
 
     oos, close = _load_oos()

@@ -17,15 +17,6 @@ Arquitectura en dos fases
     · Emite BUY si score_bot[i] >= THR_BOT
     · Emite SELL si score_top[i] >= THR_TOP
     · Respeta cooldown entre señales del mismo tipo
-
-Parámetros propios de la estrategia
-──────────────────────────────────────
-Viven dentro de esta clase.
-
-Dependencias opcionales
-────────────────────────
-  numpy, pandas, scipy, scikit-learn — requeridos para el cómputo.
-  Si no están disponibles, on_start() lanza ImportError con mensaje claro.
 """
 
 from __future__ import annotations
@@ -50,23 +41,14 @@ class CompuestoStrategy(BaseStrategy):
     """
     Estrategia de señal compuesta: DNA + Lyapunov + Entropía de Permutación
     + Delta ratio → score adaptativo 0-100.
-
-    Todos los parámetros tienen valores por defecto validados.
-    Sobreescribir al instanciar:
-        strat = CompuestoStrategy(thr_bot=70, cooldown=20)
     """
 
-    # ── Parámetros de señal ────────────────────────────────────────────────────
     DEFAULT_THR_BOT          = 75.0
     DEFAULT_THR_TOP          = 75.0
     DEFAULT_COOLDOWN         = 16
     DEFAULT_SUAVIZADO        = 6
     DEFAULT_VENTANA_SCORE    = 500
-
-    # ── Parámetros DNA ─────────────────────────────────────────────────────────
     DEFAULT_VENTANA_DNA      = 48
-
-    # ── Parámetros Lyapunov ────────────────────────────────────────────────────
     DEFAULT_TAU              = 4
     DEFAULT_DIM              = 5
     DEFAULT_W_LYAPUNOV       = 8
@@ -74,15 +56,11 @@ class CompuestoStrategy(BaseStrategy):
     DEFAULT_WIN_HFD          = 64
     DEFAULT_KMAX_HFD         = 8
     DEFAULT_WIN_LYAP_NORM    = 500
-
-    # ── Parámetros PE ──────────────────────────────────────────────────────────
     DEFAULT_PE_ORDER         = 4
     DEFAULT_PE_DELAY         = 1
     DEFAULT_PE_VENTANA       = 64
     DEFAULT_WIN_PE_NORM      = 500
     DEFAULT_PE_PESOS         = (0.40, 0.30, 0.15, 0.15)
-
-    # ── Parámetros RF ──────────────────────────────────────────────────────────
     DEFAULT_RF_ESTIMATORS    = 300
     DEFAULT_RF_DEPTH         = 12
     DEFAULT_RF_MIN_SAMPLES   = 10
@@ -121,11 +99,9 @@ class CompuestoStrategy(BaseStrategy):
 
         log.info(
             "CompuestoStrategy configurada",
-            thr_bot       = thr_bot,
-            thr_top       = thr_top,
-            cooldown      = cooldown,
-            suavizado     = suavizado,
-            ventana_score = ventana_score,
+            thr_bot=thr_bot, thr_top=thr_top,
+            cooldown=cooldown, suavizado=suavizado,
+            ventana_score=ventana_score,
         )
 
     # ══════════════════════════════════════════════════════════════════════════
@@ -135,13 +111,6 @@ class CompuestoStrategy(BaseStrategy):
     def on_start(self, wallet: Wallet, feed: PriceFeed = None,
                  start: str = None, end: str = None,
                  symbol: str = "BTCUSDT") -> None:
-        """
-        Carga o calcula el score compuesto sobre el dataset completo.
-        Requiere acceso al PriceFeed para cargar todas las velas.
-
-        feed, start, end son opcionales — si no se pasan se intenta
-        cargar desde cache. Si no hay cache lanza ValueError.
-        """
         log.info("CompuestoStrategy iniciando — cargando scores...")
         t0 = time.time()
 
@@ -157,15 +126,11 @@ class CompuestoStrategy(BaseStrategy):
 
         log.info(
             "CompuestoStrategy lista",
-            elapsed = f"{time.time()-t0:.1f}s",
-            n       = len(self._ts_to_idx),
+            elapsed=f"{time.time()-t0:.1f}s",
+            n=len(self._ts_to_idx),
         )
 
     def on_candle(self, candle: Candle, wallet: Wallet) -> Signal:
-        """
-        Lookup del score para esta vela y emisión de señal.
-        O(1) — usa diccionario de timestamp → índice.
-        """
         idx = self._ts_to_idx.get(candle.ts)
         if idx is None or self._score_bot is None:
             return HOLD
@@ -178,40 +143,27 @@ class CompuestoStrategy(BaseStrategy):
         if sb >= self.thr_bot and (candle.ts - self._last_bot_ts) >= cooldown_s:
             self._last_bot_ts = candle.ts
             return Signal(
-                side   = SignalSide.BUY,
-                price  = candle.close,
-                reason = f"score_bot={sb:.1f}>={self.thr_bot}",
-                score  = sb,
+                side=SignalSide.BUY, price=candle.close,
+                reason=f"score_bot={sb:.1f}>={self.thr_bot}", score=sb,
             )
 
         if st >= self.thr_top and (candle.ts - self._last_top_ts) >= cooldown_s:
             self._last_top_ts = candle.ts
             return Signal(
-                side   = SignalSide.SELL,
-                price  = candle.close,
-                reason = f"score_top={st:.1f}>={self.thr_top}",
-                score  = st,
+                side=SignalSide.SELL, price=candle.close,
+                reason=f"score_top={st:.1f}>={self.thr_top}", score=st,
             )
 
         return HOLD
 
     def on_stop(self, wallet: Wallet) -> None:
-        log.info(
-            "CompuestoStrategy detenida",
-            velas_procesadas = self.candles_seen,
-        )
+        log.info("CompuestoStrategy detenida", velas_procesadas=self.candles_seen)
 
     # ══════════════════════════════════════════════════════════════════════════
     # CÓMPUTO DEL PIPELINE
     # ══════════════════════════════════════════════════════════════════════════
 
     def _compute_and_cache(self, candles: List[Candle]) -> None:
-        """
-        Calcula el pipeline completo y cachea todos los resultados,
-        incluyendo timestamps.npy, de forma atómica antes de retornar.
-        Así si el proceso se interrumpe no queda un cache parcial sin
-        alineación temporal.
-        """
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
         close  = np.array([c.close   for c in candles], dtype=np.float64)
@@ -220,25 +172,19 @@ class CompuestoStrategy(BaseStrategy):
         open_  = np.array([c.open    for c in candles], dtype=np.float64)
         volume = np.array([c.volume  for c in candles], dtype=np.float64)
         taker  = np.array([c.taker_buy_base_vol or 0.0 for c in candles], dtype=np.float64)
-        trades = np.array([c.trades_count or 0 for c in candles],         dtype=np.float64)
-        ts_arr = np.array([c.ts for c in candles],                         dtype=np.int64)
+        trades = np.array([c.trades_count or 0 for c in candles],          dtype=np.float64)
+        ts_arr = np.array([c.ts for c in candles],                          dtype=np.int64)
         N      = len(candles)
 
         log.info(f"Pipeline compuesto: {N:,} velas")
 
-        # ── DNA ────────────────────────────────────────────────────────────────
-        dna = self._load_or_compute("dna", lambda: self._calc_dna(
-            open_, high, low, close, volume, taker, trades, N))
-
-        # ── Lyapunov + HFD ────────────────────────────────────────────────────
+        dna  = self._load_or_compute("dna",  lambda: self._calc_dna(open_, high, low, close, volume, taker, trades, N))
         lyap = self._load_or_compute("lyap", lambda: self._calc_lyapunov(close, N))
         _    = self._load_or_compute("hfd",  lambda: self._calc_hfd(close, N))
 
-        # ── PE + TE ───────────────────────────────────────────────────────────
         pe_matrix = self._load_or_compute("pe_matrix", lambda: self._calc_pe(dna, close, N))
         te_arr    = self._load_or_compute("te_dc",     lambda: self._calc_te(dna, close, N))
 
-        # ── RF ────────────────────────────────────────────────────────────────
         prob_bot, prob_top, labels = self._load_or_compute_triple(
             "prob_bot", "prob_top", "labels",
             lambda: self._calc_rf(close, dna, lyap,
@@ -246,26 +192,15 @@ class CompuestoStrategy(BaseStrategy):
                                   pe_matrix, te_arr, N)
         )
 
-        # ── Score compuesto ────────────────────────────────────────────────────
-        sb, st = self._calc_score(
-            dna, lyap, pe_matrix, te_arr,
-            prob_bot, prob_top, labels, N
-        )
+        sb, st = self._calc_score(dna, lyap, pe_matrix, te_arr, prob_bot, prob_top, labels, N)
 
-        # Guardar scores finales
         np.save(self.cache_dir / "score_bot.npy", sb)
         np.save(self.cache_dir / "score_top.npy", st)
-
-        # Guardar timestamps como parte del mismo cache atómico.
-        # Esto garantiza que score_bot/top y timestamps siempre están
-        # alineados — si el proceso se interrumpe antes de llegar aquí
-        # los scores tampoco existen y el próximo arranque recalcula todo.
         np.save(self.cache_dir / "timestamps.npy", ts_arr)
+
         log.info(
             "cache guardado",
-            scores     = len(sb),
-            timestamps = len(ts_arr),
-            dir        = str(self.cache_dir),
+            scores=len(sb), timestamps=len(ts_arr), dir=str(self.cache_dir),
         )
 
         self._score_bot = sb
@@ -273,7 +208,15 @@ class CompuestoStrategy(BaseStrategy):
         self._ts_to_idx = {int(ts): i for i, ts in enumerate(ts_arr)}
 
     def _load_from_cache(self) -> None:
-        """Carga scores desde cache. Lanza si no existen."""
+        """
+        Carga scores desde cache. Lanza si no existen o están incompletos.
+
+        FIX: la versión anterior emitía solo un log.warning si faltaba
+        timestamps.npy, dejando _ts_to_idx vacío ({}). En ese estado,
+        on_candle() retorna HOLD para todas las velas sin ningún error
+        visible — el backtest completo corre y termina con 0 operaciones.
+        Ahora se lanza FileNotFoundError de forma explícita en ambos casos.
+        """
         sb_path = self.cache_dir / "score_bot.npy"
         st_path = self.cache_dir / "score_top.npy"
         ts_path = self.cache_dir / "timestamps.npy"
@@ -284,19 +227,22 @@ class CompuestoStrategy(BaseStrategy):
                 "Pasar feed= a on_start() para computar desde cero."
             )
 
+        if not ts_path.exists():
+            raise FileNotFoundError(
+                f"Cache incompleto: falta timestamps.npy en {self.cache_dir}. "
+                "El cache fue generado por una versión anterior del sistema sin "
+                "alineación temporal. "
+                "Borrar y recalcular: python backtest_compuesto.py --nocache"
+            )
+
         self._score_bot = np.load(sb_path)
         self._score_top = np.load(st_path)
-
-        if ts_path.exists():
-            ts_arr = np.load(ts_path)
-            self._ts_to_idx = {int(ts): i for i, ts in enumerate(ts_arr)}
-        else:
-            log.warning("cache sin timestamps.npy — señales pueden no alinearse")
+        ts_arr = np.load(ts_path)
+        self._ts_to_idx = {int(ts): i for i, ts in enumerate(ts_arr)}
 
         log.info(
             "scores cargados desde cache",
-            n   = len(self._score_bot),
-            dir = str(self.cache_dir),
+            n=len(self._score_bot), dir=str(self.cache_dir),
         )
 
     def _load_or_compute(self, name: str, fn) -> np.ndarray:
@@ -328,7 +274,7 @@ class CompuestoStrategy(BaseStrategy):
         return a1, a2, a3
 
     # ══════════════════════════════════════════════════════════════════════════
-    # CÁLCULOS INTERNOS
+    # CÁLCULOS INTERNOS (sin cambios)
     # ══════════════════════════════════════════════════════════════════════════
 
     def _calc_dna(self, open_, high, low, close, volume, taker, trades, N):
@@ -517,12 +463,12 @@ class CompuestoStrategy(BaseStrategy):
         proba  = np.zeros((len(X[START:]), 3))
         for fold, (tr, te_) in enumerate(tscv.split(X_bal)):
             rf = RandomForestClassifier(
-                n_estimators   = self.DEFAULT_RF_ESTIMATORS,
-                max_depth      = self.DEFAULT_RF_DEPTH,
+                n_estimators     = self.DEFAULT_RF_ESTIMATORS,
+                max_depth        = self.DEFAULT_RF_DEPTH,
                 min_samples_leaf = self.DEFAULT_RF_MIN_SAMPLES,
-                class_weight   = 'balanced',
-                random_state   = 42,
-                n_jobs         = -1,
+                class_weight     = 'balanced',
+                random_state     = 42,
+                n_jobs           = -1,
             )
             rf.fit(X_bal[tr], y_bal[tr])
             proba += rf.predict_proba(X_sc)
@@ -606,10 +552,8 @@ class CompuestoStrategy(BaseStrategy):
                     continue
                 try:
                     lr = LogisticRegression(
-                        C            = self.DEFAULT_LR_C,
-                        class_weight = 'balanced',
-                        max_iter     = 1000,
-                        random_state = 42,
+                        C=self.DEFAULT_LR_C, class_weight='balanced',
+                        max_iter=1000, random_state=42,
                     )
                     lr.fit(Xsc[tr], yv[tr])
                     ws.append(lr.coef_[0])

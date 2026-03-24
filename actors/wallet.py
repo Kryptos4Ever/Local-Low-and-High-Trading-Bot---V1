@@ -11,6 +11,7 @@ Interfaz abstracta Wallet
 ──────────────────────────
   get_usdt_balance()   →  float
   get_btc_balance()    →  float          # BTC libre acumulado (no en posiciones)
+  get_btc_acumulado()  →  float          # BTC total vendido históricamente
   get_positions()      →  List[Position]
   get_slot_usdt()      →  float          # tamaño del slot actual
   get_btc_por_venta()  →  float          # BTC a vender en la próxima señal SELL
@@ -108,6 +109,15 @@ class Wallet(ABC):
         """BTC libre acumulado (no está en posiciones abiertas)."""
 
     @abstractmethod
+    def get_btc_acumulado(self) -> float:
+        """
+        BTC total vendido históricamente durante la sesión.
+        Usado en el summary del JSON de resultados.
+        FIX: declarado explícitamente en la interfaz para que cualquier
+        implementación alternativa de Wallet esté obligada a proveerlo.
+        """
+
+    @abstractmethod
     def get_positions(self) -> List[Position]:
         """Lista de posiciones abiertas (BTC comprado y no vendido)."""
 
@@ -173,23 +183,23 @@ class MemoryWallet(Wallet):
     """
 
     def __init__(self, usdt_inicial: float, max_posiciones: int) -> None:
-        self._usdt:          float          = usdt_inicial
-        self._btc_libre:          float          = 0.0
-        self._btc_acumulado_total: float          = 0.0   # BTC total vendido históricamente
-        self._posiciones:    deque[Position] = deque()
-        self._max_pos:       int            = max_posiciones
-        self._slot_usdt:     float          = usdt_inicial / max_posiciones
-        self._btc_por_venta: float          = 0.0
-        self._usdt_inicial:  float          = usdt_inicial
+        self._usdt:                float          = usdt_inicial
+        self._btc_libre:           float          = 0.0
+        self._btc_acumulado_total: float          = 0.0
+        self._posiciones:          deque[Position] = deque()
+        self._max_pos:             int            = max_posiciones
+        self._slot_usdt:           float          = usdt_inicial / max_posiciones
+        self._btc_por_venta:       float          = 0.0
+        self._usdt_inicial:        float          = usdt_inicial
 
     # ── Interfaz ──────────────────────────────────────────────────────────────
 
-    def get_usdt_balance(self)  -> float:           return self._usdt
-    def get_btc_balance(self)   -> float:           return self._btc_libre
-    def get_btc_acumulado(self) -> float:           return self._btc_acumulado_total
-    def get_positions(self)     -> List[Position]:  return list(self._posiciones)
-    def get_slot_usdt(self)     -> float:           return self._slot_usdt
-    def get_btc_por_venta(self) -> float:           return self._btc_por_venta
+    def get_usdt_balance(self)   -> float:           return self._usdt
+    def get_btc_balance(self)    -> float:           return self._btc_libre
+    def get_btc_acumulado(self)  -> float:           return self._btc_acumulado_total
+    def get_positions(self)      -> List[Position]:  return list(self._posiciones)
+    def get_slot_usdt(self)      -> float:           return self._slot_usdt
+    def get_btc_por_venta(self)  -> float:           return self._btc_por_venta
 
     def update(self, trade: TradeRecord) -> None:
         if trade.ignored:
@@ -209,7 +219,6 @@ class MemoryWallet(Wallet):
             btc_vendido = trade.btc_sold or 0.0
             self._reducir_posiciones_fifo(btc_vendido)
             self._btc_acumulado_total += btc_vendido
-            # Recalcular slot si la cartera quedó vacía
             if self.positions_count == 0:
                 self._recalcular_slot()
 
@@ -232,12 +241,12 @@ class MemoryWallet(Wallet):
 
     def reset(self) -> None:
         """Reinicia la billetera al estado inicial — útil entre runs del grid."""
-        self._usdt          = self._usdt_inicial
-        self._btc_libre            = 0.0
-        self._btc_acumulado_total  = 0.0
-        self._posiciones    = deque()
-        self._slot_usdt     = self._usdt_inicial / self._max_pos
-        self._btc_por_venta = 0.0
+        self._usdt                = self._usdt_inicial
+        self._btc_libre           = 0.0
+        self._btc_acumulado_total = 0.0
+        self._posiciones          = deque()
+        self._slot_usdt           = self._usdt_inicial / self._max_pos
+        self._btc_por_venta       = 0.0
 
     # ── Helpers privados ──────────────────────────────────────────────────────
 
@@ -273,9 +282,9 @@ class JSONWallet(MemoryWallet):
     Extiende MemoryWallet agregando persistencia en archivo JSON.
 
     En cada update() el estado se puede guardar (modo append-only en producción,
-    sobreescritura en backtest para compatibilidad con Graficador_v2).
+    sobreescritura en backtest para compatibilidad con Graficador.py).
 
-    El JSON producido es compatible con el esquema esperado por Graficador_v2.py.
+    El JSON producido es compatible con el esquema esperado por Graficador.py.
     """
 
     def __init__(
@@ -300,7 +309,7 @@ class JSONWallet(MemoryWallet):
         """
         Escribe el JSON final al disco.
         Llamar al finalizar el backtest desde el runner.
-        Compatible con el esquema de Graficador_v2.py.
+        Compatible con el esquema de Graficador.py.
         """
         payload = {
             "summary":       summary,
@@ -315,7 +324,7 @@ class JSONWallet(MemoryWallet):
         """Retorna una copia del log de trades para el runner."""
         return list(self._trade_log)
 
-    # ── Conversión TradeRecord → dict (esquema Graficador_v2) ─────────────────
+    # ── Conversión TradeRecord → dict (esquema Graficador) ────────────────────
 
     def _trade_to_dict(self, t: TradeRecord) -> dict:
         snap = self.snapshot(t.price)
@@ -336,7 +345,7 @@ class JSONWallet(MemoryWallet):
             "btc_bought":                 round(t.btc_bought,   10) if t.btc_bought    else None,
             "commission_usdt":            round(t.commission,    8) if t.commission    else None,
             "btc_sold":                   round(t.btc_sold,     10) if t.btc_sold      else None,
-            "btc_accumulated":            0.0,
+            "btc_accumulated":            round(self._btc_acumulado_total, 10),  # FIX: era siempre 0.0
             "usdt_received":              round(t.usdt_received, 8) if t.usdt_received else None,
             "ganancia_usdt":              round(t.ganancia_usdt, 8) if t.ganancia_usdt else None,
             "pct_capital_usado":          None,
@@ -350,16 +359,17 @@ class JSONWallet(MemoryWallet):
 class BinanceWallet(Wallet):
     """
     Consulta balances reales via REST API de Binance.
-    Implementación completa en etapa de producción.
+    Implementación completa en actors/binance_wallet.py.
     """
 
-    def get_usdt_balance(self)  -> float:       raise NotImplementedError
-    def get_btc_balance(self)   -> float:       raise NotImplementedError
+    def get_usdt_balance(self)  -> float:          raise NotImplementedError
+    def get_btc_balance(self)   -> float:          raise NotImplementedError
+    def get_btc_acumulado(self) -> float:          raise NotImplementedError
     def get_positions(self)     -> List[Position]: raise NotImplementedError
-    def get_slot_usdt(self)     -> float:       raise NotImplementedError
-    def get_btc_por_venta(self) -> float:       raise NotImplementedError
-    def update(self, trade)     -> None:        raise NotImplementedError
-    def snapshot(self, price)   -> dict:        raise NotImplementedError
+    def get_slot_usdt(self)     -> float:          raise NotImplementedError
+    def get_btc_por_venta(self) -> float:          raise NotImplementedError
+    def update(self, trade)     -> None:           raise NotImplementedError
+    def snapshot(self, price)   -> dict:           raise NotImplementedError
 
 
 # ══════════════════════════════════════════════════════════════════════════════

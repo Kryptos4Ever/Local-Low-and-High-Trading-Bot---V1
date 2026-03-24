@@ -31,12 +31,11 @@ from __future__ import annotations
 
 import queue
 import threading
-from typing import Callable, Optional
+from typing import Optional
 
 from actors.clock       import Clock
 from actors.price_feed  import Candle, PriceFeed
 from support.logger     import get_logger
-from support.time_utils import to_iso
 
 log = get_logger("live_clock")
 
@@ -64,11 +63,12 @@ class LiveClock(Clock):
                     sin procesar antes de descartar (con velas de 1h esto
                     nunca ocurre en condiciones normales de operación).
         """
-        self._feed       = feed
-        self._symbol     = symbol
-        self._queue:     queue.Queue[Optional[Candle]] = queue.Queue(maxsize=queue_size)
-        self._running    = False
-        self._stop_event = threading.Event()
+        self._feed        = feed
+        self._symbol      = symbol
+        self._queue:      queue.Queue[Optional[Candle]] = queue.Queue(maxsize=queue_size)
+        self._stop_event  = threading.Event()
+        self._start_lock  = threading.Lock()
+        self._started     = False
         log.info("LiveClock inicializado", symbol=symbol)
 
     # ── Interfaz Clock ────────────────────────────────────────────────────────
@@ -84,9 +84,13 @@ class LiveClock(Clock):
 
         El timeout interno de 1 segundo permite chequear stop_event
         sin bloquear indefinidamente (útil para Ctrl+C limpio).
+
+        FIX: _start() ahora usa un Lock para garantizar que subscribe()
+        se completa exactamente una vez sin race condition entre el
+        primer tick() y posibles velas que lleguen antes de que el
+        flag de inicialización anterior estuviera seteado.
         """
-        if not self._running:
-            self._start()
+        self._ensure_started()
 
         while not self._stop_event.is_set():
             try:
@@ -115,7 +119,6 @@ class LiveClock(Clock):
         """
         log.info("LiveClock detenido")
         self._stop_event.set()
-        self._running = False
         # Desbloquear tick() si está esperando en la Queue
         try:
             self._queue.put_nowait(None)
@@ -127,14 +130,31 @@ class LiveClock(Clock):
 
     # ── Privado ───────────────────────────────────────────────────────────────
 
-    def _start(self) -> None:
-        """Inicia el stream WebSocket al primer tick()."""
-        self._running = True
-        log.info("iniciando stream WebSocket", symbol=self._symbol)
-        self._feed.subscribe(
-            callback = self._on_candle,
-            symbol   = self._symbol,
-        )
+    def _ensure_started(self) -> None:
+        """
+        Inicia el stream WebSocket exactamente una vez, de forma thread-safe.
+
+        FIX: la versión anterior usaba un flag booleano `_running` que se
+        seteaba a True antes de llamar a subscribe(). Si el WebSocket
+        entregaba una vela muy rápido (en tests o en condiciones de red
+        favorable), _on_candle podía ser llamado antes de que _started
+        fuera True, y un segundo tick() llamaba subscribe() de nuevo.
+
+        Ahora se usa un Lock + flag para garantizar que subscribe() se
+        llama exactamente una vez, independientemente de la velocidad
+        del WebSocket.
+        """
+        if self._started:
+            return
+        with self._start_lock:
+            if self._started:   # double-checked locking
+                return
+            log.info("iniciando stream WebSocket", symbol=self._symbol)
+            self._feed.subscribe(
+                callback = self._on_candle,
+                symbol   = self._symbol,
+            )
+            self._started = True
 
     def _on_candle(self, candle: Candle) -> None:
         """

@@ -3,9 +3,6 @@ clock.py — Actor 4: Reloj / Director de ciclos
 ═══════════════════════════════════════════════
 Responsabilidad única: decidir CUÁNDO se ejecuta cada ciclo de la estrategia.
 
-Es el actor que falta en la mayoría de los frameworks de trading amateur.
-Sin él, el switch backtest → producción obliga a reescribir la estrategia.
-
 Interfaz abstracta Clock
 ─────────────────────────
   tick()         →  Candle | None   (None = fin del stream)
@@ -15,7 +12,11 @@ Interfaz abstracta Clock
 Implementaciones
 ─────────────────
   LocalClock   →  itera velas desde un PriceFeed local (backtest)
-  LiveClock    →  stub para producción (espera cierre de vela real en Binance)
+  LiveClock    →  stream en tiempo real via BinanceWSFeed (actors/live_clock.py)
+
+NOTA: LiveClock vive en actors/live_clock.py — no en este módulo.
+Importar siempre desde actors o desde actors.live_clock, nunca desde
+actors.clock, para evitar ambigüedad.
 
 Uso en runners
 ───────────────
@@ -26,6 +27,7 @@ Uso en runners
       ...
 
   # Producción (mismo código, distinto clock)
+  from actors.live_clock import LiveClock
   clock = LiveClock(feed, symbol)
   while (candle := clock.tick()) is not None:
       signal = strategy.on_candle(candle)
@@ -192,40 +194,6 @@ class LocalClock(Clock):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# STUB producción: LiveClock
-# ══════════════════════════════════════════════════════════════════════════════
-
-class LiveClock(Clock):
-    """
-    Espera el cierre de cada vela horaria en Binance y retorna la vela cerrada.
-    Implementación completa en etapa de producción.
-
-    En producción tick() bloquea hasta que cierra la vela actual,
-    luego retorna inmediatamente con los datos definitivos de esa vela.
-    Nunca retorna None salvo señal explícita de parada.
-    """
-
-    def __init__(self, feed: PriceFeed, symbol: str = "BTCUSDT") -> None:
-        self._feed   = feed
-        self._symbol = symbol
-        self._running = True
-
-    @property
-    def is_live(self) -> bool:
-        return True
-
-    def tick(self) -> Optional[Candle]:
-        raise NotImplementedError("LiveClock pendiente de implementación.")
-
-    def reset(self) -> None:
-        pass   # no tiene efecto en producción
-
-    def stop(self) -> None:
-        """Señal de parada — tick() retornará None en la próxima llamada."""
-        self._running = False
-
-
-# ══════════════════════════════════════════════════════════════════════════════
 # FACTORY
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -235,7 +203,7 @@ def build_clock(feed: PriceFeed) -> Clock:
 
     Modos (mode_config.py):
         USE_LIVE_CLOCK = False  →  LocalClock  (backtest)
-        USE_LIVE_CLOCK = True   →  LiveClock   (producción)
+        USE_LIVE_CLOCK = True   →  LiveClock   (producción, actors/live_clock.py)
     """
     try:
         import mode_config as MC
@@ -244,6 +212,8 @@ def build_clock(feed: PriceFeed) -> Clock:
         use_live = False
 
     if use_live:
+        # Importación local para evitar dependencia circular en backtest
+        from actors.live_clock import LiveClock
         try:
             import config_local as CL
             symbol = getattr(CL, "SYMBOL", "BTCUSDT")
