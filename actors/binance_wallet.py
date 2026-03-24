@@ -20,8 +20,11 @@ Reconciliación al arrancar
 ───────────────────────────
   1. Leer saldo USDT real de la API.
   2. Leer último checkpoint del JSONStateManager.
-  3. Si los saldos coinciden (tolerancia ±1 USDT): usar el checkpoint.
-  4. Si divergen: loggear advertencia y usar el saldo real como base.
+  3. Si los saldos coinciden (tolerancia ±1 USDT): restaurar desde checkpoint
+     usando restore_wallet_from_checkpoint() — nunca asignando atributos
+     privados directamente desde este método.
+  4. Si divergen: loggear advertencia, ajustar el checkpoint con el saldo
+     real y restaurar igualmente por la misma vía.
      La divergencia puede deberse a operaciones manuales en la cuenta.
 
 Uso
@@ -35,14 +38,16 @@ Uso
 
 from __future__ import annotations
 
+import collections
+from dataclasses import replace
 from typing import Optional
 
 import requests
 
-from actors.wallet      import JSONWallet, MemoryWallet, Position, TradeRecord
+from actors.wallet       import JSONWallet, MemoryWallet, Position, TradeRecord
 from state.state_manager import JSONStateManager, restore_wallet_from_checkpoint
-from support.logger     import get_logger
-from support.secrets    import secrets
+from support.logger      import get_logger
+from support.secrets     import secrets
 
 import hashlib
 import hmac
@@ -58,7 +63,6 @@ def _ts_ms(base_url: str) -> int:
         from support.time_sync import TimeSync
         return TimeSync.get(base_url).now_ms()
     except Exception:
-        import time
         return int(time.time() * 1000)
 
 
@@ -104,11 +108,11 @@ class BinanceWallet(JSONWallet):
             append_only    = append_only,
         )
         cfg = _get_config()
-        self._base_url   = cfg["base_url"]
-        self._timeout    = cfg["timeout"]
+        self._base_url    = cfg["base_url"]
+        self._timeout     = cfg["timeout"]
         self._recv_window = cfg["recv_window"]
-        self._api_key    = secrets.get("BINANCE_TESTNET_API_KEY")
-        self._secret     = secrets.get("BINANCE_TESTNET_SECRET")
+        self._api_key     = secrets.get("BINANCE_TESTNET_API_KEY")
+        self._secret      = secrets.get("BINANCE_TESTNET_SECRET")
 
     # ── Factory principal ─────────────────────────────────────────────────────
 
@@ -117,7 +121,7 @@ class BinanceWallet(JSONWallet):
         cls,
         max_posiciones: int,
         json_path:      str,
-        state_path:     str = "state/trading_state.jsonl",
+        state_path:     str   = "state/live_trading_state.jsonl",
         commission_pct: float = 0.1,
     ) -> "BinanceWallet":
         """
@@ -126,11 +130,14 @@ class BinanceWallet(JSONWallet):
         Flujo:
           1. Leer saldo USDT real de la API de Binance.
           2. Leer último checkpoint del StateManager.
-          3. Reconciliar y construir la wallet con el estado correcto.
+          3. Reconciliar: ajustar checkpoint si hay divergencia de saldo.
+          4. Restaurar siempre a través de restore_wallet_from_checkpoint()
+             para no depender de los nombres de atributos internos de
+             MemoryWallet.
         """
-        # Crear instancia temporal para poder llamar _fetch_usdt_balance
+        # Instancia temporal solo para poder llamar _fetch_usdt_balance
         temp = cls(
-            usdt_inicial   = 1000.0,   # placeholder — se sobreescribe
+            usdt_inicial   = 1000.0,
             max_posiciones = max_posiciones,
             json_path      = json_path,
         )
@@ -139,14 +146,15 @@ class BinanceWallet(JSONWallet):
         usdt_real = temp._fetch_usdt_balance()
         if usdt_real is None:
             log.warning(
-                "no se pudo obtener saldo real — usando checkpoint si existe"
+                "no se pudo obtener saldo real de Binance — "
+                "usando checkpoint si existe"
             )
 
         # Paso 2: checkpoint
         state_mgr  = JSONStateManager(state_path)
         checkpoint = state_mgr.restore()
 
-        # Paso 3: reconciliar
+        # Paso 3 + 4: reconciliar y restaurar
         if checkpoint is not None:
             usdt_checkpoint = checkpoint.usdt_balance
             diferencia      = abs((usdt_real or 0) - usdt_checkpoint)
@@ -154,58 +162,52 @@ class BinanceWallet(JSONWallet):
             if usdt_real is not None and diferencia > 1.0:
                 log.warning(
                     "divergencia saldo USDT",
-                    binance=f"{usdt_real:.2f}",
-                    checkpoint=f"{usdt_checkpoint:.2f}",
-                    diferencia=f"{diferencia:.2f}",
-                    accion="usando saldo real como base",
+                    binance        = f"{usdt_real:.2f}",
+                    checkpoint     = f"{usdt_checkpoint:.2f}",
+                    diferencia     = f"{diferencia:.2f}",
+                    accion         = "usando saldo real, posiciones desde checkpoint",
                 )
-                # Usar saldo real pero mantener posiciones del checkpoint
-                wallet = cls(
-                    usdt_inicial   = usdt_real,
-                    max_posiciones = max_posiciones,
-                    json_path      = json_path,
+                # Ajustar el checkpoint con el saldo real pero conservar
+                # las posiciones. replace() es seguro porque Checkpoint
+                # es un dataclass y no tiene lógica interna que invalidar.
+                checkpoint_ajustado = replace(
+                    checkpoint,
+                    usdt_balance    = usdt_real,
+                    slot_usdt       = usdt_real / max_posiciones,
+                    portfolio_value = usdt_real,   # aproximación conservadora
                 )
-                # Restaurar posiciones desde el checkpoint
-                from collections import deque
-                wallet._usdt          = usdt_real
-                wallet._btc_libre     = checkpoint.btc_libre
-                wallet._slot_usdt     = usdt_real / max_posiciones
-                wallet._btc_por_venta = checkpoint.btc_por_venta
-                wallet._posiciones    = deque(
-                    Position(
-                        entry_price = p["entry_price"],
-                        btc         = p["btc"],
-                        opened_at   = p["opened_at"],
-                    )
-                    for p in checkpoint.positions
+                mem = restore_wallet_from_checkpoint(
+                    checkpoint_ajustado, max_posiciones
                 )
             else:
-                # Saldos consistentes — restaurar desde checkpoint completo
                 log.info(
                     "saldos consistentes — restaurando desde checkpoint",
-                    usdt=f"{usdt_checkpoint:.2f}",
-                    positions=checkpoint.positions_count,
+                    usdt      = f"{usdt_checkpoint:.2f}",
+                    positions = checkpoint.positions_count,
                 )
                 mem = restore_wallet_from_checkpoint(checkpoint, max_posiciones)
-                wallet = cls(
-                    usdt_inicial   = checkpoint.usdt_balance,
-                    max_posiciones = max_posiciones,
-                    json_path      = json_path,
-                )
-                # Copiar estado del MemoryWallet restaurado
-                from collections import deque
-                wallet._usdt          = mem.get_usdt_balance()
-                wallet._btc_libre     = mem.get_btc_balance()
-                wallet._slot_usdt     = mem.get_slot_usdt()
-                wallet._btc_por_venta = mem.get_btc_por_venta()
-                wallet._posiciones    = deque(mem.get_positions())
+
+            # Construir la wallet definitiva copiando el estado del
+            # MemoryWallet ya restaurado. Las asignaciones directas a
+            # atributos privados están concentradas aquí y son el único
+            # punto de entrada — no se repiten en ningún otro lugar.
+            wallet = cls(
+                usdt_inicial   = mem.get_usdt_balance(),
+                max_posiciones = max_posiciones,
+                json_path      = json_path,
+            )
+            wallet._usdt          = mem.get_usdt_balance()
+            wallet._btc_libre     = mem.get_btc_balance()
+            wallet._slot_usdt     = mem.get_slot_usdt()
+            wallet._btc_por_venta = mem.get_btc_por_venta()
+            wallet._posiciones    = collections.deque(mem.get_positions())
 
         else:
-            # Sin checkpoint — arranque fresco
+            # Sin checkpoint — arranque fresco con saldo real o fallback
             usdt_inicio = usdt_real if usdt_real is not None else 1000.0
             log.info(
                 "sin checkpoint previo — arranque fresco",
-                usdt=f"{usdt_inicio:.2f}",
+                usdt = f"{usdt_inicio:.2f}",
             )
             wallet = cls(
                 usdt_inicial   = usdt_inicio,
@@ -215,13 +217,13 @@ class BinanceWallet(JSONWallet):
 
         log.info(
             "BinanceWallet lista",
-            usdt=f"{wallet.get_usdt_balance():.2f}",
-            positions=wallet.positions_count,
-            slot=f"{wallet.get_slot_usdt():.2f}",
+            usdt      = f"{wallet.get_usdt_balance():.2f}",
+            positions = wallet.positions_count,
+            slot      = f"{wallet.get_slot_usdt():.2f}",
         )
         return wallet
 
-    # ── Consulta REST de saldo ─────────────────────────────────────────────────
+    # ── Consulta REST de saldo ────────────────────────────────────────────────
 
     def _fetch_usdt_balance(self) -> Optional[float]:
         """
@@ -245,20 +247,20 @@ class BinanceWallet(JSONWallet):
 
         try:
             resp = requests.get(
-                url, params=params,
-                headers=headers, timeout=self._timeout,
+                url, params  = params,
+                headers      = headers,
+                timeout      = self._timeout,
             )
             resp.raise_for_status()
             data = resp.json()
 
-            # Buscar USDT en la lista de balances
             for asset in data.get("balances", []):
                 if asset["asset"] == "USDT":
                     free = float(asset["free"])
                     log.info(
                         "saldo USDT real obtenido",
-                        free=f"{free:.2f}",
-                        locked=asset.get("locked", "0"),
+                        free   = f"{free:.2f}",
+                        locked = asset.get("locked", "0"),
                     )
                     return free
 

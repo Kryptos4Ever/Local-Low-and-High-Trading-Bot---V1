@@ -10,6 +10,7 @@ Arquitectura en dos fases
     · Calcula o carga desde cache: DNA, Lyapunov, HFD, PE, TE, RF, Score
     · Construye dos arrays: score_bot[N] y score_top[N]
     · Mapea timestamp → índice para lookup O(1) en on_candle
+    · Guarda timestamps.npy como parte del cache atómico
 
   Fase LIGERA (on_candle):
     · Lookup del score por timestamp
@@ -29,7 +30,6 @@ Dependencias opcionales
 
 from __future__ import annotations
 
-import os
 import time
 from collections import deque
 from pathlib import Path
@@ -59,9 +59,9 @@ class CompuestoStrategy(BaseStrategy):
     # ── Parámetros de señal ────────────────────────────────────────────────────
     DEFAULT_THR_BOT          = 75.0
     DEFAULT_THR_TOP          = 75.0
-    DEFAULT_COOLDOWN         = 16       # horas mínimas entre señales del mismo tipo
-    DEFAULT_SUAVIZADO        = 6        # rolling mean sobre el score antes del dedup
-    DEFAULT_VENTANA_SCORE    = 500      # ventana del percentil adaptativo
+    DEFAULT_COOLDOWN         = 16
+    DEFAULT_SUAVIZADO        = 6
+    DEFAULT_VENTANA_SCORE    = 500
 
     # ── Parámetros DNA ─────────────────────────────────────────────────────────
     DEFAULT_VENTANA_DNA      = 48
@@ -80,7 +80,7 @@ class CompuestoStrategy(BaseStrategy):
     DEFAULT_PE_DELAY         = 1
     DEFAULT_PE_VENTANA       = 64
     DEFAULT_WIN_PE_NORM      = 500
-    DEFAULT_PE_PESOS         = (0.40, 0.30, 0.15, 0.15)  # close, delta, lwk, trade
+    DEFAULT_PE_PESOS         = (0.40, 0.30, 0.15, 0.15)
 
     # ── Parámetros RF ──────────────────────────────────────────────────────────
     DEFAULT_RF_ESTIMATORS    = 300
@@ -94,40 +94,38 @@ class CompuestoStrategy(BaseStrategy):
 
     def __init__(
         self,
-        # Señal
         thr_bot:         float = DEFAULT_THR_BOT,
         thr_top:         float = DEFAULT_THR_TOP,
         cooldown:        int   = DEFAULT_COOLDOWN,
         suavizado:       int   = DEFAULT_SUAVIZADO,
         ventana_score:   int   = DEFAULT_VENTANA_SCORE,
-        # Cache
         cache_dir:       str   = ".cache_compuesto",
         force_recompute: bool  = False,
     ) -> None:
         super().__init__(name="Compuesto-DNA+Lyapunov+PE+Delta")
 
-        self.thr_bot       = thr_bot
-        self.thr_top       = thr_top
-        self.cooldown      = cooldown
-        self.suavizado     = suavizado
-        self.ventana_score = ventana_score
-        self.cache_dir     = Path(cache_dir)
+        self.thr_bot         = thr_bot
+        self.thr_top         = thr_top
+        self.cooldown        = cooldown
+        self.suavizado       = suavizado
+        self.ventana_score   = ventana_score
+        self.cache_dir       = Path(cache_dir)
         self.force_recompute = force_recompute
 
-        # Estado del score (se inicializa en on_start)
         self._score_bot:  Optional[np.ndarray] = None
         self._score_top:  Optional[np.ndarray] = None
-        self._ts_to_idx:  Dict[int, int]       = {}   # timestamp → índice array
+        self._ts_to_idx:  Dict[int, int]       = {}
 
-        # Control de cooldown
         self._last_bot_ts: int = 0
         self._last_top_ts: int = 0
 
         log.info(
             "CompuestoStrategy configurada",
-            thr_bot=thr_bot, thr_top=thr_top,
-            cooldown=cooldown, suavizado=suavizado,
-            ventana_score=ventana_score,
+            thr_bot       = thr_bot,
+            thr_top       = thr_top,
+            cooldown      = cooldown,
+            suavizado     = suavizado,
+            ventana_score = ventana_score,
         )
 
     # ══════════════════════════════════════════════════════════════════════════
@@ -148,17 +146,19 @@ class CompuestoStrategy(BaseStrategy):
         t0 = time.time()
 
         if feed is not None:
-            candles = feed.get_candles(start or "2017-01-01",
-                                       end   or "2030-01-01",
-                                       symbol)
+            candles = feed.get_candles(
+                start or "2017-01-01",
+                end   or "2030-01-01",
+                symbol,
+            )
             self._compute_and_cache(candles)
         else:
             self._load_from_cache()
 
         log.info(
             "CompuestoStrategy lista",
-            elapsed=f"{time.time()-t0:.1f}s",
-            n=len(self._ts_to_idx),
+            elapsed = f"{time.time()-t0:.1f}s",
+            n       = len(self._ts_to_idx),
         )
 
     def on_candle(self, candle: Candle, wallet: Wallet) -> Signal:
@@ -173,7 +173,6 @@ class CompuestoStrategy(BaseStrategy):
         sb = float(self._score_bot[idx])
         st = float(self._score_top[idx])
 
-        # Cooldown en segundos (1 vela = 3600s)
         cooldown_s = self.cooldown * 3600
 
         if sb >= self.thr_bot and (candle.ts - self._last_bot_ts) >= cooldown_s:
@@ -199,7 +198,7 @@ class CompuestoStrategy(BaseStrategy):
     def on_stop(self, wallet: Wallet) -> None:
         log.info(
             "CompuestoStrategy detenida",
-            velas_procesadas=self.candles_seen,
+            velas_procesadas = self.candles_seen,
         )
 
     # ══════════════════════════════════════════════════════════════════════════
@@ -207,7 +206,12 @@ class CompuestoStrategy(BaseStrategy):
     # ══════════════════════════════════════════════════════════════════════════
 
     def _compute_and_cache(self, candles: List[Candle]) -> None:
-        """Calcula el pipeline completo y cachea los resultados."""
+        """
+        Calcula el pipeline completo y cachea todos los resultados,
+        incluyendo timestamps.npy, de forma atómica antes de retornar.
+        Así si el proceso se interrumpe no queda un cache parcial sin
+        alineación temporal.
+        """
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
         close  = np.array([c.close   for c in candles], dtype=np.float64)
@@ -252,6 +256,18 @@ class CompuestoStrategy(BaseStrategy):
         np.save(self.cache_dir / "score_bot.npy", sb)
         np.save(self.cache_dir / "score_top.npy", st)
 
+        # Guardar timestamps como parte del mismo cache atómico.
+        # Esto garantiza que score_bot/top y timestamps siempre están
+        # alineados — si el proceso se interrumpe antes de llegar aquí
+        # los scores tampoco existen y el próximo arranque recalcula todo.
+        np.save(self.cache_dir / "timestamps.npy", ts_arr)
+        log.info(
+            "cache guardado",
+            scores     = len(sb),
+            timestamps = len(ts_arr),
+            dir        = str(self.cache_dir),
+        )
+
         self._score_bot = sb
         self._score_top = st
         self._ts_to_idx = {int(ts): i for i, ts in enumerate(ts_arr)}
@@ -277,8 +293,11 @@ class CompuestoStrategy(BaseStrategy):
         else:
             log.warning("cache sin timestamps.npy — señales pueden no alinearse")
 
-        log.info("scores cargados desde cache",
-                 n=len(self._score_bot), dir=str(self.cache_dir))
+        log.info(
+            "scores cargados desde cache",
+            n   = len(self._score_bot),
+            dir = str(self.cache_dir),
+        )
 
     def _load_or_compute(self, name: str, fn) -> np.ndarray:
         path = self.cache_dir / f"{name}.npy"
@@ -301,11 +320,11 @@ class CompuestoStrategy(BaseStrategy):
             log.info(f"  cache hit: {n1}, {n2}, {n3}")
             return np.load(p1), np.load(p2), np.load(p3)
         log.info(f"  calculando: {n1}, {n2}, {n3}...")
-        t0      = time.time()
+        t0         = time.time()
         a1, a2, a3 = fn()
-        for arr, n, p in [(a1,n1,p1),(a2,n2,p2),(a3,n3,p3)]:
+        for arr, n, p in [(a1, n1, p1), (a2, n2, p2), (a3, n3, p3)]:
             np.save(p, arr)
-        log.info(f"  RF listo", elapsed=f"{time.time()-t0:.1f}s")
+        log.info("  RF listo", elapsed=f"{time.time()-t0:.1f}s")
         return a1, a2, a3
 
     # ══════════════════════════════════════════════════════════════════════════
@@ -313,7 +332,6 @@ class CompuestoStrategy(BaseStrategy):
     # ══════════════════════════════════════════════════════════════════════════
 
     def _calc_dna(self, open_, high, low, close, volume, taker, trades, N):
-        from support.time_utils import to_epoch_s
         tr            = np.where(high - low == 0, 1e-9, high - low)
         body_ratio    = np.clip((close - open_) / tr, -1, 1)
         upper_wick    = np.clip((high - np.maximum(open_, close)) / tr, 0, 1)
@@ -402,7 +420,6 @@ class CompuestoStrategy(BaseStrategy):
 
         channels = [close, dna[:,3], dna[:,2], dna[:,5]]
         result   = np.column_stack([pe_series(ch) for ch in channels])
-        # Suavizar
         for j in range(result.shape[1]):
             result[:,j] = pd.Series(result[:,j]).ffill().bfill().rolling(12, min_periods=1).mean().values
         return result.astype(np.float32)
@@ -455,7 +472,6 @@ class CompuestoStrategy(BaseStrategy):
         from sklearn.preprocessing import StandardScaler
         from sklearn.model_selection import TimeSeriesSplit
 
-        # Labeling
         labels = np.zeros(N, dtype=int)
         for order in self.DEFAULT_LABEL_ORDERS:
             for bi in argrelextrema(close, np.less_equal, order=order)[0]:
@@ -468,7 +484,6 @@ class CompuestoStrategy(BaseStrategy):
                     labels[ti] = -1
         y3 = np.where(labels==1,1,np.where(labels==-1,2,0))
 
-        # Features
         dna_df = pd.DataFrame(dna, columns=[f'd{i}' for i in range(dna.shape[1])])
         feats  = [dna]
         for w in [12, 24, 48]:
@@ -486,7 +501,6 @@ class CompuestoStrategy(BaseStrategy):
         X = np.column_stack([f if f.ndim==2 else f.reshape(-1,1) for f in feats])
         X = np.nan_to_num(X, nan=0.0, posinf=0.0, neginf=0.0)
 
-        # Train
         START = 200
         scaler = StandardScaler().fit(X[START:])
         X_sc   = scaler.transform(X[START:])
@@ -503,10 +517,13 @@ class CompuestoStrategy(BaseStrategy):
         proba  = np.zeros((len(X[START:]), 3))
         for fold, (tr, te_) in enumerate(tscv.split(X_bal)):
             rf = RandomForestClassifier(
-                n_estimators=self.DEFAULT_RF_ESTIMATORS,
-                max_depth=self.DEFAULT_RF_DEPTH,
-                min_samples_leaf=self.DEFAULT_RF_MIN_SAMPLES,
-                class_weight='balanced', random_state=42, n_jobs=-1)
+                n_estimators   = self.DEFAULT_RF_ESTIMATORS,
+                max_depth      = self.DEFAULT_RF_DEPTH,
+                min_samples_leaf = self.DEFAULT_RF_MIN_SAMPLES,
+                class_weight   = 'balanced',
+                random_state   = 42,
+                n_jobs         = -1,
+            )
             rf.fit(X_bal[tr], y_bal[tr])
             proba += rf.predict_proba(X_sc)
             log.info(f"    RF fold {fold+1}/{self.DEFAULT_RF_CV_SPLITS} OK")
@@ -525,11 +542,9 @@ class CompuestoStrategy(BaseStrategy):
         from sklearn.model_selection import TimeSeriesSplit
         from scipy.ndimage import uniform_filter1d
 
-        # Suavizar probabilities
         pb_sm = pd.Series(prob_bot).rolling(self.suavizado, min_periods=1).mean().values
         pt_sm = pd.Series(prob_top).rolling(self.suavizado, min_periods=1).mean().values
 
-        # Lyapunov percentil
         lyap_c   = pd.Series(lyap).ffill().bfill().values
         lyap_pct = np.full(N, 0.5)
         for i in range(self.DEFAULT_WIN_LYAP_NORM, N):
@@ -539,7 +554,6 @@ class CompuestoStrategy(BaseStrategy):
         lyap_bot = lyap_rev * (1 - lyap_pct)
         lyap_top = lyap_rev * lyap_pct
 
-        # PE tensión
         w1, w2, w3, w4 = self.DEFAULT_PE_PESOS
         pe_comp = (w1*pe_matrix[:,0] + w2*pe_matrix[:,1] +
                    w3*pe_matrix[:,2] + w4*pe_matrix[:,3])
@@ -548,36 +562,35 @@ class CompuestoStrategy(BaseStrategy):
             pe_ten[i] = 1.0 - percentileofscore(pe_comp[i-self.DEFAULT_WIN_PE_NORM:i], pe_comp[i]) / 100.0
         pe_ten = pd.Series(pe_ten).ffill().bfill().values
 
-        # Delta divergencia
         delta  = pd.Series(dna[:,3]).rolling(12, min_periods=1).mean().values
-        p_chg  = pd.Series(dna[:,0]).pct_change(12).fillna(0).values  # body como proxy
+        p_chg  = pd.Series(dna[:,0]).pct_change(12).fillna(0).values
         d_chg  = pd.Series(delta).diff(12).fillna(0).values
         def rzsc(arr, w=200):
-            s=pd.Series(arr); m=s.rolling(w,min_periods=1).mean()
-            st_=s.rolling(w,min_periods=1).std().fillna(1).replace(0,1)
+            s  = pd.Series(arr)
+            m  = s.rolling(w, min_periods=1).mean()
+            st_= s.rolling(w, min_periods=1).std().fillna(1).replace(0,1)
             return ((s-m)/st_).values
-        pz=rzsc(p_chg); dz=rzsc(d_chg)
+        pz = rzsc(p_chg); dz = rzsc(d_chg)
         def rp(arr, w=500):
-            out=np.full(N, 0.5)
+            out = np.full(N, 0.5)
             for i in range(w, N):
-                out[i]=percentileofscore(arr[i-w:i], arr[i])/100.0
+                out[i] = percentileofscore(arr[i-w:i], arr[i]) / 100.0
             return out
-        div_bot=rp(np.clip(-pz*dz,0,None)); div_top=rp(np.clip(pz*dz,0,None))
+        div_bot = rp(np.clip(-pz*dz, 0, None))
+        div_top = rp(np.clip( pz*dz, 0, None))
 
-        # Morfología
-        b6 =pd.Series(dna[:,0]).rolling(6, min_periods=1).mean().values
-        b24=pd.Series(dna[:,0]).rolling(24,min_periods=1).mean().values
-        morph_bot=rp(np.where(b24<-0.05,np.clip(b6-b24,0,None),0.0))
-        morph_top=rp(np.where(b24> 0.05,np.clip(b24-b6,0,None),0.0))
+        b6  = pd.Series(dna[:,0]).rolling(6,  min_periods=1).mean().values
+        b24 = pd.Series(dna[:,0]).rolling(24, min_periods=1).mean().values
+        morph_bot = rp(np.where(b24 < -0.05, np.clip(b6-b24,  0, None), 0.0))
+        morph_top = rp(np.where(b24 >  0.05, np.clip(b24-b6,  0, None), 0.0))
 
-        # Features compuestos
-        y3 = np.where(labels==1,1,np.where(labels==-1,2,0))
+        y3 = np.where(labels==1, 1, np.where(labels==-1, 2, 0))
         yb = (y3==1).astype(int); yt = (y3==2).astype(int)
         START = 600
 
         def build_X(pb, lb, pe, db, mb):
-            ib=pb*pe; ilp=lb*pe; id_=pb*db; ipe=pe*db
-            return np.column_stack([pb,lb,pe,db,mb,ib,ilp,id_,ipe])
+            ib  = pb*pe; ilp = lb*pe; id_ = pb*db; ipe = pe*db
+            return np.column_stack([pb, lb, pe, db, mb, ib, ilp, id_, ipe])
 
         Xb = build_X(pb_sm, lyap_bot, pe_ten, div_bot, morph_bot)
         Xt = build_X(pt_sm, lyap_top, pe_ten, div_top, morph_top)
@@ -586,17 +599,27 @@ class CompuestoStrategy(BaseStrategy):
         sc_t = StandardScaler().fit(Xt[START:])
 
         def opt_w(Xsc, yv):
-            ws=[]; tscv=TimeSeriesSplit(n_splits=self.DEFAULT_LR_C.__class__(5) if False else 5)
-            for tr,te_ in tscv.split(Xsc):
-                if len(np.unique(yv[tr]))<2 or (yv[tr]==1).sum()<3: continue
+            ws   = []
+            tscv = TimeSeriesSplit(n_splits=5)
+            for tr, te_ in tscv.split(Xsc):
+                if len(np.unique(yv[tr])) < 2 or (yv[tr]==1).sum() < 3:
+                    continue
                 try:
-                    lr=LogisticRegression(C=self.DEFAULT_LR_C, class_weight='balanced',
-                                          max_iter=1000, random_state=42)
-                    lr.fit(Xsc[tr], yv[tr]); ws.append(lr.coef_[0])
-                except: continue
-            if not ws: return np.ones(Xsc.shape[1])/Xsc.shape[1]
-            w=np.clip(np.mean(ws,axis=0),0,None); s=w.sum()
-            return w/s if s>0 else np.ones(len(w))/len(w)
+                    lr = LogisticRegression(
+                        C            = self.DEFAULT_LR_C,
+                        class_weight = 'balanced',
+                        max_iter     = 1000,
+                        random_state = 42,
+                    )
+                    lr.fit(Xsc[tr], yv[tr])
+                    ws.append(lr.coef_[0])
+                except Exception:
+                    continue
+            if not ws:
+                return np.ones(Xsc.shape[1]) / Xsc.shape[1]
+            w = np.clip(np.mean(ws, axis=0), 0, None)
+            s = w.sum()
+            return w / s if s > 0 else np.ones(len(w)) / len(w)
 
         wb = opt_w(sc_b.transform(Xb[START:]), yb[START:])
         wt = opt_w(sc_t.transform(Xt[START:]), yt[START:])
@@ -605,12 +628,13 @@ class CompuestoStrategy(BaseStrategy):
         raw_top = uniform_filter1d(Xt @ wt, size=self.suavizado)
 
         def adaptive_score(raw, w=None):
-            w = w or self.ventana_score
+            w   = w or self.ventana_score
             out = np.full(N, 50.0)
             for i in range(w, N):
-                seg = raw[i-w:i]
+                seg      = raw[i-w:i]
                 p10, p90 = np.percentile(seg, 10), np.percentile(seg, 90)
-                out[i] = 50.0 if p90==p10 else float(np.clip((raw[i]-p10)/(p90-p10)*100,0,100))
+                out[i]   = (50.0 if p90 == p10
+                            else float(np.clip((raw[i]-p10)/(p90-p10)*100, 0, 100)))
             return out
 
         sb = adaptive_score(raw_bot)
@@ -623,18 +647,18 @@ class CompuestoStrategy(BaseStrategy):
 
     def describe(self) -> dict:
         return {
-            "estrategia":     self.name,
-            "thr_bot":        self.thr_bot,
-            "thr_top":        self.thr_top,
-            "cooldown_velas": self.cooldown,
-            "suavizado":      self.suavizado,
-            "ventana_score":  self.ventana_score,
-            "N":              "adaptativo_score_compuesto",
-            "rsi_length":     "N/A",
-            "ath_caida_maxima": "N/A",
+            "estrategia":        self.name,
+            "thr_bot":           self.thr_bot,
+            "thr_top":           self.thr_top,
+            "cooldown_velas":    self.cooldown,
+            "suavizado":         self.suavizado,
+            "ventana_score":     self.ventana_score,
+            "N":                 "adaptativo_score_compuesto",
+            "rsi_length":        "N/A",
+            "ath_caida_maxima":  "N/A",
             "atl_subida_maxima": "N/A",
-            "factor_caida":   "N/A",
-            "factor_subida":  "N/A",
-            "guardia_compra": True,
-            "guardia_venta":  True,
+            "factor_caida":      "N/A",
+            "factor_subida":     "N/A",
+            "guardia_compra":    True,
+            "guardia_venta":     True,
         }

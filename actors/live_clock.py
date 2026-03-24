@@ -8,12 +8,13 @@ que BinanceWSFeed entrega una vela cerrada, luego retorna inmediatamente.
 
 Arquitectura
 ─────────────
-  BinanceWSFeed.subscribe()  →  callback → Queue(maxsize=1)
+  BinanceWSFeed.subscribe()  →  callback → Queue(maxsize=2)
   LiveClock.tick()           →  Queue.get(block=True) → Candle
 
 La Queue desacopla el thread del WebSocket del hilo principal del trader.
-La capacidad 1 es intencional: si el trader es más lento que el exchange
-(poco probable a 1h/vela) la vela vieja se descarta y se procesa la nueva.
+La capacidad 2 garantiza que nunca se descarta una vela a menos que el
+trader tarde más de 2 horas en procesar un tick (imposible en condiciones
+normales con velas de 1h).
 
 Uso en live_local_reversal.py
 ───────────────────────────────
@@ -54,12 +55,14 @@ class LiveClock(Clock):
         self,
         feed:       PriceFeed,
         symbol:     str   = "BTCUSDT",
-        queue_size: int   = 1,
+        queue_size: int   = 2,
     ) -> None:
         """
         feed:       instancia de BinanceWSFeed (o cualquier PriceFeed con subscribe())
         symbol:     par de trading, debe coincidir con config_world.SYMBOL
-        queue_size: capacidad de la cola interna. 1 = procesar solo la vela más reciente.
+        queue_size: capacidad de la cola interna. 2 = tolera hasta 2 velas
+                    sin procesar antes de descartar (con velas de 1h esto
+                    nunca ocurre en condiciones normales de operación).
         """
         self._feed       = feed
         self._symbol     = symbol
@@ -138,20 +141,22 @@ class LiveClock(Clock):
         Callback llamado por BinanceWSFeed cuando cierra una vela.
         Corre en el thread del WebSocket — solo encola, no procesa.
 
-        Si la queue está llena (trader lento) descarta la vela vieja
-        y enola la nueva para evitar acumulación de lag.
+        Si la queue está llena significa que el trader lleva más de
+        queue_size horas sin procesar un tick — situación anómala que
+        se registra como error. Se descarta la vela más antigua para
+        evitar acumulación de lag indefinida.
         """
         if self._stop_event.is_set():
             return
 
-        # Vaciar la queue si está llena antes de encolar la nueva vela
         if self._queue.full():
             try:
                 old = self._queue.get_nowait()
-                log.warning(
-                    "queue llena — descartando vela antigua",
+                log.error(
+                    "VELA DESCARTADA — el trader no procesó la vela anterior a tiempo",
                     descartada=old.iso() if old else "None",
                     nueva=candle.iso(),
+                    accion="revisar latencia del modelo o reducir complejidad del tick",
                 )
             except queue.Empty:
                 pass
@@ -159,4 +164,7 @@ class LiveClock(Clock):
         try:
             self._queue.put_nowait(candle)
         except queue.Full:
-            pass   # race condition extremadamente improbable — ignorar
+            log.error(
+                "no se pudo encolar vela — queue llena tras vaciado",
+                ts=candle.iso(),
+            )

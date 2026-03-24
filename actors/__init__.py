@@ -11,6 +11,8 @@ from .order_book import (
     OrderSide, OrderStatus, Order, OrderBook,
     SimulatedOrderBook, BinanceOrderBook, build_order_book,
 )
+from .clock import Clock, LocalClock, build_clock
+from .live_clock import LiveClock
 
 __all__ = [
     "Candle", "PriceFeed", "SQLiteFeed", "CSVFeed",
@@ -19,4 +21,5 @@ __all__ = [
     "MemoryWallet", "JSONWallet", "BinanceWallet", "build_wallet",
     "OrderSide", "OrderStatus", "Order", "OrderBook",
     "SimulatedOrderBook", "BinanceOrderBook", "build_order_book",
+    "Clock", "LocalClock", "LiveClock", "build_clock",
 ]
