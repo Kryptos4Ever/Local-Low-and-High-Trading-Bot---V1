@@ -32,9 +32,18 @@ Lógica de slots (del Backtest_irreal.py — benchmark canónico)
 
 Implementaciones
 ─────────────────
-  JSONWallet     →  persiste en archivo .json (backtest con registro completo)
   MemoryWallet   →  solo RAM (grid search, sin I/O)
-  BinanceWallet  →  stub para producción
+  JSONWallet     →  persiste en archivo .json (backtest con registro completo)
+  BinanceWallet  →  sincronizada con cuenta real (actors/binance_wallet.py)
+
+Factory
+────────
+  build_wallet(mode, ...)  →  Wallet
+    mode="memory"  →  MemoryWallet  (grid search)
+    mode="json"    →  JSONWallet    (default, backtest)
+    mode="live"    →  BinanceWallet (producción/testnet)
+
+  No lee mode_config — el runner decide el modo explícitamente.
 """
 
 from __future__ import annotations
@@ -42,7 +51,7 @@ from __future__ import annotations
 import json
 from abc import ABC, abstractmethod
 from collections import deque
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional
 
@@ -63,10 +72,6 @@ class Position:
     btc:         float
     opened_at:   int    # epoch s UTC
 
-    @property
-    def value_at(self, price: float) -> float:
-        return self.btc * price
-
 
 @dataclass(slots=True)
 class TradeRecord:
@@ -86,8 +91,8 @@ class TradeRecord:
     usdt_received:  Optional[float] = None
     ganancia_usdt:  Optional[float] = None
     # Metadata
-    ignored:        bool   = False
-    ignore_reason:  Optional[str] = None
+    ignored:        bool            = False
+    ignore_reason:  Optional[str]   = None
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -110,12 +115,7 @@ class Wallet(ABC):
 
     @abstractmethod
     def get_btc_acumulado(self) -> float:
-        """
-        BTC total vendido históricamente durante la sesión.
-        Usado en el summary del JSON de resultados.
-        FIX: declarado explícitamente en la interfaz para que cualquier
-        implementación alternativa de Wallet esté obligada a proveerlo.
-        """
+        """BTC total vendido históricamente durante la sesión."""
 
     @abstractmethod
     def get_positions(self) -> List[Position]:
@@ -123,33 +123,21 @@ class Wallet(ABC):
 
     @abstractmethod
     def get_slot_usdt(self) -> float:
-        """
-        Tamaño del slot actual en USDT.
-        Se recalcula solo cuando positions_count llega a 0.
-        """
+        """Tamaño del slot actual en USDT. Se recalcula solo cuando positions_count llega a 0."""
 
     @abstractmethod
     def get_btc_por_venta(self) -> float:
-        """
-        BTC a vender en la próxima operación SELL.
-        Se recalcula después de cada BUY.
-        """
+        """BTC a vender en la próxima operación SELL. Se recalcula después de cada BUY."""
 
     @abstractmethod
     def update(self, trade: TradeRecord) -> None:
-        """
-        Actualiza el estado de la billetera después de una operación.
-        Llamado por el OrderBook tras ejecutar una orden.
-        """
+        """Actualiza el estado de la billetera después de una operación."""
 
     @abstractmethod
     def snapshot(self, current_price: float) -> dict:
-        """
-        Retorna el estado completo de la billetera en un momento dado.
-        Usado por el StateManager y por el JSON de resultados.
-        """
+        """Retorna el estado completo de la billetera en un momento dado."""
 
-    # ── Propiedades calculadas (no abstractas — disponibles en todas) ─────────
+    # ── Propiedades calculadas (no abstractas) ────────────────────────────────
 
     @property
     def positions_count(self) -> int:
@@ -183,23 +171,23 @@ class MemoryWallet(Wallet):
     """
 
     def __init__(self, usdt_inicial: float, max_posiciones: int) -> None:
-        self._usdt:                float          = usdt_inicial
-        self._btc_libre:           float          = 0.0
-        self._btc_acumulado_total: float          = 0.0
+        self._usdt:                float           = usdt_inicial
+        self._btc_libre:           float           = 0.0
+        self._btc_acumulado_total: float           = 0.0
         self._posiciones:          deque[Position] = deque()
-        self._max_pos:             int            = max_posiciones
-        self._slot_usdt:           float          = usdt_inicial / max_posiciones
-        self._btc_por_venta:       float          = 0.0
-        self._usdt_inicial:        float          = usdt_inicial
+        self._max_pos:             int             = max_posiciones
+        self._slot_usdt:           float           = usdt_inicial / max_posiciones
+        self._btc_por_venta:       float           = 0.0
+        self._usdt_inicial:        float           = usdt_inicial
 
     # ── Interfaz ──────────────────────────────────────────────────────────────
 
-    def get_usdt_balance(self)   -> float:           return self._usdt
-    def get_btc_balance(self)    -> float:           return self._btc_libre
-    def get_btc_acumulado(self)  -> float:           return self._btc_acumulado_total
-    def get_positions(self)      -> List[Position]:  return list(self._posiciones)
-    def get_slot_usdt(self)      -> float:           return self._slot_usdt
-    def get_btc_por_venta(self)  -> float:           return self._btc_por_venta
+    def get_usdt_balance(self)  -> float:           return self._usdt
+    def get_btc_balance(self)   -> float:           return self._btc_libre
+    def get_btc_acumulado(self) -> float:           return self._btc_acumulado_total
+    def get_positions(self)     -> List[Position]:  return list(self._posiciones)
+    def get_slot_usdt(self)     -> float:           return self._slot_usdt
+    def get_btc_por_venta(self) -> float:           return self._btc_por_venta
 
     def update(self, trade: TradeRecord) -> None:
         if trade.ignored:
@@ -280,10 +268,6 @@ class MemoryWallet(Wallet):
 class JSONWallet(MemoryWallet):
     """
     Extiende MemoryWallet agregando persistencia en archivo JSON.
-
-    En cada update() el estado se puede guardar (modo append-only en producción,
-    sobreescritura en backtest para compatibilidad con Graficador.py).
-
     El JSON producido es compatible con el esquema esperado por Graficador.py.
     """
 
@@ -309,7 +293,6 @@ class JSONWallet(MemoryWallet):
         """
         Escribe el JSON final al disco.
         Llamar al finalizar el backtest desde el runner.
-        Compatible con el esquema de Graficador.py.
         """
         payload = {
             "summary":       summary,
@@ -318,7 +301,8 @@ class JSONWallet(MemoryWallet):
         self._json_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self._json_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, indent=2, ensure_ascii=False, default=str)
-        log.info("JSON guardado", path=str(self._json_path), trades=len(self._trade_log))
+        log.info("JSON guardado", path=str(self._json_path),
+                 trades=len(self._trade_log))
 
     def get_trade_log(self) -> list[dict]:
         """Retorna una copia del log de trades para el runner."""
@@ -345,7 +329,7 @@ class JSONWallet(MemoryWallet):
             "btc_bought":                 round(t.btc_bought,   10) if t.btc_bought    else None,
             "commission_usdt":            round(t.commission,    8) if t.commission    else None,
             "btc_sold":                   round(t.btc_sold,     10) if t.btc_sold      else None,
-            "btc_accumulated":            round(self._btc_acumulado_total, 10),  # FIX: era siempre 0.0
+            "btc_accumulated":            round(self._btc_acumulado_total, 10),
             "usdt_received":              round(t.usdt_received, 8) if t.usdt_received else None,
             "ganancia_usdt":              round(t.ganancia_usdt, 8) if t.ganancia_usdt else None,
             "pct_capital_usado":          None,
@@ -353,62 +337,55 @@ class JSONWallet(MemoryWallet):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# STUB producción
-# ══════════════════════════════════════════════════════════════════════════════
-
-class BinanceWallet(Wallet):
-    """
-    Consulta balances reales via REST API de Binance.
-    Implementación completa en actors/binance_wallet.py.
-    """
-
-    def get_usdt_balance(self)  -> float:          raise NotImplementedError
-    def get_btc_balance(self)   -> float:          raise NotImplementedError
-    def get_btc_acumulado(self) -> float:          raise NotImplementedError
-    def get_positions(self)     -> List[Position]: raise NotImplementedError
-    def get_slot_usdt(self)     -> float:          raise NotImplementedError
-    def get_btc_por_venta(self) -> float:          raise NotImplementedError
-    def update(self, trade)     -> None:           raise NotImplementedError
-    def snapshot(self, price)   -> dict:           raise NotImplementedError
-
-
-# ══════════════════════════════════════════════════════════════════════════════
 # FACTORY
 # ══════════════════════════════════════════════════════════════════════════════
 
-def build_wallet(mode: str = "auto") -> Wallet:
+def build_wallet(
+    mode:           str   = "json",
+    usdt_inicial:   float = None,
+    max_posiciones: int   = None,
+    json_path:      str   = None,
+    state_path:     str   = None,
+) -> Wallet:
     """
-    Construye la implementación correcta según mode_config y config_local.
+    Helper para construir una Wallet sin instanciar manualmente.
+    No lee mode_config — el runner decide el modo explícitamente.
 
-    Modos (mode_config.py):
-        USE_LIVE_WALLET  = False  →  JSONWallet  (backtest)
-        USE_LIVE_WALLET  = False  +  USE_MEMORY_WALLET = True  →  MemoryWallet (grid)
-        USE_LIVE_WALLET  = True   →  BinanceWallet (producción)
+    mode="memory"  →  MemoryWallet  (grid search, sin I/O)
+    mode="json"    →  JSONWallet    (default, backtest con persistencia)
+    mode="live"    →  BinanceWallet (producción/testnet)
+
+    Los parámetros con None se leen desde config_local como fallback.
+
+    Para control fino, instanciar directamente:
+        wallet = JSONWallet(usdt_inicial=1000, max_posiciones=5, json_path="res.json")
+        wallet = BinanceWallet.from_account(max_posiciones=5, json_path="live.json")
     """
-    try:
-        import mode_config as MC
-        use_live   = getattr(MC, "USE_LIVE_WALLET",   False)
-        use_memory = getattr(MC, "USE_MEMORY_WALLET", False)
-    except ImportError:
-        use_live = use_memory = False
-
     try:
         import config_local as CL
-        usdt_ini  = getattr(CL, "SALDO_USDT_INICIAL", 1000.0)
-        max_pos   = getattr(CL, "MAX_POSICIONES",      5)
-        json_path = getattr(CL, "RESULTS_JSON",        "backtest_results.json")
+        _usdt   = usdt_inicial   or getattr(CL, "SALDO_USDT_INICIAL", 1000.0)
+        _maxpos = max_posiciones or getattr(CL, "MAX_POSICIONES",      5)
+        _jpath  = json_path      or getattr(CL, "RESULTS_JSON",        "backtest_results.json")
+        _spath  = state_path     or getattr(CL, "STATE_PATH",          "state/trading_state.jsonl")
     except ImportError:
-        usdt_ini  = 1000.0
-        max_pos   = 5
-        json_path = "backtest_results.json"
+        _usdt   = usdt_inicial   or 1000.0
+        _maxpos = max_posiciones or 5
+        _jpath  = json_path      or "backtest_results.json"
+        _spath  = state_path     or "state/trading_state.jsonl"
 
-    if use_live:
-        log.info("Wallet modo LIVE → BinanceWallet")
-        return BinanceWallet()
+    if mode == "live":
+        from actors.binance_wallet import BinanceWallet
+        log.info("Wallet → BinanceWallet", max_pos=_maxpos)
+        return BinanceWallet.from_account(
+            max_posiciones = _maxpos,
+            json_path      = _jpath,
+            state_path     = _spath,
+        )
 
-    if use_memory:
-        log.info("Wallet modo MEMORY → MemoryWallet", usdt=usdt_ini, max_pos=max_pos)
-        return MemoryWallet(usdt_ini, max_pos)
+    if mode == "memory":
+        log.info("Wallet → MemoryWallet", usdt=_usdt, max_pos=_maxpos)
+        return MemoryWallet(_usdt, _maxpos)
 
-    log.info("Wallet modo LOCAL → JSONWallet", path=json_path)
-    return JSONWallet(usdt_ini, max_pos, json_path)
+    # default: json
+    log.info("Wallet → JSONWallet", path=_jpath)
+    return JSONWallet(_usdt, _maxpos, _jpath)

@@ -18,12 +18,19 @@ Parámetro candle_ts
 Todos los métodos de ejecución reciben candle_ts (epoch s de la vela que
 generó la señal). Se aplica ANTES de submit() para que el TradeRecord
 tenga la fecha real de la vela, no el timestamp de ejecución del proceso.
-Sin esto los gráficos muestran todas las operaciones en la fecha de hoy.
 
 Implementaciones
 ─────────────────
   SimulatedOrderBook  →  ejecución instantánea, lógica de slots del Irreal
-  BinanceOrderBook    →  stub para producción
+  BinanceOrderBook    →  órdenes reales (actors/binance_order_book.py)
+
+Factory
+────────
+  build_order_book(mode, ...)  →  OrderBook
+    mode="local"  →  SimulatedOrderBook  (default, backtest)
+    mode="live"   →  BinanceOrderBook    (producción/testnet)
+
+  No lee mode_config — el runner decide el modo explícitamente.
 """
 
 from __future__ import annotations
@@ -64,12 +71,12 @@ class Order:
     order_id:      str
     side:          OrderSide
     price:         float
-    ts:            int               # epoch s UTC — sobreescrito con candle_ts
+    ts:            int                   # epoch s UTC — sobreescrito con candle_ts
 
-    usdt_amount:   Optional[float]      = None
-    btc_amount:    Optional[float]      = None
-    status:        OrderStatus          = OrderStatus.PENDING
-    reject_reason: Optional[str]        = None
+    usdt_amount:   Optional[float]       = None
+    btc_amount:    Optional[float]       = None
+    status:        OrderStatus           = OrderStatus.PENDING
+    reject_reason: Optional[str]         = None
     trade:         Optional[TradeRecord] = None
 
     @property
@@ -110,8 +117,8 @@ class OrderBook(ABC):
     ) -> Order:
         """
         Encadena create → (fijar ts) → submit → check → notificar wallet.
-        candle_ts se fija ANTES de submit para que _execute_buy/_sell
-        lo lean al construir el TradeRecord.
+        candle_ts se fija ANTES de submit para que el TradeRecord tenga
+        la fecha real de la vela.
         """
         if side == OrderSide.BUY:
             order = self.create_order(side, price,
@@ -120,7 +127,6 @@ class OrderBook(ABC):
             order = self.create_order(side, price,
                                       btc_amount=wallet.get_btc_por_venta())
 
-        # Fijar timestamp de vela ANTES de ejecutar
         if candle_ts:
             order.ts = candle_ts
 
@@ -163,7 +169,7 @@ class SimulatedOrderBook(OrderBook):
             order_id    = str(uuid.uuid4())[:8],
             side        = side,
             price       = price,
-            ts          = now_epoch_s(),   # se sobreescribe con candle_ts
+            ts          = now_epoch_s(),
             usdt_amount = usdt_amount,
             btc_amount  = btc_amount,
         )
@@ -171,15 +177,10 @@ class SimulatedOrderBook(OrderBook):
         return order
 
     def submit(self, order: Order) -> Order:
-        """
-        Ejecuta la orden. El ts ya viene fijado con candle_ts desde execute().
-        Al finalizar garantiza que el TradeRecord hereda ese mismo ts.
-        """
         if order.side == OrderSide.BUY:
             self._execute_buy(order)
         else:
             self._execute_sell(order)
-        # Garantizar consistencia ts Order → TradeRecord
         if order.trade:
             order.trade.ts = order.ts
         return order
@@ -217,9 +218,9 @@ class SimulatedOrderBook(OrderBook):
         if btc_a_vender <= 0:
             self._reject(order, "sin_btc")
             return
-        usdt_bruto  = round(btc_a_vender * order.price, 8)
-        commission  = round(usdt_bruto * self._commission_pct / 100.0, 8)
-        usdt_neto   = round(usdt_bruto - commission, 8)
+        usdt_bruto   = round(btc_a_vender * order.price, 8)
+        commission   = round(usdt_bruto * self._commission_pct / 100.0, 8)
+        usdt_neto    = round(usdt_bruto - commission, 8)
         order.status = OrderStatus.FILLED
         order.trade  = TradeRecord(
             ts            = order.ts,
@@ -228,7 +229,7 @@ class SimulatedOrderBook(OrderBook):
             btc_sold      = round(btc_a_vender, 10),
             usdt_received = usdt_neto,
             commission    = commission,
-            ganancia_usdt = None,   # calculada por Wallet con costo FIFO
+            ganancia_usdt = None,
         )
         log.debug("SELL ejecutado", price=order.price,
                   btc=btc_a_vender, usdt_rec=usdt_neto)
@@ -269,16 +270,13 @@ class SimulatedOrderBook(OrderBook):
         wallet:    Wallet,
         candle_ts: int = 0,
     ) -> Order:
-        """
-        Verifica guardias y delega a execute() pasando candle_ts.
-        Versión recomendada para los runners.
-        """
+        """Verifica guardias y delega a execute() pasando candle_ts."""
         reason = (self.check_buy_guards(wallet)
                   if side == OrderSide.BUY
                   else self.check_sell_guards(wallet))
 
         if reason:
-            ts = candle_ts if candle_ts else now_epoch_s()
+            ts    = candle_ts if candle_ts else now_epoch_s()
             order = self.create_order(
                 side        = side,
                 price       = price,
@@ -295,46 +293,48 @@ class SimulatedOrderBook(OrderBook):
             wallet.update(order.trade)
             return order
 
-        # CORRECCIÓN: pasar candle_ts a execute() para timestamp correcto
         return self.execute(side, price, wallet, candle_ts=candle_ts)
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# STUB producción
-# ══════════════════════════════════════════════════════════════════════════════
-
-class BinanceOrderBook(OrderBook):
-    """Coloca órdenes reales en Binance. Implementación pendiente (etapa live)."""
-    def create_order(self, side, price, usdt_amount=None, btc_amount=None):
-        raise NotImplementedError("BinanceOrderBook pendiente de implementación.")
-    def submit(self, order):
-        raise NotImplementedError("BinanceOrderBook pendiente de implementación.")
-    def check(self, order_id):
-        raise NotImplementedError("BinanceOrderBook pendiente de implementación.")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # FACTORY
 # ══════════════════════════════════════════════════════════════════════════════
 
-def build_order_book() -> OrderBook:
-    try:
-        import mode_config as MC
-        use_live = getattr(MC, "USE_LIVE_ORDERBOOK", False)
-    except ImportError:
-        use_live = False
+def build_order_book(
+    mode:           str   = "local",
+    commission_pct: float = None,
+    max_posiciones: int   = None,
+) -> OrderBook:
+    """
+    Helper para construir un OrderBook sin instanciar manualmente.
+    No lee mode_config — el runner decide el modo explícitamente.
 
+    mode="local"  →  SimulatedOrderBook  (default, backtest)
+    mode="live"   →  BinanceOrderBook    (producción/testnet)
+
+    Los parámetros con None se leen desde config_local como fallback.
+
+    Para control fino, instanciar directamente:
+        ob = SimulatedOrderBook(commission_pct=0.1, max_posiciones=5)
+        ob = BinanceOrderBook(max_posiciones=5, commission_pct=0.1)
+    """
     try:
         import config_local as CL
-        commission = getattr(CL, "COMMISSION_PCT", 0.1)
-        max_pos    = getattr(CL, "MAX_POSICIONES",  5)
+        _commission = commission_pct or getattr(CL, "COMMISSION_PCT", 0.1)
+        _maxpos     = max_posiciones or getattr(CL, "MAX_POSICIONES",  5)
     except ImportError:
-        commission, max_pos = 0.1, 5
+        _commission = commission_pct or 0.1
+        _maxpos     = max_posiciones or 5
 
-    if use_live:
-        log.info("OrderBook modo LIVE → BinanceOrderBook")
-        return BinanceOrderBook()
+    if mode == "live":
+        from actors.binance_order_book import BinanceOrderBook
+        log.info("OrderBook → BinanceOrderBook",
+                 commission=f"{_commission}%", max_pos=_maxpos)
+        return BinanceOrderBook(
+            max_posiciones = _maxpos,
+            commission_pct = _commission,
+        )
 
-    log.info("OrderBook modo LOCAL → SimulatedOrderBook",
-             commission=f"{commission}%", max_pos=max_pos)
-    return SimulatedOrderBook(commission_pct=commission, max_posiciones=max_pos)
+    log.info("OrderBook → SimulatedOrderBook",
+             commission=f"{_commission}%", max_pos=_maxpos)
+    return SimulatedOrderBook(commission_pct=_commission, max_posiciones=_maxpos)

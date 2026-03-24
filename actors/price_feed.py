@@ -13,15 +13,25 @@ Implementaciones locales (simulación)
   SQLiteFeed   →  lee desde btc_hourly.db  (configurado en config_local)
   CSVFeed      →  lee desde archivo .csv
 
-Implementaciones producción (a codificar en etapa de producción)
-─────────────────────────────────────────────────────────────────
-  BinanceRESTFeed  →  histórico via REST API
-  BinanceWSFeed    →  stream en tiempo real via WebSocket
+Implementaciones producción
+─────────────────────────────────────────────────────────────────────────────
+  BinanceRESTFeed  →  histórico via REST API  (actors/binance_feed.py)
+  BinanceWSFeed    →  stream en tiempo real via WebSocket (actors/binance_feed.py)
+
+Factory
+────────
+  build_price_feed(mode)  →  PriceFeed
+    mode="local"  →  SQLiteFeed   (default, backtest)
+    mode="rest"   →  BinanceRESTFeed (histórico live / warmup)
+    mode="live"   →  BinanceWSFeed   (stream en tiempo real)
+
+  Cada runner instancia explícitamente lo que necesita. La factory es un
+  helper conveniente — no lee mode_config ni ningún archivo de configuración
+  global.
 
 Candle (dataclass)
 ───────────────────
 Tipo interno canónico. Todos los actores y estrategias hablan Candle.
-Los feeds convierten en sus propios bordes desde el formato de la fuente.
 Timestamps siempre en UTC epoch seconds (int) via time_utils.
 """
 
@@ -33,7 +43,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Callable, Iterator, List, Optional
 
-from support.logger    import get_logger
+from support.logger     import get_logger
 from support.time_utils import to_epoch_s, to_iso, TimeInput
 
 log = get_logger("price_feed")
@@ -49,7 +59,7 @@ class Candle:
     Vela OHLCV canónica del sistema.
 
     Campos obligatorios: los 6 primeros.
-    Campos opcionales: los datos de taker de Binance — presentes en SQLite
+    Campos opcionales: datos de taker de Binance — presentes en SQLite
     pero ausentes en fuentes genéricas como CSV o exchanges alternativos.
 
     ts:   UTC epoch seconds (int) — timestamp de APERTURA de la vela
@@ -71,11 +81,7 @@ class Candle:
 
     @property
     def delta_ratio(self) -> Optional[float]:
-        """
-        Presión compradora: taker_buy_base_vol / volume.
-        None si los datos de taker no están disponibles.
-        Clave para el método ④ (entropía de permutación multivariada).
-        """
+        """Presión compradora: taker_buy_base_vol / volume."""
         if self.taker_buy_base_vol is None or self.volume == 0:
             return None
         return self.taker_buy_base_vol / self.volume
@@ -92,10 +98,7 @@ class Candle:
 
     @property
     def body_ratio(self) -> Optional[float]:
-        """
-        Ratio del cuerpo sobre el rango total [-1, 1].
-        None si total_range es 0 (vela plana).
-        """
+        """Ratio del cuerpo sobre el rango total [-1, 1]. None si vela plana."""
         if self.total_range == 0:
             return None
         return self.body / self.total_range
@@ -142,15 +145,13 @@ class PriceFeed(ABC):
     @abstractmethod
     def get_candles(
         self,
-        start: TimeInput,
-        end:   TimeInput,
+        start:  TimeInput,
+        end:    TimeInput,
         symbol: str = "BTCUSDT",
     ) -> List[Candle]:
         """
         Retorna lista de velas en el rango [start, end] inclusive,
         ordenadas cronológicamente (más antigua primero).
-
-        start / end: cualquier formato aceptado por time_utils.to_epoch_s().
         """
 
     @abstractmethod
@@ -170,10 +171,7 @@ class PriceFeed(ABC):
         end:    TimeInput,
         symbol: str = "BTCUSDT",
     ) -> Iterator[Candle]:
-        """
-        Iterador conveniente sobre get_candles().
-        Útil en runners de backtest para procesar vela a vela sin cargar todo.
-        """
+        """Iterador conveniente sobre get_candles()."""
         for candle in self.get_candles(start, end, symbol):
             yield candle
 
@@ -203,39 +201,23 @@ class SQLiteFeed(PriceFeed):
         self.table   = table
         log.info("SQLiteFeed inicializado", db=db_path, table=table)
 
-    # ── Interfaz pública ──────────────────────────────────────────────────────
-
     def get_candles(
         self,
         start:  TimeInput,
         end:    TimeInput,
         symbol: str = "BTCUSDT",
     ) -> List[Candle]:
-        """
-        Carga todas las velas del rango en memoria.
-        Para rangos muy grandes (>50k velas) preferir iter_candles().
-        """
-        start_ms = to_epoch_s(start) * 1000
-        # Incluir el día completo: si end es una fecha sin hora (00:00:00),
-        # extender al último segundo del día (23:59:59) para que el rango
-        # sea consistente con FECHA_FIN='2022-11-22' → hasta las 23:59:59.
+        start_ms  = to_epoch_s(start) * 1000
         end_epoch = to_epoch_s(end)
-        # Detectar si el timestamp apunta exactamente al inicio del día (medianoche)
         from datetime import datetime, timezone
         end_dt = datetime.fromtimestamp(end_epoch, tz=timezone.utc)
         if end_dt.hour == 0 and end_dt.minute == 0 and end_dt.second == 0:
-            end_epoch += 86399   # +23h 59m 59s → fin del día completo
-        end_ms = end_epoch * 1000
-
-        rows = self._query(start_ms, end_ms)
+            end_epoch += 86399
+        end_ms  = end_epoch * 1000
+        rows    = self._query(start_ms, end_ms)
         candles = [self._row_to_candle(r) for r in rows]
-
-        log.info(
-            "velas cargadas",
-            count=len(candles),
-            start=to_iso(start),
-            end=to_iso(end),
-        )
+        log.info("velas cargadas", count=len(candles),
+                 start=to_iso(start), end=to_iso(end))
         return candles
 
     def subscribe(
@@ -243,16 +225,10 @@ class SQLiteFeed(PriceFeed):
         callback: Callable[[Candle], None],
         symbol:   str = "BTCUSDT",
     ) -> None:
-        """
-        No implementado en SQLiteFeed — la DB es estática.
-        En backtest el Clock itera las velas; subscribe() es para live.
-        """
         raise NotImplementedError(
             "SQLiteFeed no soporta subscribe(). "
             "Usá LocalClock.tick() para iterar velas en backtest."
         )
-
-    # ── Helpers privados ──────────────────────────────────────────────────────
 
     def _query(self, start_ms: int, end_ms: int) -> list:
         conn = sqlite3.connect(self.db_path)
@@ -300,21 +276,18 @@ class SQLiteFeed(PriceFeed):
 class CSVFeed(PriceFeed):
     """
     Lee velas desde un archivo CSV.
-    Columnas mínimas requeridas: timestamp (epoch ms o s), open, high, low, close, volume
-    Columnas opcionales: trades_count, taker_buy_base_volume, taker_buy_quote_volume
-
-    Útil para datos de exchanges sin SQLite o para tests con datos sintéticos.
+    Columnas mínimas requeridas: timestamp (epoch ms o s), open, high, low, close, volume.
+    Columnas opcionales: trades_count, taker_buy_base_volume, taker_buy_quote_volume.
     """
 
-    # Nombres de columna aceptados (case-insensitive, el feed normaliza)
     _COL_ALIASES = {
-        "ts":        ["timestamp", "ts", "time", "open_time"],
-        "open":      ["open", "o"],
-        "high":      ["high", "h"],
-        "low":       ["low", "l"],
-        "close":     ["close", "c"],
-        "volume":    ["volume", "vol", "base_volume"],
-        "trades":    ["trades_count", "trades", "number_of_trades"],
+        "ts":          ["timestamp", "ts", "time", "open_time"],
+        "open":        ["open", "o"],
+        "high":        ["high", "h"],
+        "low":         ["low", "l"],
+        "close":       ["close", "c"],
+        "volume":      ["volume", "vol", "base_volume"],
+        "trades":      ["trades_count", "trades", "number_of_trades"],
         "taker_base":  ["taker_buy_base_volume", "taker_buy_base_vol", "taker_base"],
         "taker_quote": ["taker_buy_quote_volume", "taker_buy_quote_vol", "taker_quote"],
     }
@@ -322,7 +295,7 @@ class CSVFeed(PriceFeed):
     def __init__(self, csv_path: str, delimiter: str = ",") -> None:
         self.csv_path  = csv_path
         self.delimiter = delimiter
-        self._col_map: dict[str, str] = {}  # se construye al leer el header
+        self._col_map: dict[str, str] = {}
         log.info("CSVFeed inicializado", path=csv_path)
 
     def get_candles(
@@ -333,7 +306,6 @@ class CSVFeed(PriceFeed):
     ) -> List[Candle]:
         start_s = to_epoch_s(start)
         end_s   = to_epoch_s(end)
-
         candles: List[Candle] = []
         with open(self.csv_path, newline="", encoding="utf-8") as f:
             reader = csv.DictReader(f, delimiter=self.delimiter)
@@ -344,7 +316,6 @@ class CSVFeed(PriceFeed):
                 if ts < start_s or ts > end_s:
                     continue
                 candles.append(self._row_to_candle(row, ts))
-
         log.info("velas CSV cargadas", count=len(candles), path=self.csv_path)
         return candles
 
@@ -354,8 +325,6 @@ class CSVFeed(PriceFeed):
         symbol:   str = "BTCUSDT",
     ) -> None:
         raise NotImplementedError("CSVFeed no soporta subscribe().")
-
-    # ── Helpers ───────────────────────────────────────────────────────────────
 
     def _build_col_map(self, fieldnames: list[str]) -> None:
         lower_fields = {f.lower(): f for f in fieldnames}
@@ -374,10 +343,9 @@ class CSVFeed(PriceFeed):
         return to_epoch_s(int(float(raw)))
 
     def _row_to_candle(self, row: dict, ts: int) -> Candle:
-        def f(key): return float(self._get(row, key) or 0)
-        def i(key): v = self._get(row, key); return int(v) if v else None
+        def f(key):  return float(self._get(row, key) or 0)
+        def i(key):  v = self._get(row, key); return int(v)   if v else None
         def fo(key): v = self._get(row, key); return float(v) if v else None
-
         return Candle(
             ts                  = ts,
             open                = f("open"),
@@ -392,64 +360,40 @@ class CSVFeed(PriceFeed):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# STUBS de producción (se implementan en etapa live)
+# FACTORY
 # ══════════════════════════════════════════════════════════════════════════════
 
-class BinanceRESTFeed(PriceFeed):
+def build_price_feed(mode: str = "local") -> PriceFeed:
     """
-    Descarga histórico desde la API REST de Binance.
-    Implementación completa en etapa de producción.
+    Helper para construir un PriceFeed sin instanciar manualmente.
+    No lee mode_config — el runner decide el modo explícitamente.
+
+    mode="local"  →  SQLiteFeed desde config_local  (default, backtest)
+    mode="rest"   →  BinanceRESTFeed  (histórico live / warmup)
+    mode="live"   →  BinanceWSFeed    (stream en tiempo real)
+
+    Para control fino, instanciar directamente:
+        feed = SQLiteFeed(db_path=CL.DB_PATH, table=CL.DB_TABLE)
+        feed = BinanceWSFeed()
     """
-    def get_candles(self, start, end, symbol="BTCUSDT"):
-        raise NotImplementedError("BinanceRESTFeed pendiente de implementación.")
-
-    def subscribe(self, callback, symbol="BTCUSDT"):
-        raise NotImplementedError("BinanceRESTFeed no soporta subscribe(). Usar BinanceWSFeed.")
-
-
-class BinanceWSFeed(PriceFeed):
-    """
-    Stream de velas en tiempo real via WebSocket de Binance.
-    Implementación completa en etapa de producción.
-    """
-    def get_candles(self, start, end, symbol="BTCUSDT"):
-        raise NotImplementedError("BinanceWSFeed no soporta get_candles(). Usar BinanceRESTFeed.")
-
-    def subscribe(self, callback, symbol="BTCUSDT"):
-        raise NotImplementedError("BinanceWSFeed pendiente de implementación.")
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# FACTORY — modo config decide qué implementación usar
-# ══════════════════════════════════════════════════════════════════════════════
-
-def build_price_feed() -> PriceFeed:
-    """
-    Construye la implementación correcta según mode_config y config_local.
-    Llamar desde los runners — nunca instanciar feeds directamente.
-
-    Modos disponibles (mode_config.py):
-        USE_LIVE_FEED = False  →  SQLiteFeed (default backtest)
-        USE_LIVE_FEED = True   →  BinanceWSFeed (producción)
-    """
-    try:
-        import mode_config as MC
-        use_live = getattr(MC, "USE_LIVE_FEED", False)
-    except ImportError:
-        use_live = False
-
-    if use_live:
-        log.info("PriceFeed modo LIVE → BinanceWSFeed")
+    if mode == "live":
+        from actors.binance_feed import BinanceWSFeed
+        log.info("PriceFeed → BinanceWSFeed")
         return BinanceWSFeed()
 
-    # Modo local — leer ruta desde config_local
+    if mode == "rest":
+        from actors.binance_feed import BinanceRESTFeed
+        log.info("PriceFeed → BinanceRESTFeed")
+        return BinanceRESTFeed()
+
+    # default: local
     try:
         import config_local as CL
-        db_path = getattr(CL, "DB_PATH", "btc_hourly.db")
+        db_path = getattr(CL, "DB_PATH",  "btc_hourly.db")
         table   = getattr(CL, "DB_TABLE", "btc_hourly")
     except ImportError:
         db_path = "btc_hourly.db"
         table   = "btc_hourly"
 
-    log.info("PriceFeed modo LOCAL → SQLiteFeed", db=db_path)
+    log.info("PriceFeed → SQLiteFeed", db=db_path)
     return SQLiteFeed(db_path=db_path, table=table)

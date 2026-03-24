@@ -13,20 +13,19 @@ Si el programa se cae a las 2am con posiciones abiertas y se reinicia a las
   · Cuál es el slot actual y el btc_por_venta
   · Cuándo fue la última vela procesada
 
-Sin StateManager el sistema reinicia desde cero y puede duplicar
-posiciones o ignorar las que ya tenía abiertas.
-
 Diseño
 ───────
   · Archivo JSON append-only: cada checkpoint es una línea nueva.
-    Nunca se sobreescribe — el archivo crece. Esto garantiza que aunque
-    el proceso muera a mitad de un write, el checkpoint anterior sigue
-    siendo válido.
-
   · restore() lee el último checkpoint válido del archivo.
+  · En backtest se usa MemoryStateManager (sin I/O).
 
-  · En backtest el StateManager es opcional (MemoryStateManager no escribe
-    nada al disco).
+Factory
+────────
+  build_state_manager(mode, ...)  →  StateManager
+    mode="memory"  →  MemoryStateManager  (default, backtest)
+    mode="json"    →  JSONStateManager    (producción/testnet)
+
+  No lee mode_config — el runner decide el modo explícitamente.
 """
 
 from __future__ import annotations
@@ -54,31 +53,36 @@ class Checkpoint:
     Snapshot completo del estado del sistema en un momento dado.
     Suficiente para restaurar la sesión sin pérdida de información.
     """
-    ts:                    int      # epoch s UTC del checkpoint
-    last_candle_ts:        int      # timestamp de la última vela procesada
+    ts:                    int
+    last_candle_ts:        int
     usdt_balance:          float
     btc_libre:             float
     slot_usdt:             float
     btc_por_venta:         float
-    positions:             list     # [{"entry_price": float, "btc": float, "opened_at": int}]
+    btc_acumulado_total:   float
+    capital_inicial:       float
+    positions:             list
     positions_count:       int
-    portfolio_value:       float    # valorado al close de la última vela
-    metadata:              Dict[str, Any]  # info extra (estrategia, config, etc.)
+    portfolio_value:       float
+    metadata:              Dict[str, Any]
 
     def to_dict(self) -> dict:
         return asdict(self)
 
     @classmethod
     def from_dict(cls, d: dict) -> "Checkpoint":
+        # Compatibilidad hacia atrás: checkpoints sin los campos nuevos
+        d.setdefault("btc_acumulado_total", 0.0)
+        d.setdefault("capital_inicial",     d.get("usdt_balance", 0.0))
         return cls(**d)
 
     @classmethod
     def from_wallet(
         cls,
-        wallet:          Wallet,
-        last_candle_ts:  int,
-        current_price:   float,
-        metadata:        Optional[Dict[str, Any]] = None,
+        wallet:         Wallet,
+        last_candle_ts: int,
+        current_price:  float,
+        metadata:       Optional[Dict[str, Any]] = None,
     ) -> "Checkpoint":
         """Construye un Checkpoint desde el estado actual de la Wallet."""
         positions = [
@@ -90,16 +94,19 @@ class Checkpoint:
             for p in wallet.get_positions()
         ]
         return cls(
-            ts              = now_epoch_s(),
-            last_candle_ts  = last_candle_ts,
-            usdt_balance    = wallet.get_usdt_balance(),
-            btc_libre       = wallet.get_btc_balance(),
-            slot_usdt       = wallet.get_slot_usdt(),
-            btc_por_venta   = wallet.get_btc_por_venta(),
-            positions       = positions,
-            positions_count = wallet.positions_count,
-            portfolio_value = wallet.portfolio_value(current_price),
-            metadata        = metadata or {},
+            ts                  = now_epoch_s(),
+            last_candle_ts      = last_candle_ts,
+            usdt_balance        = wallet.get_usdt_balance(),
+            btc_libre           = wallet.get_btc_balance(),
+            slot_usdt           = wallet.get_slot_usdt(),
+            btc_por_venta       = wallet.get_btc_por_venta(),
+            btc_acumulado_total = wallet.get_btc_acumulado(),
+            capital_inicial     = getattr(wallet, "_usdt_inicial",
+                                          wallet.get_usdt_balance()),
+            positions           = positions,
+            positions_count     = wallet.positions_count,
+            portfolio_value     = wallet.portfolio_value(current_price),
+            metadata            = metadata or {},
         )
 
 
@@ -115,14 +122,11 @@ class StateManager(ABC):
 
     @abstractmethod
     def restore(self) -> Optional[Checkpoint]:
-        """
-        Retorna el último checkpoint válido, o None si no hay ninguno.
-        Llamar al arrancar el sistema antes de procesar cualquier vela.
-        """
+        """Retorna el último checkpoint válido, o None si no hay ninguno."""
 
     @abstractmethod
     def clear(self) -> None:
-        """Borra el historial de checkpoints. Usar al iniciar un nuevo backtest."""
+        """Borra el historial de checkpoints."""
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -130,10 +134,7 @@ class StateManager(ABC):
 # ══════════════════════════════════════════════════════════════════════════════
 
 class MemoryStateManager(StateManager):
-    """
-    Solo RAM — no escribe nada al disco.
-    Para backtest y grid search donde no se necesita persistencia.
-    """
+    """Solo RAM — no escribe nada al disco. Para backtest y grid search."""
 
     def __init__(self) -> None:
         self._last: Optional[Checkpoint] = None
@@ -157,9 +158,6 @@ class JSONStateManager(StateManager):
     Persiste checkpoints en archivo JSONL (JSON Lines) append-only.
     Cada checkpoint es una línea JSON independiente — si el proceso muere
     a mitad de un write, las líneas anteriores siguen siendo válidas.
-
-    restore() lee el archivo de atrás hacia adelante hasta encontrar
-    el primer checkpoint válido (el más reciente).
     """
 
     def __init__(self, state_path: str) -> None:
@@ -168,7 +166,6 @@ class JSONStateManager(StateManager):
         log.info("JSONStateManager inicializado", path=str(self._path))
 
     def save(self, checkpoint: Checkpoint) -> None:
-        """Append-only: agrega una línea al final del archivo."""
         line = json.dumps(checkpoint.to_dict(), default=str, ensure_ascii=False)
         with open(self._path, "a", encoding="utf-8") as f:
             f.write(line + "\n")
@@ -180,10 +177,6 @@ class JSONStateManager(StateManager):
         )
 
     def restore(self) -> Optional[Checkpoint]:
-        """
-        Lee el último checkpoint válido del archivo.
-        Itera de atrás hacia adelante para encontrar el más reciente.
-        """
         if not self._path.exists():
             log.info("sin checkpoint previo — inicio fresco")
             return None
@@ -197,11 +190,11 @@ class JSONStateManager(StateManager):
             if not line:
                 continue
             try:
-                data = json.loads(line)
+                data       = json.loads(line)
                 last_valid = Checkpoint.from_dict(data)
                 break
             except (json.JSONDecodeError, TypeError, KeyError):
-                continue   # línea corrupta — probar la anterior
+                continue
 
         if last_valid:
             log.info(
@@ -216,7 +209,6 @@ class JSONStateManager(StateManager):
         return last_valid
 
     def clear(self) -> None:
-        """Borra el archivo de estado."""
         if self._path.exists():
             self._path.unlink()
             log.info("estado borrado", path=str(self._path))
@@ -232,24 +224,22 @@ def restore_wallet_from_checkpoint(
 ) -> MemoryWallet:
     """
     Reconstruye una MemoryWallet desde un Checkpoint guardado.
-    Llamar en el arranque del live_trader tras restore().
-
-    Retorna una MemoryWallet con el estado completo restaurado.
-    Los runners pueden hacer cast a JSONWallet si necesitan persistencia.
+    Restaura también btc_acumulado_total y capital_inicial para que
+    el PnL y los reportes sean correctos desde el arranque original.
     """
     from actors.wallet import Position
     from collections   import deque
 
     wallet = MemoryWallet(
-        usdt_inicial   = checkpoint.usdt_balance,
+        usdt_inicial   = checkpoint.capital_inicial,
         max_posiciones = max_posiciones,
     )
-    # Sobreescribir estado interno directamente
-    wallet._usdt          = checkpoint.usdt_balance
-    wallet._btc_libre     = checkpoint.btc_libre
-    wallet._slot_usdt     = checkpoint.slot_usdt
-    wallet._btc_por_venta = checkpoint.btc_por_venta
-    wallet._posiciones    = deque(
+    wallet._usdt                = checkpoint.usdt_balance
+    wallet._btc_libre           = checkpoint.btc_libre
+    wallet._slot_usdt           = checkpoint.slot_usdt
+    wallet._btc_por_venta       = checkpoint.btc_por_venta
+    wallet._btc_acumulado_total = checkpoint.btc_acumulado_total
+    wallet._posiciones          = deque(
         Position(
             entry_price = p["entry_price"],
             btc         = p["btc"],
@@ -262,6 +252,7 @@ def restore_wallet_from_checkpoint(
         usdt=f"{wallet.get_usdt_balance():.2f}",
         positions=wallet.positions_count,
         slot=f"{wallet.get_slot_usdt():.2f}",
+        btc_acumulado=f"{wallet.get_btc_acumulado():.8f}",
     )
     return wallet
 
@@ -270,29 +261,31 @@ def restore_wallet_from_checkpoint(
 # FACTORY
 # ══════════════════════════════════════════════════════════════════════════════
 
-def build_state_manager() -> StateManager:
+def build_state_manager(
+    mode:       str = "memory",
+    state_path: str = None,
+) -> StateManager:
     """
-    Construye el StateManager según mode_config.
+    Helper para construir un StateManager sin instanciar manualmente.
+    No lee mode_config — el runner decide el modo explícitamente.
 
-    Modos (mode_config.py):
-        USE_LIVE_CLOCK = False  →  MemoryStateManager (backtest, sin I/O)
-        USE_LIVE_CLOCK = True   →  JSONStateManager   (producción)
+    mode="memory"  →  MemoryStateManager  (default, backtest, sin I/O)
+    mode="json"    →  JSONStateManager    (producción/testnet, persiste en disco)
+
+    Para control fino, instanciar directamente:
+        state = MemoryStateManager()
+        state = JSONStateManager(state_path="state/live_trading_state.jsonl")
     """
-    try:
-        import mode_config as MC
-        use_live = getattr(MC, "USE_LIVE_CLOCK", False)
-    except ImportError:
-        use_live = False
+    if mode == "json":
+        _path = state_path
+        if not _path:
+            try:
+                import config_local as CL
+                _path = getattr(CL, "STATE_PATH", "state/trading_state.jsonl")
+            except ImportError:
+                _path = "state/trading_state.jsonl"
+        log.info("StateManager → JSONStateManager", path=_path)
+        return JSONStateManager(state_path=_path)
 
-    if not use_live:
-        log.info("StateManager modo MEMORY (backtest)")
-        return MemoryStateManager()
-
-    try:
-        import config_local as CL
-        state_path = getattr(CL, "STATE_PATH", "state/trading_state.jsonl")
-    except ImportError:
-        state_path = "state/trading_state.jsonl"
-
-    log.info("StateManager modo JSON", path=state_path)
-    return JSONStateManager(state_path=state_path)
+    log.info("StateManager → MemoryStateManager")
+    return MemoryStateManager()

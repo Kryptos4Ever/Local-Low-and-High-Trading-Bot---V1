@@ -14,9 +14,13 @@ Implementaciones
   LocalClock   →  itera velas desde un PriceFeed local (backtest)
   LiveClock    →  stream en tiempo real via BinanceWSFeed (actors/live_clock.py)
 
-NOTA: LiveClock vive en actors/live_clock.py — no en este módulo.
-Importar siempre desde actors o desde actors.live_clock, nunca desde
-actors.clock, para evitar ambigüedad.
+Factory
+────────
+  build_clock(feed, mode, ...)  →  Clock
+    mode="local"  →  LocalClock  (default, backtest)
+    mode="live"   →  LiveClock   (producción/testnet)
+
+  No lee mode_config — el runner decide el modo explícitamente.
 
 Uso en runners
 ───────────────
@@ -62,9 +66,6 @@ class Clock(ABC):
         Retorna la siguiente vela disponible.
         Retorna None cuando el stream terminó (fin del backtest
         o señal de parada en producción).
-
-        En backtest: retorno instantáneo (itera el array en memoria).
-        En producción: bloquea hasta que cierra la vela actual del exchange.
         """
 
     @abstractmethod
@@ -108,13 +109,13 @@ class LocalClock(Clock):
         end:    TimeInput,
         symbol: str = "BTCUSDT",
     ) -> None:
-        self._feed   = feed
-        self._start  = start
-        self._end    = end
-        self._symbol = symbol
+        self._feed    = feed
+        self._start   = start
+        self._end     = end
+        self._symbol  = symbol
         self._candles: list[Candle] = []
-        self._cursor: int = 0
-        self._loaded: bool = False
+        self._cursor:  int  = 0
+        self._loaded:  bool = False
 
         log.info(
             "LocalClock inicializado",
@@ -136,10 +137,8 @@ class LocalClock(Clock):
         """
         if not self._loaded:
             self._load()
-
         if self._cursor >= len(self._candles):
             return None
-
         candle = self._candles[self._cursor]
         self._cursor += 1
         return candle
@@ -197,45 +196,48 @@ class LocalClock(Clock):
 # FACTORY
 # ══════════════════════════════════════════════════════════════════════════════
 
-def build_clock(feed: PriceFeed) -> Clock:
+def build_clock(
+    feed:   PriceFeed,
+    mode:   str       = "local",
+    start:  TimeInput = None,
+    end:    TimeInput = None,
+    symbol: str       = None,
+) -> Clock:
     """
-    Construye el clock correcto según mode_config y config_local.
+    Helper para construir un Clock sin instanciar manualmente.
+    No lee mode_config — el runner decide el modo explícitamente.
 
-    Modos (mode_config.py):
-        USE_LIVE_CLOCK = False  →  LocalClock  (backtest)
-        USE_LIVE_CLOCK = True   →  LiveClock   (producción, actors/live_clock.py)
+    mode="local"  →  LocalClock  (default, backtest)
+    mode="live"   →  LiveClock   (producción/testnet)
+
+    start y end son requeridos para mode="local".
+    Si no se pasan, se leen desde config_local como fallback.
+
+    Para control fino, instanciar directamente:
+        clock = LocalClock(feed, start=CL.FECHA_INICIO, end=CL.FECHA_FIN)
+        clock = LiveClock(feed, symbol="BTCUSDT")
     """
-    try:
-        import mode_config as MC
-        use_live = getattr(MC, "USE_LIVE_CLOCK", False)
-    except ImportError:
-        use_live = False
-
-    if use_live:
-        # Importación local para evitar dependencia circular en backtest
-        from actors.live_clock import LiveClock
-        try:
-            import config_local as CL
-            symbol = getattr(CL, "SYMBOL", "BTCUSDT")
-        except ImportError:
-            symbol = "BTCUSDT"
-        log.info("Clock modo LIVE → LiveClock", symbol=symbol)
-        return LiveClock(feed=feed, symbol=symbol)
-
     try:
         import config_local as CL
-        start  = getattr(CL, "FECHA_INICIO", None)
-        end    = getattr(CL, "FECHA_FIN",    None)
-        symbol = getattr(CL, "SYMBOL",       "BTCUSDT")
+        _start  = start  or getattr(CL, "FECHA_INICIO", None)
+        _end    = end    or getattr(CL, "FECHA_FIN",    None)
+        _symbol = symbol or getattr(CL, "SYMBOL",       "BTCUSDT")
     except ImportError:
-        start = end = None
-        symbol = "BTCUSDT"
+        _start  = start
+        _end    = end
+        _symbol = symbol or "BTCUSDT"
 
-    if not start or not end:
+    if mode == "live":
+        from actors.live_clock import LiveClock
+        log.info("Clock → LiveClock", symbol=_symbol)
+        return LiveClock(feed=feed, symbol=_symbol)
+
+    # default: local
+    if not _start or not _end:
         raise ValueError(
-            "FECHA_INICIO y FECHA_FIN deben estar definidas en config_local.py "
-            "para usar LocalClock."
+            "start y end son requeridos para LocalClock. "
+            "Pasalos explícitamente o definí FECHA_INICIO/FECHA_FIN en config_local.py."
         )
 
-    log.info("Clock modo LOCAL → LocalClock", start=start, end=end)
-    return LocalClock(feed=feed, start=start, end=end, symbol=symbol)
+    log.info("Clock → LocalClock", start=_start, end=_end)
+    return LocalClock(feed=feed, start=_start, end=_end, symbol=_symbol)
