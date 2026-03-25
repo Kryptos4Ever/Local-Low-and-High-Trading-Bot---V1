@@ -209,6 +209,8 @@ class MemoryWallet(Wallet):
             self._btc_acumulado_total += btc_vendido
             if self.positions_count == 0:
                 self._recalcular_slot()
+            else:
+                self._recalcular_btc_por_venta()
 
     def snapshot(self, current_price: float) -> dict:
         return {

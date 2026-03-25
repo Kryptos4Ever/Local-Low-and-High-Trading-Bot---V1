@@ -98,8 +98,8 @@ log = get_logger("backtest_local_reversal")
 # PARÁMETROS DE LA ESTRATEGIA
 # ════════════════════════════════════════════════════════════════════
 
-THR_B     = 0.5   # umbral señal BUY   — rango razonable: [0.45, 0.65]
-THR_T     = 0.5   # umbral señal SELL  — rango razonable: [0.40, 0.60]
+THR_B     = 0.85   # umbral señal BUY   — rango razonable: [0.45, 0.65]
+THR_T     = 0.75   # umbral señal SELL  — rango razonable: [0.40, 0.60]
 
 CACHE_DIR = ".cache_local_reversal"
 

@@ -133,10 +133,10 @@ class LocalReversalStrategy(BaseStrategy):
     """
 
     # ── Parámetros de modelo (no modificar sin recalibrar) ────────────────────
-    _VENTANA_LABEL    = 18    # velas ±18 para definir extremo local
-    _VENTANA_FEATURES = 24    # ventana de entrada al modelo (1 día)
-    _WARMUP           = 200   # velas de warm-up para rolling z-score
-    _N_FEATURES       = 197   # 24 velas × 8 series + 5 agregadas
+    _VENTANA_LABEL    = 12    # velas ±12 para definir extremo local
+    _VENTANA_FEATURES = 12    # ventana de entrada al modelo (1/2 día)
+    _WARMUP           = 1000   # velas de warm-up para rolling z-score
+    _N_FEATURES       = 101   # 24 velas × 8 series + 5 agregadas
 
     # ── Parámetros del modelo ML ──────────────────────────────────────────────
     _MODEL_PARAMS = dict(
