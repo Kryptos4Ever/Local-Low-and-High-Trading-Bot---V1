@@ -266,11 +266,48 @@ class BinanceOrderBook(OrderBook):
                 sum(float(f["price"]) * float(f["qty"]) for f in fills) / total_qty
                 if total_qty > 0 else order.price
             )
-            commission_usdt = sum(
-                float(f["commission"])
-                * (avg_price if f.get("commissionAsset") != "USDT" else 1.0)
-                for f in fills
-            )
+            # Convertimos la comisión a USDT según `commissionAsset`.
+            # Binance puede cobrar comisión en `USDT` (quote), en `BTC` (base),
+            # o en otro activo (ej. `BNB`). Para descontar bien `usdt_received`
+            # en SELL, necesitamos el valor en USDT.
+            asset_to_usdt_mult: dict[str, float] = {}
+            commission_usdt = 0.0
+
+            def _asset_mult_to_usdt(asset: str) -> float:
+                asset = (asset or "").upper()
+                if not asset or asset == "USDT":
+                    return 1.0
+                if asset == "BTC":
+                    # Este orderbook opera en BTCUSDT → avg_price = BTCUSDT.
+                    return avg_price
+                if asset in asset_to_usdt_mult:
+                    return asset_to_usdt_mult[asset]
+                # Terceros assets: intentamos convertir vía ticker público.
+                # Ej: BNB → BNBUSDT.
+                try:
+                    params = {"symbol": f"{asset}USDT"}
+                    r = requests.get(
+                        f"{self._base_url}/api/v3/ticker/price",
+                        params=params,
+                        timeout=self._timeout,
+                    )
+                    r.raise_for_status()
+                    px = float(r.json()["price"])
+                    asset_to_usdt_mult[asset] = px
+                    return px
+                except Exception as e:
+                    log.warning(
+                        "no se pudo convertir commissionAsset a USDT",
+                        commission_asset=asset,
+                        error=str(e),
+                    )
+                    asset_to_usdt_mult[asset] = 0.0
+                    return 0.0
+
+            for f in fills:
+                comm = float(f.get("commission", 0) or 0)
+                asset = f.get("commissionAsset") or "USDT"
+                commission_usdt += comm * _asset_mult_to_usdt(asset)
 
             order.status = OrderStatus.FILLED
 

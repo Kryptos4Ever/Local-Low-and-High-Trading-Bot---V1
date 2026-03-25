@@ -22,6 +22,18 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+# Windows a veces usa cp1252 en consola y puede romper prints con Unicode
+# (por ejemplo "═", "✓", flechas, etc.). Para que la suite sea robusta,
+# forzamos UTF-8 en stdout/stderr cuando sea posible.
+try:
+    sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
+except Exception:
+    pass
+try:
+    sys.stderr.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
+except Exception:
+    pass
+
 TEST_MODULES = [
     "tests.test_features_labeling",
     "tests.test_wallet_logic",

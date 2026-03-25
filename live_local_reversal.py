@@ -833,7 +833,7 @@ class LiveTrader:
             if signal.is_actionable:
                 order = self._ob.execute_with_guards(
                     side      = signal.to_order_side(),
-                    price     = candle.close,
+                    price     = signal.price if signal.price else candle.close,
                     wallet    = self._wallet,
                     candle_ts = candle.ts,
                 )
