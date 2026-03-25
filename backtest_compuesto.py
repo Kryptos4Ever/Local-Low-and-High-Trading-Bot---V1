@@ -4,7 +4,7 @@ backtest_compuesto.py — Runner de la Señal Compuesta
 Ensambla todos los actores y corre CompuestoStrategy
 (DNA + Lyapunov + PE + Delta → Score 0-100).
 
-Resultado: JSON compatible con Graficador_v2.py
+Resultado: JSON compatible con Graficador.py
 
 Uso:
     python backtest_compuesto.py          # calcula todo desde cero
@@ -12,9 +12,17 @@ Uso:
     python backtest_compuesto.py --nocache # borra cache y recalcula
 
 Configuración:
-    · config_local.py        → rutas, fechas, capital
-    · mode_config.py         → modos (todos en False para backtest local)
+    · config_local.py         → rutas, fechas, capital
     · strategies/compuesto.py → parámetros de la estrategia (inline abajo)
+
+Actores utilizados
+───────────────────
+    PriceFeed  : SQLiteFeed        (DB local)
+    Wallet     : JSONWallet        (persiste resultados)
+    OrderBook  : SimulatedOrderBook
+    Clock      : LocalClock
+    Risk       : RiskManager permisivo (sin límites)
+    State      : MemoryStateManager   (sin persistencia entre sesiones)
 """
 
 from __future__ import annotations
@@ -28,14 +36,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 import config_local as CL
-import mode_config  as MC
 
 from actors.price_feed    import SQLiteFeed
-from actors.wallet        import JSONWallet
+from actors.wallet        import JSONWallet, TradeRecord
 from actors.order_book    import SimulatedOrderBook, OrderSide
 from actors.clock         import LocalClock
-from actors.wallet        import TradeRecord
-from risk.risk_manager    import build_risk_manager
+from risk.risk_manager    import RiskManager, RiskConfig
 from state.state_manager  import MemoryStateManager, Checkpoint
 from strategies.compuesto import CompuestoStrategy
 from strategies.base_strategy import SignalSide
@@ -46,7 +52,6 @@ log = get_logger("backtest_compuesto")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PARÁMETROS DE LA ESTRATEGIA
-# (viven aquí — cambiables sin tocar la clase)
 # ══════════════════════════════════════════════════════════════════════════════
 THR_BOT        = 75.0
 THR_TOP        = 75.0
@@ -93,7 +98,9 @@ def main(use_cache: bool = True, clear_cache: bool = False) -> None:
         commission_pct = CL.COMMISSION_PCT,
         max_posiciones = CL.MAX_POSICIONES,
     )
-    risk   = build_risk_manager(usdt_inicial=CL.SALDO_USDT_INICIAL)
+    # Backtest: sin límites de riesgo
+    risk   = RiskManager(config=RiskConfig.permissive(),
+                         usdt_inicial=CL.SALDO_USDT_INICIAL)
     state  = MemoryStateManager()
 
     strategy = CompuestoStrategy(
@@ -106,23 +113,17 @@ def main(use_cache: bool = True, clear_cache: bool = False) -> None:
         force_recompute= not use_cache,
     )
 
-    # ── 2. on_start: carga/calcula scores ─────────────────────────────────────
-    # Pasar el feed completo (dataset completo, no solo el rango de backtest)
-    # para que el score tenga warm-up suficiente
+    # ── 2. on_start: carga/calcula scores sobre el dataset completo ────────────
+    # Se pasa el feed completo para que el score tenga warm-up suficiente.
+    # La estrategia internamente guarda timestamps.npy como parte del cache.
     print("Inicializando estrategia (puede tardar en primer run)...")
     strategy.on_start(
         wallet = wallet,
         feed   = feed,
-        start  = "2017-01-01",   # dataset completo para warm-up
+        start  = "2017-01-01",
         end    = "2030-01-01",
         symbol = CL.SYMBOL,
     )
-
-    # Guardar timestamps en cache para futuros runs
-    import numpy as np
-    all_candles = feed.get_candles("2017-01-01", "2030-01-01", CL.SYMBOL)
-    ts_arr = np.array([c.ts for c in all_candles], dtype=np.int64)
-    np.save(Path(CACHE_DIR) / "timestamps.npy", ts_arr)
 
     # ── 3. Clock solo para el rango de backtest ────────────────────────────────
     clock = LocalClock(feed, start=CL.FECHA_INICIO, end=CL.FECHA_FIN,
@@ -142,7 +143,7 @@ def main(use_cache: bool = True, clear_cache: bool = False) -> None:
 
     for candle in clock:
         last_candle = candle
-        signal = strategy._tick(candle, wallet)
+        signal      = strategy._tick(candle, wallet)
 
         if not signal.is_actionable:
             continue
@@ -160,7 +161,8 @@ def main(use_cache: bool = True, clear_cache: bool = False) -> None:
             ))
             continue
 
-        order = ob.execute_with_guards(order_side, signal.price, wallet, candle_ts=candle.ts)
+        order = ob.execute_with_guards(order_side, signal.price, wallet,
+                                       candle_ts=candle.ts)
 
         if order.is_filled:
             if order_side == OrderSide.BUY:

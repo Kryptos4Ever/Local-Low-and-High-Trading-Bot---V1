@@ -1,8 +1,10 @@
 """
 live_local_reversal.py — Runner live con dashboard en tiempo real
 ═════════════════════════════════════════════════════════════════
-Ejecuta LocalReversalStrategy contra Binance Testnet con:
+Ejecuta LocalReversalStrategy contra Binance (testnet o producción) con:
 
+  · Requerimiento de caché de modelo entrenado — si no existe, lo genera
+    automáticamente desde la DB local antes de conectar al exchange.
   · Limpieza automática de BTC al arrancar (vende BTC libre pre-existente)
   · Dashboard en consola que se refresca en cada tick
   · Dashboard HTML en live_dashboard.html (abrir en browser, refresca solo)
@@ -10,16 +12,40 @@ Ejecuta LocalReversalStrategy contra Binance Testnet con:
 Flujo completo
 ───────────────
   1. Cargar credenciales (.env)
-  2. Medir desfase de reloj vs Binance (compensación automática)
-  3. Vender BTC libre pre-existente
-  4. Inicializar actores (Wallet, OrderBook, Feed, Clock)
-  5. Warmup: ~500 velas históricas + entrenar modelo (~90s)
-  6. Loop: tick → señal → ejecución → dashboards → checkpoint
-  7. Shutdown limpio (Ctrl+C)
+  2. Verificar caché del modelo — si no existe, entrenar desde la DB local
+  3. Medir desfase de reloj vs Binance (compensación automática)
+  4. Vender BTC libre pre-existente
+  5. Inicializar actores (Wallet, OrderBook, Feed, Clock)
+  6. Cargar modelo desde caché (instantáneo, ya garantizado en paso 2)
+  7. Loop: tick → señal → ejecución → dashboards → checkpoint
+  8. Shutdown limpio (Ctrl+C)
+
+Caché del modelo
+─────────────────
+  El modelo se entrena una vez en backtest sobre el dataset completo y se
+  guarda en CACHE_DIR. En live se carga desde ese caché — nunca se reentrena
+  en vivo porque requeriría la DB local que puede no estar disponible en el
+  servidor de producción.
+
+  Si el caché no existe al arrancar live:
+    · Se busca la DB en config_local.DB_PATH
+    · Se entrena el modelo sobre el rango completo (igual que el backtest)
+    · Se guarda el caché para futuras ejecuciones
+    · Solo entonces se conecta al exchange
+
+  Si la DB tampoco está disponible: error fatal con mensaje claro.
+
+Actores utilizados
+───────────────────
+    PriceFeed  : BinanceWSFeed    (stream en tiempo real)
+    Wallet     : BinanceWallet    (sincronizada con cuenta real)
+    OrderBook  : BinanceOrderBook (órdenes reales)
+    Clock      : LiveClock
+    State      : JSONStateManager (persiste entre sesiones)
 
 Parámetros configurables
 ─────────────────────────
-  THR_B, THR_T, MAX_POSICIONES, WARMUP_CANDLES
+  THR_B, THR_T, MAX_POSICIONES, SYMBOL
 """
 
 from __future__ import annotations
@@ -40,7 +66,7 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from actors.binance_feed       import BinanceRESTFeed, BinanceWSFeed
+from actors.binance_feed       import BinanceWSFeed
 from actors.binance_order_book import BinanceOrderBook
 from actors.binance_wallet     import BinanceWallet
 from actors.live_clock         import LiveClock
@@ -65,7 +91,6 @@ THR_T             = 0.50
 MAX_POSICIONES    = 5
 COMMISSION_PCT    = 0.1
 SYMBOL            = "BTCUSDT"
-WARMUP_CANDLES    = 500
 LIVE_RESULTS_JSON = "live_results.json"
 STATE_PATH        = "state/live_trading_state.jsonl"
 CACHE_DIR         = ".cache_local_reversal"
@@ -73,6 +98,100 @@ DASHBOARD_HTML    = "live_dashboard.html"
 DASHBOARD_REFRESH = 10     # segundos entre refresh del HTML
 MAX_TRADE_LOG     = 50
 CHART_CANDLES     = 48     # velas a mostrar en el gráfico (~2 días)
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# VERIFICACIÓN Y GENERACIÓN DE CACHÉ
+# ════════════════════════════════════════════════════════════════════════════
+
+def _cache_exists() -> bool:
+    """Verifica que el caché del modelo está completo y listo para usar."""
+    cache = Path(CACHE_DIR)
+    return (
+        (cache / "prob_bottom.npy").exists() and
+        (cache / "prob_top.npy").exists()    and
+        (cache / "timestamps.npy").exists()
+    )
+
+
+def _entrenar_desde_db() -> None:
+    """
+    Entrena el modelo desde la DB local usando el rango completo,
+    exactamente igual que backtest_local_reversal.py.
+
+    Se llama automáticamente si el caché no existe al arrancar live.
+    Requiere config_local.py con DB_PATH válido.
+    """
+    print("\n  [caché] El caché del modelo no existe — entrenando desde la DB local...")
+
+    try:
+        import config_local as CL
+        db_path = CL.DB_PATH
+        db_table = getattr(CL, "DB_TABLE", "btc_hourly")
+        symbol   = getattr(CL, "SYMBOL",   "BTCUSDT")
+    except ImportError:
+        raise RuntimeError(
+            "No se encontró config_local.py.\n"
+            "Para ejecutar en live sin caché previo es necesario tener\n"
+            "config_local.py con DB_PATH apuntando a la base de datos local,\n"
+            "o ejecutar primero: python backtest_local_reversal.py --fast"
+        )
+
+    if not Path(db_path).exists():
+        raise RuntimeError(
+            f"DB no encontrada en: {db_path}\n"
+            "Para ejecutar en live es necesario tener el caché del modelo.\n"
+            "Opciones:\n"
+            "  1. Ejecutar: python backtest_local_reversal.py --fast\n"
+            "  2. Copiar el directorio .cache_local_reversal al servidor"
+        )
+
+    from actors.price_feed import SQLiteFeed
+    from actors.wallet     import MemoryWallet
+
+    print(f"  [caché] Cargando velas desde {db_path}...")
+    feed   = SQLiteFeed(db_path=db_path, table=db_table)
+    wallet = MemoryWallet(usdt_inicial=1000.0, max_posiciones=MAX_POSICIONES)
+
+    strategy = LocalReversalStrategy(
+        thr_b           = THR_B,
+        thr_t           = THR_T,
+        cache_dir       = CACHE_DIR,
+        force_recompute = True,   # siempre recomputar si llegamos aquí
+    )
+
+    print("  [caché] Entrenando modelo sobre dataset completo (~90s)...")
+    t0 = time.time()
+    strategy.on_start(
+        wallet = wallet,
+        feed   = feed,
+        start  = "2017-01-01",
+        end    = "2030-01-01",
+        symbol = symbol,
+    )
+    elapsed = time.time() - t0
+    print(f"  [caché] Entrenamiento completado en {elapsed:.0f}s → caché guardado en {CACHE_DIR}/")
+
+
+def ensure_cache() -> None:
+    """
+    Punto de entrada único para garantizar que el caché existe antes de
+    conectar al exchange. Si no existe, lo genera desde la DB local.
+    Si no puede generarlo, lanza RuntimeError con instrucciones claras.
+    """
+    if _cache_exists():
+        log.info("caché del modelo verificado", dir=CACHE_DIR)
+        print(f"  [caché] Modelo encontrado en {CACHE_DIR}/ ✓")
+        return
+
+    _entrenar_desde_db()
+
+    # Verificar que el entrenamiento produjo los archivos esperados
+    if not _cache_exists():
+        raise RuntimeError(
+            f"El entrenamiento finalizó pero no se encontraron los archivos\n"
+            f"esperados en {CACHE_DIR}/. Revisar logs de entrenamiento."
+        )
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -97,12 +216,12 @@ class _Signer:
 
     def __init__(self, api_key: str, secret: str,
                  base_url: str, recv_window: int, timeout: int) -> None:
-        self.api_key      = api_key
-        self.secret       = secret
-        self.base_url     = base_url
-        self.recv_window  = recv_window
-        self.timeout      = timeout
-        self._offset_ms   = self._measure_offset()
+        self.api_key     = api_key
+        self.secret      = secret
+        self.base_url    = base_url
+        self.recv_window = recv_window
+        self.timeout     = timeout
+        self._offset_ms  = self._measure_offset()
         if abs(self._offset_ms) > 500:
             log.warning("desfase de reloj detectado",
                         offset_s=f"{self._offset_ms/1000:.1f}s",
@@ -112,10 +231,10 @@ class _Signer:
         offsets = []
         for _ in range(3):
             try:
-                t0  = int(time.time() * 1000)
-                r   = requests.get(f"{self.base_url}/api/v3/time",
-                                   timeout=self.timeout)
-                t1  = int(time.time() * 1000)
+                t0 = int(time.time() * 1000)
+                r  = requests.get(f"{self.base_url}/api/v3/time",
+                                  timeout=self.timeout)
+                t1 = int(time.time() * 1000)
                 offsets.append(r.json()["serverTime"] - (t0 + t1) // 2)
             except Exception:
                 pass
@@ -551,7 +670,8 @@ def render_html(st: dict) -> None:
         log.warning("no se pudo escribir HTML", error=str(e))
 
 
-def _build_state(wallet, nb, ns, ni, candle, pb, pt, sig, tlog, usdt_ini, chart_hist=None) -> dict:
+def _build_state(wallet, nb, ns, ni, candle, pb, pt, sig, tlog,
+                 usdt_ini, chart_hist=None) -> dict:
     px = candle.close if candle else 0.0
     return {
         "portfolio": round(wallet.portfolio_value(px), 2),
@@ -600,21 +720,21 @@ def _extract_probs(signal) -> tuple[float, float]:
 class LiveTrader:
 
     def __init__(self) -> None:
-        self._clock:     Optional[LiveClock]             = None
-        self._wallet:    Optional[BinanceWallet]         = None
-        self._ob:        Optional[BinanceOrderBook]      = None
-        self._strategy:  Optional[LocalReversalStrategy] = None
-        self._state_mgr: Optional[JSONStateManager]      = None
-        self._signer:    Optional[_Signer]               = None
-        self._running    = False
+        self._clock:      Optional[LiveClock]             = None
+        self._wallet:     Optional[BinanceWallet]         = None
+        self._ob:         Optional[BinanceOrderBook]      = None
+        self._strategy:   Optional[LocalReversalStrategy] = None
+        self._state_mgr:  Optional[JSONStateManager]      = None
+        self._signer:     Optional[_Signer]               = None
+        self._running     = False
         self._nb = self._ns = self._ni = 0
-        self._t_start    = 0.0
+        self._t_start     = 0.0
         self._last_candle: Optional[Candle] = None
         self._pb = self._pt = 0.0
-        self._sig        = "—"
-        self._tlog:      list = []
-        self._usdt_ini   = 0.0
-        self._chart_hist: list = []  # {ts, o, h, l, c, pb, pt, signal}
+        self._sig         = "—"
+        self._tlog:       list = []
+        self._usdt_ini    = 0.0
+        self._chart_hist: list = []
 
     def run(self) -> None:
         self._t_start = time.time()
@@ -626,8 +746,13 @@ class LiveTrader:
         print(f"  HTML dashboard: abrir '{DASHBOARD_HTML}' en el browser")
         print("─" * 60)
         try:
+            # Paso 1: garantizar caché ANTES de conectar al exchange
+            ensure_cache()
+            # Paso 2: conectar actores live
             self._setup()
-            self._warmup()
+            # Paso 3: cargar modelo desde caché (instantáneo)
+            self._load_model()
+            # Paso 4: loop principal
             self._loop()
         except KeyboardInterrupt:
             pass
@@ -648,33 +773,36 @@ class LiveTrader:
         sell_preexisting_btc(self._signer, SYMBOL)
         self._state_mgr = JSONStateManager(STATE_PATH)
         self._wallet = BinanceWallet.from_account(
-            max_posiciones=MAX_POSICIONES,
-            json_path=LIVE_RESULTS_JSON,
-            state_path=STATE_PATH,
+            max_posiciones = MAX_POSICIONES,
+            json_path      = LIVE_RESULTS_JSON,
+            state_path     = STATE_PATH,
         )
         self._usdt_ini = self._wallet.get_usdt_balance()
         self._ob = BinanceOrderBook(
-            max_posiciones=MAX_POSICIONES,
-            commission_pct=COMMISSION_PCT,
+            max_posiciones = MAX_POSICIONES,
+            commission_pct = COMMISSION_PCT,
         )
-        feed = BinanceWSFeed()
-        self._clock = LiveClock(feed=feed, symbol=SYMBOL)
-        self._strategy = LocalReversalStrategy(
-            thr_b=THR_B, thr_t=THR_T,
-            cache_dir=CACHE_DIR, force_recompute=False,
-        )
+        feed         = BinanceWSFeed()
+        self._clock  = LiveClock(feed=feed, symbol=SYMBOL)
         print(f"\n  Wallet: ${self._wallet.get_usdt_balance():,.2f} USDT libre  "
               f"| {self._wallet.positions_count} pos. abiertas")
 
-    def _warmup(self) -> None:
-        print(f"\n  Entrenando modelo ({WARMUP_CANDLES} velas históricas, ~90s)...")
-        rest = BinanceRESTFeed()
-        self._strategy.on_start(
-            wallet=self._wallet, feed=rest,
-            start=now_epoch_s() - WARMUP_CANDLES * 3600,
-            end="now", symbol=SYMBOL,
+    def _load_model(self) -> None:
+        """
+        Carga el modelo desde el caché garantizado por ensure_cache().
+        No se pasa feed — on_start() leerá directamente del caché en disco.
+        Esta operación es instantánea (~1s).
+        """
+        print("\n  Cargando modelo desde caché...", end=" ", flush=True)
+        self._strategy = LocalReversalStrategy(
+            thr_b           = THR_B,
+            thr_t           = THR_T,
+            cache_dir       = CACHE_DIR,
+            force_recompute = False,
         )
-        print("  Modelo listo. Esperando el cierre de la próxima vela...\n")
+        self._strategy.on_start(wallet=self._wallet)
+        print("OK")
+        print("  Esperando el cierre de la próxima vela...\n")
         self._refresh()
 
     # ── Loop ──────────────────────────────────────────────────────────────
@@ -689,9 +817,8 @@ class LiveTrader:
             self._pb, self._pt = _extract_probs(signal)
             self._sig = signal.side.value
 
-            # Acumular vela en el historial del gráfico
             self._chart_hist.append({
-                "ts":  candle.ts * 1000,   # ms para Chart.js
+                "ts":  candle.ts * 1000,
                 "o":   candle.open,
                 "h":   candle.high,
                 "l":   candle.low,
@@ -705,20 +832,20 @@ class LiveTrader:
 
             if signal.is_actionable:
                 order = self._ob.execute_with_guards(
-                    side=signal.to_order_side(),
-                    price=candle.close,
-                    wallet=self._wallet,
-                    candle_ts=candle.ts,
+                    side      = signal.to_order_side(),
+                    price     = candle.close,
+                    wallet    = self._wallet,
+                    candle_ts = candle.ts,
                 )
                 if order.is_filled:
                     side_s = order.side.value
-                    t = order.trade
-                    qty  = (f"{t.btc_bought:.6f} BTC" if t and t.btc_bought
-                            else f"{t.btc_sold:.6f} BTC" if t and t.btc_sold
-                            else "")
-                    info = (f"${t.usdt_received:,.2f}" if t and t.usdt_received
-                            else f"${t.usdt_spent:,.2f}" if t and t.usdt_spent
-                            else "")
+                    t      = order.trade
+                    qty    = (f"{t.btc_bought:.6f} BTC" if t and t.btc_bought
+                              else f"{t.btc_sold:.6f} BTC" if t and t.btc_sold
+                              else "")
+                    info   = (f"${t.usdt_received:,.2f}" if t and t.usdt_received
+                              else f"${t.usdt_spent:,.2f}" if t and t.usdt_spent
+                              else "")
                     self._tlog.append({
                         "hora":   datetime.fromtimestamp(
                                       candle.ts, tz=timezone.utc
@@ -734,11 +861,10 @@ class LiveTrader:
                         self._nb += 1
                     else:
                         self._ns += 1
-                    # scores en el JSON
                     log_e = self._wallet.get_trade_log()
                     if log_e:
-                        log_e[-1]["score_bot"] = self._pb if side_s=="BUY"  else 0.0
-                        log_e[-1]["score_top"] = self._pt if side_s=="SELL" else 0.0
+                        log_e[-1]["score_bot"] = self._pb if side_s == "BUY"  else 0.0
+                        log_e[-1]["score_top"] = self._pt if side_s == "SELL" else 0.0
                 elif order.is_ignored:
                     self._ni += 1
 
@@ -771,14 +897,18 @@ class LiveTrader:
         if self._wallet and self._wallet.get_trade_log():
             px = self._last_candle.close if self._last_candle else 0
             self._wallet.flush({
-                "estrategia": "LocalReversal-GBM", "modo": "LIVE_TESTNET",
-                "fecha_inicio": to_iso(int(self._t_start)),
-                "fecha_fin": to_iso(now_epoch_s()),
-                "symbol": SYMBOL, "thr_b": THR_B, "thr_t": THR_T,
-                "total_compras": self._nb, "total_ventas": self._ns,
-                "total_ignorados": self._ni,
-                "saldo_inicial_usdt": self._usdt_ini,
-                "usdt_balance_final": round(self._wallet.get_usdt_balance(), 8),
+                "estrategia":            "LocalReversal-GBM",
+                "modo":                  "LIVE_TESTNET",
+                "fecha_inicio":          to_iso(int(self._t_start)),
+                "fecha_fin":             to_iso(now_epoch_s()),
+                "symbol":                SYMBOL,
+                "thr_b":                 THR_B,
+                "thr_t":                 THR_T,
+                "total_compras":         self._nb,
+                "total_ventas":          self._ns,
+                "total_ignorados":       self._ni,
+                "saldo_inicial_usdt":    self._usdt_ini,
+                "usdt_balance_final":    round(self._wallet.get_usdt_balance(), 8),
                 "portfolio_value_final": round(
                     self._wallet.portfolio_value(px), 4),
             })

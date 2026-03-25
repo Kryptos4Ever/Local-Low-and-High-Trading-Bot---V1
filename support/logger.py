@@ -15,7 +15,7 @@ Uso:
     log.warning("señal ignorada", motivo="max_posiciones")
     log.error("orden rechazada", order_id="abc123", detalle=str(e))
 
-Configuración (via mode_config.py):
+Configuración (via log_config.py):
     LOG_TO_FILE  = True        # False → solo consola
     LOG_LEVEL    = "INFO"      # DEBUG | INFO | WARNING | ERROR | CRITICAL
     LOG_DIR      = "logs/"     # directorio donde se crean los archivos
@@ -32,14 +32,14 @@ from pathlib import Path
 from typing import Any
 
 
-# ── Configuración por defecto (puede ser sobreescrita por mode_config) ────────
+# ── Configuración por defecto (puede ser sobreescrita por log_config) ────────
 _LOG_TO_FILE: bool = False
 _LOG_LEVEL:   str  = "INFO"
 _LOG_DIR:     str  = "logs"
 
-# Intenta leer desde mode_config si existe
+# Intenta leer desde log_config si existe
 try:
-    import mode_config as MC
+    import log_config as MC
     _LOG_TO_FILE = getattr(MC, "LOG_TO_FILE", _LOG_TO_FILE)
     _LOG_LEVEL   = getattr(MC, "LOG_LEVEL",   _LOG_LEVEL)
     _LOG_DIR     = getattr(MC, "LOG_DIR",      _LOG_DIR)

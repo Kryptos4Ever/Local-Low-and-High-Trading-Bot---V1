@@ -18,6 +18,15 @@ Configuración del entorno:
 Parámetros de la estrategia (configurar en este archivo):
     THR_B, THR_T  →  ver documentación abajo
 
+Actores utilizados
+───────────────────
+    PriceFeed  : SQLiteFeed        (DB local)
+    Wallet     : JSONWallet        (persiste resultados)
+    OrderBook  : SimulatedOrderBook
+    Clock      : LocalClock
+    Risk       : RiskManager permisivo (sin límites)
+    State      : MemoryStateManager   (sin persistencia entre sesiones)
+
 ────────────────────────────────────────────────────────────────────
 GUÍA DE PARÁMETROS
 ────────────────────────────────────────────────────────────────────
@@ -31,16 +40,9 @@ THR_B — Umbral de confianza para señal de COMPRA
   Valor calibrado (óptimo por robustez): 0.50
 
   Efecto de subirlo: menos señales de compra, más selectivas.
-                     Mayor precision, menor recall.
-                     Menos trades por mes, potencialmente mayor
-                     retorno por trade pero perdiendo oportunidades.
-
   Efecto de bajarlo: más señales de compra, menos selectivas.
-                     Más trades por mes, mayor exposición al mercado.
 
   Rango razonable para ajuste manual: [0.45, 0.65]
-  Fuera de ese rango el sistema se vuelve extremadamente conservador
-  o extremadamente ruidoso según los datos de calibración.
 
 THR_T — Umbral de confianza para señal de VENTA
   El modelo de tops asigna a cada vela una probabilidad [0,1] de
@@ -53,7 +55,6 @@ THR_T — Umbral de confianza para señal de VENTA
   NOTA: THR_T es intencionalmente menor que THR_B. Esta asimetría
   surge de la calibración y es deliberada: facilita el cierre de
   posiciones abiertas reduciendo el tiempo en riesgo y el drawdown.
-  No se recomienda subir THR_T por encima de THR_B.
 
   Rango razonable para ajuste manual: [0.40, 0.60]
 
@@ -65,8 +66,6 @@ RENDIMIENTO ESPERADO (validación out-of-sample, todos los años OOS):
   2024    +38.0%    +120.3%   -82.3%    63.8%
   2025    +17.9%      -7.2%   +25.1%    61.4%   ← fuera de muestra
   (Con capital $1000, MAX_POSICIONES=5, COMMISSION=0.1%)
-  La estrategia brilla en mercados laterales y bajistas.
-  En bull markets fuertes el Buy&Hold la supera ampliamente.
 ────────────────────────────────────────────────────────────────────
 """
 
@@ -81,14 +80,13 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 import config_local as CL
-import mode_config  as MC
 
-from actors.price_feed        import SQLiteFeed
-from actors.wallet            import JSONWallet, TradeRecord
-from actors.order_book        import SimulatedOrderBook, OrderSide
-from actors.clock             import LocalClock
-from risk.risk_manager        import build_risk_manager
-from state.state_manager      import MemoryStateManager, Checkpoint
+from actors.price_feed         import SQLiteFeed
+from actors.wallet             import JSONWallet, TradeRecord
+from actors.order_book         import SimulatedOrderBook, OrderSide
+from actors.clock              import LocalClock
+from risk.risk_manager         import RiskManager, RiskConfig
+from state.state_manager       import MemoryStateManager, Checkpoint
 from strategies.local_reversal import LocalReversalStrategy
 from strategies.base_strategy  import SignalSide
 from support.logger            import get_logger
@@ -98,12 +96,10 @@ log = get_logger("backtest_local_reversal")
 
 # ════════════════════════════════════════════════════════════════════
 # PARÁMETROS DE LA ESTRATEGIA
-# Cambiar estos valores para ajustar el comportamiento del sistema.
-# Ver la guía completa en el encabezado de este archivo.
 # ════════════════════════════════════════════════════════════════════
 
-THR_B    = 0.5   # umbral señal BUY   — rango razonable: [0.45, 0.65]
-THR_T    = 0.5   # umbral señal SELL  — rango razonable: [0.40, 0.60]
+THR_B     = 0.5   # umbral señal BUY   — rango razonable: [0.45, 0.65]
+THR_T     = 0.5   # umbral señal SELL  — rango razonable: [0.40, 0.60]
 
 CACHE_DIR = ".cache_local_reversal"
 
@@ -143,7 +139,9 @@ def main(use_cache: bool = True, clear_cache: bool = False) -> None:
         commission_pct = CL.COMMISSION_PCT,
         max_posiciones = CL.MAX_POSICIONES,
     )
-    risk   = build_risk_manager(usdt_inicial=CL.SALDO_USDT_INICIAL)
+    # Backtest: sin límites de riesgo
+    risk   = RiskManager(config=RiskConfig.permissive(),
+                         usdt_inicial=CL.SALDO_USDT_INICIAL)
     state  = MemoryStateManager()
 
     strategy = LocalReversalStrategy(
@@ -153,12 +151,12 @@ def main(use_cache: bool = True, clear_cache: bool = False) -> None:
         force_recompute = not use_cache,
     )
 
-    # ── 2. on_start: entrena o carga modelos ──────────────────────
+    # ── 2. on_start: entrena o carga modelos sobre dataset completo ──
     print("Inicializando estrategia...")
     strategy.on_start(
         wallet = wallet,
         feed   = feed,
-        start  = "2017-01-01",   # dataset completo para entrenar
+        start  = "2017-01-01",
         end    = "2030-01-01",
         symbol = CL.SYMBOL,
     )
@@ -192,17 +190,17 @@ def main(use_cache: bool = True, clear_cache: bool = False) -> None:
 
         order_side = signal.to_order_side()
 
-        # Risk check (permisivo por defecto según mode_config)
+        # Risk check
         risk_reason = risk.check(order_side, signal.price, wallet, candle)
         if risk_reason:
             n_ignorados += 1
             ign_motivos[risk_reason] = ign_motivos.get(risk_reason, 0) + 1
             wallet.update(TradeRecord(
-                ts           = candle.ts,
-                side         = order_side.value,
-                price        = signal.price,
-                ignored      = True,
-                ignore_reason= risk_reason,
+                ts            = candle.ts,
+                side          = order_side.value,
+                price         = signal.price,
+                ignored       = True,
+                ignore_reason = risk_reason,
             ))
             continue
 
