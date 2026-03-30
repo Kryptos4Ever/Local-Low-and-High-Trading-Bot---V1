@@ -46,17 +46,17 @@ tr:hover td{background:#243044}
 <div class='hdr'>
   <div><h1>Local Reversal — Live Testnet</h1>
   <div class='ts' style='text-align:left;margin-top:4px'>THR_B=0.5 · THR_T=0.5 · Max pos=5 · BTCUSDT</div></div>
-  <div class='ts'>Actualizado: 2026-03-25 17:59:42 UTC<br>  <span style='color:#475569'>Auto-refresca cada 10s</span></div>
+  <div class='ts'>Actualizado: 2026-03-25 18:59:42 UTC<br>  <span style='color:#475569'>Auto-refresca cada 10s</span></div>
 </div>
 <div class='grid'>
   <div class='card'><div class='lbl'>Portfolio total</div><div class='val'>$79,937.90</div><div class='sub'>Inicial: $79,937.90</div></div>
   <div class='card'><div class='lbl'>P&amp;L sesión</div><div class='val pnl'>-0.00%</div><div class='sub pnl'>$-0.00 USDT</div></div>
   <div class='card'><div class='lbl'>USDT libre</div><div class='val'>$79,937.90</div><div class='sub'>Slot: $15,987.58</div></div>
-  <div class='card'><div class='lbl'>Posiciones</div><div class='val'>0 / 5</div><div class='sub'>BTC @ $70,775.65</div></div>
+  <div class='card'><div class='lbl'>Posiciones</div><div class='val'>0 / 5</div><div class='sub'>BTC @ $70,810.34</div></div>
   <div class='card'><div class='lbl'>Operaciones</div><div class='val'>0</div><div class='sub'>Buy 0 · Sell 0 · Ign 0</div></div>
-  <div class='card'><div class='lbl'>Próxima vela en</div><div class='cd'>00:00:18</div><div class='sub'>Último tick: 17:00 UTC</div></div>
+  <div class='card'><div class='lbl'>Próxima vela en</div><div class='cd'>00:00:18</div><div class='sub'>Último tick: 18:00 UTC</div></div>
 </div>
-<h2>Gráfico BTC/USDT — últimas 2 velas horarias</h2>
+<h2>Gráfico BTC/USDT — últimas 3 velas horarias</h2>
 <div class='sec' style='padding:12px 14px'>
   
   <div class='cw'><canvas id='cc'></canvas></div>
@@ -74,7 +74,7 @@ tr:hover td{background:#243044}
 <div class='sec'>
   <div style='display:flex;align-items:center;gap:10px;margin-bottom:10px'>
     <span>Señal emitida:</span><span class='badge hold'>HOLD</span>
-    <span style='color:#64748b;font-size:11px'>Close: $70,775.65</span></div>
+    <span style='color:#64748b;font-size:11px'>Close: $70,810.34</span></div>
   <div class='bar-row'><span class='bar-lbl'>prob_bottom</span>
     <div class='bar-trk'><div class='bar-fil' style='width:0.0%;background:#6b7280'></div></div>
     <span class='bar-val' style='color:#6b7280'>0.000</span></div>
@@ -89,13 +89,13 @@ tr:hover td{background:#243044}
 <h2>Últimas operaciones (buy=0 sell=0 ign=0)</h2>
 <div class='sec'><table><thead><tr><th>Hora</th><th>Tipo</th><th>Precio</th><th>Cantidad</th><th>Info</th></tr></thead><tbody><tr><td colspan='5' class='muted'>Sin operaciones aún</td></tr></tbody></table></div>
 <script>
-const OHLC=[{"x": 1774454400000, "o": 70840.01, "h": 71820.98, "l": 70201.42, "c": 71333.93}, {"x": 1774458000000, "o": 71341.35, "h": 71640.09, "l": 70737.76, "c": 70775.65}];
-const PBD=[{"x": 1774454400000, "y": 0.0}, {"x": 1774458000000, "y": 0.0}];
-const PTD=[{"x": 1774454400000, "y": 0.0}, {"x": 1774458000000, "y": 0.0}];
+const OHLC=[{"x": 1774454400000, "o": 70840.01, "h": 71820.98, "l": 70201.42, "c": 71333.93}, {"x": 1774458000000, "o": 71341.35, "h": 71640.09, "l": 70737.76, "c": 70775.65}, {"x": 1774461600000, "o": 70775.64, "h": 71228.3, "l": 69740.46, "c": 70810.34}];
+const PBD=[{"x": 1774454400000, "y": 0.0}, {"x": 1774458000000, "y": 0.0}, {"x": 1774461600000, "y": 0.0}];
+const PTD=[{"x": 1774454400000, "y": 0.0}, {"x": 1774458000000, "y": 0.0}, {"x": 1774461600000, "y": 0.0}];
 const BUY_M=[];
 const SELL_M=[];
-const TBL=[{"x": 1774454400000, "y": 0.5}, {"x": 1774458000000, "y": 0.5}];
-const TTL=[{"x": 1774454400000, "y": 0.5}, {"x": 1774458000000, "y": 0.5}];
+const TBL=[{"x": 1774454400000, "y": 0.5}, {"x": 1774458000000, "y": 0.5}, {"x": 1774461600000, "y": 0.5}];
+const TTL=[{"x": 1774454400000, "y": 0.5}, {"x": 1774458000000, "y": 0.5}, {"x": 1774461600000, "y": 0.5}];
 const GR={grid:'rgba(255,255,255,0.06)',tick:'#64748b',border:'#1e293b'};
 const XS={type:'time',time:{unit:'hour',displayFormats:{hour:'dd HH:mm'}},grid:{color:GR.grid},ticks:{color:GR.tick,maxTicksLimit:8,maxRotation:0},border:{color:GR.border}};
 const OPT={responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}}};
