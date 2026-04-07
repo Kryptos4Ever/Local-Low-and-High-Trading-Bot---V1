@@ -1,26 +1,26 @@
 """
-backtest_irreal.py — Runner del Benchmark Irreal
-═════════════════════════════════════════════════
-Ensambla todos los actores del sistema y corre la IrrealStrategy
-(oráculo perfecto) para producir el techo teórico de rendimiento.
+backtest_grid_extremes.py — Runner de GridExtremesStrategy
+═══════════════════════════════════════════════════════════
+Ensambla todos los actores del sistema y corre GridExtremesStrategy:
+grilla de compra/venta basada en extremos locales confirmados por oráculo.
 
 Resultado: JSON compatible con Graficador.py
 
 Uso:
-    python backtest_irreal.py
+    python backtest_grid_extremes.py
 
 Configuración:
-    · config_local.py  →  rutas, fechas, capital, MAX_POSICIONES, comisión
-    · strategies/irreal.py → parámetros de la estrategia (VENTANA, precios)
+    · config_local.py                → rutas, fechas, capital, MAX_POSICIONES, comisión
+    · VENTANA, DROP_PCT_BUY, etc.    → parámetros propios al inicio de este archivo
 
 Actores utilizados
 ───────────────────
-    PriceFeed  : SQLiteFeed        (DB local)
-    Wallet     : JSONWallet        (persiste resultados)
+    PriceFeed  : SQLiteFeed          (DB local)
+    Wallet     : JSONWallet          (persiste resultados)
     OrderBook  : SimulatedOrderBook
     Clock      : LocalClock
-    Risk       : RiskManager permisivo (sin límites)
-    State      : MemoryStateManager   (sin persistencia entre sesiones)
+    Risk       : RiskManager permisivo (sin límites en backtest)
+    State      : MemoryStateManager  (sin persistencia entre sesiones)
 """
 
 from __future__ import annotations
@@ -33,25 +33,27 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import config_local as CL
 
-from actors.price_feed    import SQLiteFeed
-from actors.wallet        import JSONWallet, TradeRecord
-from actors.order_book    import SimulatedOrderBook, OrderSide
-from actors.clock         import LocalClock
-from risk.risk_manager    import RiskManager, RiskConfig
-from state.state_manager  import MemoryStateManager, Checkpoint
-from strategies.irreal    import IrrealStrategy
-from strategies.base_strategy import SignalSide
-from support.logger       import get_logger
+from actors.price_feed         import SQLiteFeed
+from actors.wallet             import JSONWallet, TradeRecord
+from actors.order_book         import SimulatedOrderBook, OrderSide
+from actors.clock              import LocalClock
+from risk.risk_manager         import RiskManager, RiskConfig
+from state.state_manager       import MemoryStateManager, Checkpoint
+from strategies.grid_extremes  import GridExtremesStrategy
+from strategies.base_strategy  import SignalSide
+from support.logger            import get_logger
 
-log = get_logger("backtest_irreal")
+log = get_logger("backtest_grid_extremes")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PARÁMETROS DE LA ESTRATEGIA
 # ══════════════════════════════════════════════════════════════════════════════
-VENTANA_LOCAL  = 6       # velas a cada lado para confirmar extremo
-PRECIO_COMPRA  = "low"    # "low" | "close" | "open"
-PRECIO_VENTA   = "high"   # "high" | "close" | "open"
+
+VENTANA       = 20     # velas a cada lado para confirmar extremo local
+DROP_PCT_BUY  = 5.0    # % de caída por nivel BUY  desde el último top
+RISE_PCT_SELL = 10.0    # % de subida por nivel SELL desde el último bottom
+RETROACTIVE   = False  # True = disparar niveles ya cruzados al confirmar extremo
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -62,53 +64,65 @@ def main() -> None:
     t_start = time.time()
 
     print("╔══════════════════════════════════════════════════════════╗")
-    print("║       BACKTEST IRREAL — Oráculo Perfecto BTC/USDT       ║")
+    print("║      BACKTEST GRID EXTREMES — Grilla BTC/USDT           ║")
     print("╚══════════════════════════════════════════════════════════╝")
     print(f"  Rango         : {CL.FECHA_INICIO} → {CL.FECHA_FIN}")
     print(f"  Capital       : ${CL.SALDO_USDT_INICIAL:,.2f} USDT")
     print(f"  Max posiciones: {CL.MAX_POSICIONES}  "
           f"(slot inicial = ${CL.SALDO_USDT_INICIAL / CL.MAX_POSICIONES:,.2f})")
-    print(f"  Ventana local : {VENTANA_LOCAL} velas a cada lado")
-    print(f"  Precio compra : {PRECIO_COMPRA}   |  Precio venta: {PRECIO_VENTA}")
+    print(f"  Ventana oracle: {VENTANA} velas a cada lado")
+    print(f"  DROP_PCT_BUY  : {DROP_PCT_BUY}%  (niveles: "
+          + ", ".join(f"{i*DROP_PCT_BUY:.0f}%" for i in range(1, CL.MAX_POSICIONES + 1))
+          + ")")
+    print(f"  RISE_PCT_SELL : {RISE_PCT_SELL}%  (niveles: "
+          + ", ".join(f"{i*RISE_PCT_SELL:.0f}%" for i in range(1, CL.MAX_POSICIONES + 1))
+          + ")")
+    print(f"  Retroactive   : {RETROACTIVE}")
     print(f"  Comisión      : {CL.COMMISSION_PCT}%")
     print(f"  Output JSON   : {CL.RESULTS_JSON}")
     print("─" * 60)
 
     # ── 1. Construir actores ───────────────────────────────────────────────────
-    feed  = SQLiteFeed(db_path=CL.DB_PATH, table=CL.DB_TABLE)
-    clock = LocalClock(feed, start=CL.FECHA_INICIO, end=CL.FECHA_FIN,
-                       symbol=CL.SYMBOL)
+    feed = SQLiteFeed(db_path=CL.DB_PATH, table=CL.DB_TABLE)
+    clock = LocalClock(
+        feed, start=CL.FECHA_INICIO, end=CL.FECHA_FIN, symbol=CL.SYMBOL
+    )
     wallet = JSONWallet(
         usdt_inicial   = CL.SALDO_USDT_INICIAL,
         max_posiciones = CL.MAX_POSICIONES,
         json_path      = CL.RESULTS_JSON,
     )
-    ob    = SimulatedOrderBook(
+    ob = SimulatedOrderBook(
         commission_pct = CL.COMMISSION_PCT,
         max_posiciones = CL.MAX_POSICIONES,
     )
-    # Backtest: sin límites de riesgo
-    risk  = RiskManager(config=RiskConfig.permissive(),
-                        usdt_inicial=CL.SALDO_USDT_INICIAL)
+    risk  = RiskManager(
+        config       = RiskConfig.permissive(),
+        usdt_inicial = CL.SALDO_USDT_INICIAL,
+    )
     state = MemoryStateManager()
 
-    strategy = IrrealStrategy(
-        ventana       = VENTANA_LOCAL,
-        precio_compra = PRECIO_COMPRA,
-        precio_venta  = PRECIO_VENTA,
+    strategy = GridExtremesStrategy(
+        ventana       = VENTANA,
+        drop_pct_buy  = DROP_PCT_BUY,
+        rise_pct_sell = RISE_PCT_SELL,
+        retroactive   = RETROACTIVE,
     )
 
     # ── 2. Iniciar estrategia ─────────────────────────────────────────────────
     strategy.on_start(wallet)
 
     # ── 3. Contadores ─────────────────────────────────────────────────────────
-    n_compras    = 0
-    n_ventas     = 0
-    n_ignorados  = 0
+    n_compras   = 0
+    n_ventas    = 0
+    n_ignorados = 0
     ign_motivos: dict[str, int] = {}
-    precio_min_comprado  = float("inf")
-    precio_max_vendido   = float("-inf")
-    last_candle  = None
+
+    # Estadísticas de niveles
+    niveles_buy_disparados:  dict[int, int] = {}
+    niveles_sell_disparados: dict[int, int] = {}
+
+    last_candle = None
 
     # ── 4. Loop principal ─────────────────────────────────────────────────────
     print("Procesando velas...", end=" ", flush=True)
@@ -128,22 +142,31 @@ def main() -> None:
             n_ignorados += 1
             ign_motivos[risk_reason] = ign_motivos.get(risk_reason, 0) + 1
             wallet.update(TradeRecord(
-                ts=candle.ts, side=order_side.value, price=signal.price,
-                ignored=True, ignore_reason=risk_reason,
+                ts           = candle.ts,
+                side         = order_side.value,
+                price        = signal.price,
+                ignored      = True,
+                ignore_reason = risk_reason,
             ))
             continue
 
         # Ejecutar con guardias del OrderBook
-        order = ob.execute_with_guards(order_side, signal.price, wallet,
-                                       candle_ts=candle.ts)
+        order = ob.execute_with_guards(
+            order_side, signal.price, wallet, candle_ts=candle.ts
+        )
+
+        # Contabilizar nivel disparado (extraído del reason de la señal)
+        nivel = int(signal.score) if signal.score is not None else 0
 
         if order.is_filled:
             if order_side == OrderSide.BUY:
                 n_compras += 1
-                precio_min_comprado = min(precio_min_comprado, signal.price)
+                niveles_buy_disparados[nivel] = \
+                    niveles_buy_disparados.get(nivel, 0) + 1
             else:
                 n_ventas += 1
-                precio_max_vendido = max(precio_max_vendido, signal.price)
+                niveles_sell_disparados[nivel] = \
+                    niveles_sell_disparados.get(nivel, 0) + 1
         else:
             n_ignorados += 1
             motivo = order.reject_reason or "desconocido"
@@ -152,7 +175,14 @@ def main() -> None:
         risk.update_peak(wallet.portfolio_value(candle.close))
         state.save(Checkpoint.from_wallet(
             wallet, candle.ts, candle.close,
-            metadata={"estrategia": strategy.name},
+            metadata={
+                "estrategia":       strategy.name,
+                "ventana":          VENTANA,
+                "drop_pct_buy":     DROP_PCT_BUY,
+                "rise_pct_sell":    RISE_PCT_SELL,
+                "ultimo_top_high":  strategy._last_top_high,
+                "ultimo_bottom_low":strategy._last_bottom_low,
+            },
         ))
 
     print(f"OK  ({clock.total_candles:,} velas)")
@@ -164,17 +194,13 @@ def main() -> None:
         print("✗ No se encontraron velas en el rango indicado.")
         return
 
-    precio_final  = last_candle.close
-    port_final    = wallet.portfolio_value(precio_final)
-    pnl_pct       = (port_final / CL.SALDO_USDT_INICIAL - 1) * 100
+    precio_final = last_candle.close
+    port_final   = wallet.portfolio_value(precio_final)
+    pnl_pct      = (port_final / CL.SALDO_USDT_INICIAL - 1) * 100
 
     first_candles  = feed.get_candles(CL.FECHA_INICIO, CL.FECHA_INICIO)
     precio_inicial = first_candles[0].close if first_candles else last_candle.close
     bh_pnl         = (precio_final / precio_inicial - 1) * 100
-
-    all_candles = feed.get_candles(CL.FECHA_INICIO, CL.FECHA_FIN)
-    atl = min(c.low  for c in all_candles) if all_candles else 0
-    ath = max(c.high for c in all_candles) if all_candles else 0
 
     # ── 6. Armar summary ──────────────────────────────────────────────────────
     summary = {
@@ -191,32 +217,22 @@ def main() -> None:
         "pnl_pct":                  round(pnl_pct, 4),
         "buy_hold_pnl_pct":         round(bh_pnl, 4),
         "alpha_vs_bh":              round(pnl_pct - bh_pnl, 4),
-        "precio_min_comprado":      round(precio_min_comprado, 4) if n_compras else None,
-        "precio_max_vendido":       round(precio_max_vendido, 4)  if n_ventas  else None,
-        "atl_final":                round(atl, 4),
-        "ath_proyectado_final":     round(ath, 4),
         "total_trades_ejecutados":  n_compras + n_ventas,
         "total_compras":            n_compras,
         "total_ventas":             n_ventas,
         "total_ignorados":          n_ignorados,
         "ordenes_canceladas":       0,
         "ignorados_por_motivo":     ign_motivos,
+        "niveles_buy_disparados":   dict(sorted(niveles_buy_disparados.items())),
+        "niveles_sell_disparados":  dict(sorted(niveles_sell_disparados.items())),
         "positions_count_final":    wallet.positions_count,
         "usdt_reserva_aplicada":    0.0,
         "umbral_filtro":            None,
         "parametros": {
             **strategy.describe(),
-            "max_posiciones":    CL.MAX_POSICIONES,
-            "commission_pct":    CL.COMMISSION_PCT,
-            "slot_usdt_final":   round(wallet.get_slot_usdt(), 4),
-            "guardia_compra":    True,
-            "guardia_venta":     True,
-            "rsi_length":        "N/A",
-            "ath_caida_maxima":  "N/A",
-            "atl_subida_maxima": "N/A",
-            "factor_caida":      "N/A",
-            "factor_subida":     "N/A",
-            "N":                 "N/A",
+            "max_posiciones":  CL.MAX_POSICIONES,
+            "commission_pct":  CL.COMMISSION_PCT,
+            "slot_usdt_final": round(wallet.get_slot_usdt(), 4),
         },
     }
 
@@ -240,6 +256,24 @@ def main() -> None:
     print(f"  Ventas           : {n_ventas:,}")
     print(f"  Ignorados        : {n_ignorados:,}  → {ign_motivos}")
     print(f"  Posiciones abier.: {wallet.positions_count}")
+
+    # Distribución de niveles disparados
+    if niveles_buy_disparados:
+        distrib = "  ".join(
+            f"N{k}:{v}" for k, v in sorted(niveles_buy_disparados.items())
+        )
+        print(f"  Niveles BUY      : {distrib}")
+    if niveles_sell_disparados:
+        distrib = "  ".join(
+            f"N{k}:{v}" for k, v in sorted(niveles_sell_disparados.items())
+        )
+        print(f"  Niveles SELL     : {distrib}")
+
+    # Estado final del oráculo
+    top_str    = f"${strategy._last_top_high:,.2f}"    if strategy._last_top_high    else "N/A"
+    bottom_str = f"${strategy._last_bottom_low:,.2f}"  if strategy._last_bottom_low  else "N/A"
+    print(f"  Último top ref   : {top_str}")
+    print(f"  Último bottom ref: {bottom_str}")
     print(f"  Tiempo           : {elapsed:.1f}s")
     print(sep)
     print(f"\n✓ Resultado guardado en: {CL.RESULTS_JSON}")

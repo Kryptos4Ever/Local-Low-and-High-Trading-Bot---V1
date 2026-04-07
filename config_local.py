@@ -7,7 +7,7 @@ de una máquina específica en un equipo.
 """
 
 # ── Rutas ──────────────────────────────────────────────────────────────────────
-DB_PATH      = r"C:\Users\Bernardo\Documents\CRYPTO\Estrategias de trading automatizado\DB\btc_hourly.db"
+DB_PATH      = r"C:\Estrategias de trading automatizado\DB\btc_hourly.db"
 DB_TABLE     = "btc_hourly"
 RESULTS_JSON = "backtest_results.json"
 STATE_PATH   = "state/trading_state.jsonl"
@@ -15,7 +15,7 @@ STATE_PATH   = "state/trading_state.jsonl"
 # ── Rango de fechas ────────────────────────────────────────────────────────────
 # Formato: 'YYYY-MM-DD'  |  None = desde el inicio / hasta el final del dataset
 FECHA_INICIO = '2021-11-10'
-FECHA_FIN    = '2022-11-22'
+FECHA_FIN    = '2025-10-06'
 
 # Referencias útiles:
 #   Bottom Bear 2018  : '2018-12-10'
@@ -31,7 +31,7 @@ FECHA_FIN    = '2022-11-22'
 # ── Parámetros compartidos de simulación ──────────────────────────────────────
 SYMBOL             = "BTCUSDT"
 SALDO_USDT_INICIAL = 1000.0
-MAX_POSICIONES     = 4
+MAX_POSICIONES     = 10
 COMMISSION_PCT     = 0.1       # % (Binance Spot maker/taker)
 
 # ── Salida ─────────────────────────────────────────────────────────────────────

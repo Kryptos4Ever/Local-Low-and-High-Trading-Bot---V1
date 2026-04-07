@@ -24,13 +24,13 @@ USE_BOT_* / USE_TOP_*
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 MODO --grid
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Barre 10,584 combinaciones (7 BOT × 7 TOP × 6 thr × 6 cooldown)
+Barre combinaciones (7 BOT × 7 TOP × 7² umbrales × 6² cooldowns)
 sin re-correr el backtest: usa los pred_* guardados en trade_history.
 
 Salida del grid:
   · Top-15 combinaciones generales ordenadas por PnL
   · Tabla de ranking por predictor individual y por combinación de BOT/TOP
-  · grid_predictive_results.csv y .json con todas las 10,584 filas
+  · grid_predictive_results.csv y .json con todas las filas
 
 Requisito:
   Correr primero el backtest con todos los USE_* = True y umbral bajo
@@ -76,21 +76,21 @@ log = get_logger("backtest_predictive_candles")
 # CONFIG — Editar aquí antes de cada ejecución
 # ══════════════════════════════════════════════════════════════════════════════
 
-VENTANA    = 10     # velas hacia atrás para calcular factores  [10, 16]
-UMBRAL_BOT = 0.8   # score mínimo para señal BUY               (0, 1]
-UMBRAL_TOP = 0.7   # score mínimo para señal SELL              (0, 1]
+VENTANA    = 6     # velas hacia atrás para calcular factores  [10, 16]
+UMBRAL_BOT = 0.75   # score mínimo para señal BUY               (0, 1]
+UMBRAL_TOP = 0.6   # score mínimo para señal SELL              (0, 1]
 COOLDOWN_BOT = 96    # velas mínimas entre señales BUY  (0 = desactivado)
-COOLDOWN_TOP = 96    # velas mínimas entre señales SELL (0 = desactivado)
+COOLDOWN_TOP = 72    # velas mínimas entre señales SELL (0 = desactivado)
 
 # ── Predictores activos para BOTTOM (señal BUY) ───────────────────────────────
 USE_BOT_CLOSE_POSITION = True   # AUC=0.854 ▼
-USE_BOT_BB_POSITION    = True   # AUC=0.833 ▼
-USE_BOT_RECOVERY_PCT   = True   # AUC=0.823 ▼
+USE_BOT_BB_POSITION    = False   # AUC=0.833 ▼
+USE_BOT_RECOVERY_PCT   = False   # AUC=0.823 ▼
 
 # ── Predictores activos para TOP (señal SELL) ─────────────────────────────────
-USE_TOP_CLOSE_POSITION = True   # AUC=0.839 ▲
+USE_TOP_CLOSE_POSITION = False   # AUC=0.839 ▲
 USE_TOP_DRAWDOWN_PCT   = True   # AUC=0.826 ▼
-USE_TOP_BB_POSITION    = True   # AUC=0.821 ▲
+USE_TOP_BB_POSITION    = False   # AUC=0.821 ▲
 
 # ── Salida ────────────────────────────────────────────────────────────────────
 RESULTS_JSON = CL.RESULTS_JSON
@@ -98,8 +98,10 @@ RESULTS_JSON = CL.RESULTS_JSON
 # ── Parámetros del grid ───────────────────────────────────────────────────────
 # Umbrales a barrer (aplica tanto a BOT como a TOP por separado)
 GRID_THRESHOLDS = [0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90]
-# Cooldowns a barrer (0 = desactivado, resto en velas)
+# Cooldowns a barrer independientemente para BOT y TOP (0=desactivado, en velas)
 GRID_COOLDOWNS  = [0, 12, 24, 48, 72, 96]
+# Duración de cada vela en segundos (3600 = velas horarias)
+CANDLE_SECONDS  = 3600
 GRID_CSV        = "grid_predictive_results.csv"
 GRID_JSON_OUT   = "grid_predictive_results.json"
 
@@ -362,29 +364,54 @@ def _grid_score(
 
 
 def _simulate_combo(
-    trades:          List[dict],
-    bot_combo:       List[str],
-    top_combo:       List[str],
-    thr_bot:         float,
-    thr_top:         float,
-    cooldown:        int,
-    rec_windows:     List[List[float]],   # ventana rolling causal por trade
-    dra_windows:     List[List[float]],   # ventana rolling causal por trade
-    usdt_ini:        float,
-    max_pos:         int,
-    commission:      float,
+    trades:       List[dict],
+    bot_combo:    List[str],
+    top_combo:    List[str],
+    thr_bot:      float,
+    thr_top:      float,
+    cooldown_bot: int,           # velas; 0 = desactivado
+    cooldown_top: int,           # velas; 0 = desactivado
+    rec_windows:  List[List[float]],
+    dra_windows:  List[List[float]],
+    usdt_ini:     float,
+    max_pos:      int,
+    commission:   float,
+    candle_seconds: int = CANDLE_SECONDS,   # retenido por firma, no usado internamente
 ) -> Dict:
     """
     Re-simula la wallet con una combinación específica de predictores,
-    umbrales y cooldown.
+    umbrales y cooldowns independientes para BOT y TOP.
 
-    rec_windows[i] / dra_windows[i]: lista ORDENADA de los últimos n_norm
-    valores de recovery_pct / drawdown_pct vistos hasta el trade i inclusive.
-    Estas ventanas replican exactamente el historial rolling de la estrategia,
-    eliminando el look-ahead bias que existía en la versión anterior que usaba
-    la distribución global del período completo.
+    CORRECCIÓN DE BUG v3 — bug fundamental resuelto:
+    ─────────────────────────────────────────────────
+    Versiones anteriores decidían BUY vs SELL según el campo "type" guardado
+    en el JSON por el backtest inicial (thr=0.3, todos los predictores).
+    Esto es incorrecto porque al cambiar predictores o umbrales, el score
+    de TOP puede quedar por debajo del nuevo thr_top en candles que el
+    backtest inicial etiquetó como SELL, y al revés para BUY.
 
-    cooldown se aplica simétricamente a BOT y TOP.
+    Ejemplo concreto del error:
+      · Candle guardada como SELL (score_top(cp+dw+bb)=0.45 ≥ 0.3 en run inicial)
+      · Grid re-simula con TOP=cp, thr_top=0.80
+        → score_top(cp)=0.60 < 0.80 → grid no hace nada
+        → pero score_bot(bb+rc)=0.82 ≥ 0.75 → real backtest haría BUY
+        → BUY perdido por el grid
+
+      · Candle guardada como BUY (score_top(cp+dw+bb)=0.28 < 0.3 en run inicial)
+      · Grid re-simula con TOP=cp, thr_top=0.80
+        → score_top(cp)=0.85 ≥ 0.80 → real backtest haría SELL
+        → pero el grid intenta BUY (etiqueta del run inicial)
+        → SELL perdido, BUY falso
+
+    SOLUCIÓN: ignorar el campo "type" del JSON. En cada candle calcular
+    ambos scores y aplicar la misma lógica de prioridad que la estrategia
+    real: SELL si score_top ≥ thr_top (y cooldown ok), sino BUY si
+    score_bot ≥ thr_bot (y cooldown ok), sino nada.
+
+    COOLDOWN: se mide en índice de trade (equivalente a índice de vela,
+    ya que 9063/9072 = 99.9% de velas generan señales y están en el JSON).
+    Esto replica exactamente el cooldown de PredictiveCandlesStrategy
+    que cuenta velas procesadas, sin depender de timestamps.
     """
     w_bot = norm_weights(bot_combo, AUC_BOT) if bot_combo else {}
     w_top = norm_weights(top_combo, AUC_TOP) if top_combo else {}
@@ -393,14 +420,15 @@ def _simulate_combo(
     n_buy = n_sell = n_ign = 0
     ganancias: List[float] = []
 
-    _NEG_INF   = -(10 ** 9)
-    last_bot_i = _NEG_INF
-    last_top_i = _NEG_INF
+    # Índice del último trade en que se emitió señal (−∞ → primer tick siempre pasa)
+    _NEG_INF     = -(10 ** 9)
+    last_bot_idx = _NEG_INF
+    last_top_idx = _NEG_INF
 
     for trade_idx, t in enumerate(trades):
-        side  = t.get("type", "")
         price = t.get("price", 0.0)
-        if price <= 0 or side not in ("BUY", "SELL"):
+        ts    = t.get("ts", 0)     # solo para TradeRecord (metadata), no para cooldown
+        if price <= 0:
             continue
 
         pv = {
@@ -409,64 +437,72 @@ def _simulate_combo(
             "recovery_pct":   t.get("pred_recovery_pct"),
             "drawdown_pct":   t.get("pred_drawdown_pct"),
         }
+        # Si ningún pred_value está disponible, saltar
+        if all(v is None for v in pv.values()):
+            continue
 
-        # Usar la ventana causal para este trade_idx
         s_rec = rec_windows[trade_idx]
         s_dra = dra_windows[trade_idx]
 
-        if side == "BUY":
-            if not bot_combo:
-                continue
-            if cooldown > 0 and (trade_idx - last_bot_i) < cooldown:
-                continue
-            sb = _grid_score(bot_combo, w_bot, DIR_BOT, pv, s_rec, s_dra)
-            if sb < thr_bot:
-                continue
-            # Guardias de wallet
-            if wallet.positions_count >= max_pos:
-                n_ign += 1
-                continue
-            slot = wallet.get_slot_usdt()
-            if slot > wallet.get_usdt_balance() + 1e-9:
-                n_ign += 1
-                continue
-            comm = slot * commission / 100.0
-            btc  = (slot - comm) / price
-            wallet.update(TradeRecord(
-                ts=0, side="BUY", price=price,
-                usdt_spent=slot, btc_bought=btc, commission=comm,
-            ))
-            last_bot_i = trade_idx
-            n_buy += 1
+        # ── Calcular ambos scores (igual que on_candle en la estrategia real) ──
+        st = (_grid_score(top_combo, w_top, DIR_TOP, pv, s_rec, s_dra)
+              if top_combo else 0.0)
+        sb = (_grid_score(bot_combo, w_bot, DIR_BOT, pv, s_rec, s_dra)
+              if bot_combo else 0.0)
 
-        elif side == "SELL":
-            if not top_combo:
-                continue
-            if cooldown > 0 and (trade_idx - last_top_i) < cooldown:
-                continue
-            st = _grid_score(top_combo, w_top, DIR_TOP, pv, s_rec, s_dra)
-            if st < thr_top:
-                continue
-            # Guardias de wallet
-            if wallet.positions_count == 0:
-                n_ign += 1
-                continue
-            bpv = wallet.get_btc_por_venta()
-            if bpv <= 0:
-                n_ign += 1
-                continue
-            usdt_bruto = bpv * price
-            comm       = usdt_bruto * commission / 100.0
-            usdt_neto  = usdt_bruto - comm
-            ganancia   = usdt_neto - wallet.get_slot_usdt()
-            wallet.update(TradeRecord(
-                ts=0, side="SELL", price=price,
-                btc_sold=bpv, usdt_received=usdt_neto,
-                commission=comm, ganancia_usdt=ganancia,
-            ))
-            ganancias.append(ganancia)
-            last_top_i = trade_idx
-            n_sell += 1
+        # ── SELL tiene prioridad sobre BUY (replica on_candle exactamente) ─────
+        #
+        # CRÍTICO: el cooldown se resetea cuando SE EMITE LA SEÑAL (cd_ok=True
+        # y score ≥ umbral), no cuando la orden se ejecuta. Esto replica
+        # exactamente predictive_candles.py donde _last_top_idx/_last_bot_idx
+        # se asignan ANTES del return Signal(), independientemente de si el
+        # OrderBook acepta o rechaza la orden posterior.
+        sell_triggered = False
+        if top_combo and st >= thr_top:
+            cd_ok = (cooldown_top == 0 or
+                     (trade_idx - last_top_idx) >= cooldown_top)
+            if cd_ok:
+                sell_triggered = True
+                last_top_idx = trade_idx   # ← siempre al emitir señal
+                if wallet.positions_count == 0:
+                    n_ign += 1
+                else:
+                    bpv = wallet.get_btc_por_venta()
+                    if bpv <= 0:
+                        n_ign += 1
+                    else:
+                        usdt_bruto = bpv * price
+                        comm       = usdt_bruto * commission / 100.0
+                        usdt_neto  = usdt_bruto - comm
+                        ganancia   = usdt_neto - wallet.get_slot_usdt()
+                        wallet.update(TradeRecord(
+                            ts=ts, side="SELL", price=price,
+                            btc_sold=bpv, usdt_received=usdt_neto,
+                            commission=comm, ganancia_usdt=ganancia,
+                        ))
+                        ganancias.append(ganancia)
+                        n_sell += 1
+            # si cooldown bloquea SELL, sigue hacia el check de BUY (igual que la estrategia)
+
+        if not sell_triggered and bot_combo and sb >= thr_bot:
+            cd_ok = (cooldown_bot == 0 or
+                     (trade_idx - last_bot_idx) >= cooldown_bot)
+            if cd_ok:
+                last_bot_idx = trade_idx   # ← siempre al emitir señal
+                if wallet.positions_count >= max_pos:
+                    n_ign += 1
+                else:
+                    slot = wallet.get_slot_usdt()
+                    if slot > wallet.get_usdt_balance() + 1e-9:
+                        n_ign += 1
+                    else:
+                        comm = slot * commission / 100.0
+                        btc  = (slot - comm) / price
+                        wallet.update(TradeRecord(
+                            ts=ts, side="BUY", price=price,
+                            usdt_spent=slot, btc_bought=btc, commission=comm,
+                        ))
+                        n_buy += 1
 
     last_price = trades[-1].get("price", 0.0) if trades else 0.0
     port  = wallet.portfolio_value(last_price)
@@ -475,13 +511,13 @@ def _simulate_combo(
              if ganancias else 0.0)
 
     return {
-        "pnl_pct":  round(pnl, 2),
+        "pnl_pct":   round(pnl, 2),
         "portfolio": round(port, 2),
-        "n_buy":    n_buy,
-        "n_sell":   n_sell,
-        "n_trades": n_buy + n_sell,
-        "n_ign":    n_ign,
-        "win_rate": round(wr, 1),
+        "n_buy":     n_buy,
+        "n_sell":    n_sell,
+        "n_trades":  n_buy + n_sell,
+        "n_ign":     n_ign,
+        "win_rate":  round(wr, 1),
     }
 
 
@@ -506,15 +542,13 @@ def _build_predictor_table(results: List[dict], bh_pnl: float) -> None:
     """
     Muestra dos tablas:
       1. Ranking de combinaciones BOT: para cada subconjunto de predictores
-         BOT, cuál es el mejor PnL alcanzable (optimizando top, thr, cooldown)
+         BOT, cuál es el mejor PnL alcanzable (optimizando top, thr, cooldowns)
       2. Ídem para TOP.
-
-    Columnas: combo | mejor PnL | alpha vs B&H | thr_bot/top | cooldown | B/S | WR%
     """
-    sep  = "─" * 82
-    sep2 = "═" * 82
+    sep  = "─" * 90
+    sep2 = "═" * 90
 
-    # ── Tabla BOT: agrupar por bot_combo, encontrar mejor resultado ───────────
+    # ── Tabla BOT ─────────────────────────────────────────────────────────────
     by_bot: Dict[str, List[dict]] = defaultdict(list)
     for r in results:
         by_bot[r["bot_combo"]].append(r)
@@ -525,13 +559,13 @@ def _build_predictor_table(results: List[dict], bh_pnl: float) -> None:
         best_by_bot.append({
             "combo":    bot_c,
             "abbrev":   _abbrev(bot_c.split("+")),
-            "n_pred":   len(bot_c.split("+")),
             "is_solo":  len(bot_c.split("+")) == 1,
             "pnl":      best["pnl_pct"],
             "alpha_bh": best["alpha_vs_bh"],
             "thr_b":    best["umbral_bot"],
             "thr_t":    best["umbral_top"],
-            "cooldown": best["cooldown"],
+            "cd_b":     best["cooldown_bot"],
+            "cd_t":     best["cooldown_top"],
             "n_buy":    best["n_buy"],
             "n_sell":   best["n_sell"],
             "win_rate": best["win_rate"],
@@ -541,26 +575,27 @@ def _build_predictor_table(results: List[dict], bh_pnl: float) -> None:
 
     print(f"\n{sep2}")
     print("  RANKING BOT — mejor PnL por combinación de predictores de BOTTOM")
-    print(f"  (optimizando top_combo, umbrales y cooldown)")
+    print(f"  (optimizando top_combo, umbrales y cooldowns independientes)")
     print(sep2)
     print(f"  {'#':>2}  {'BOT':>14}  {'mejor_top':>14}  "
-          f"{'thr_b':>6} {'thr_t':>6} {'cd':>4}  "
+          f"{'thr_b':>6} {'thr_t':>6} {'cd_b':>4} {'cd_t':>4}  "
           f"{'PnL%':>8} {'α_BH':>8}  {'B/S':>9}  {'WR%':>5}")
     print(sep)
     for i, r in enumerate(best_by_bot, 1):
         solo_tag = " *" if r["is_solo"] else "  "
         pnl_s = f"{'+' if r['pnl']>=0 else ''}{r['pnl']:.2f}%"
         abh_s = f"{'+' if r['alpha_bh']>=0 else ''}{r['alpha_bh']:.2f}%"
-        cd_s  = str(int(r["cooldown"])) if r["cooldown"] else "off"
+        cdb_s = str(int(r["cd_b"])) if r["cd_b"] else "off"
+        cdt_s = str(int(r["cd_t"])) if r["cd_t"] else "off"
         bs_s  = f"{r['n_buy']}B/{r['n_sell']}S"
         print(f"  {i:>2}.{solo_tag}{r['abbrev']:>14}  {r['best_top']:>14}  "
-              f"{r['thr_b']:>6.2f} {r['thr_t']:>6.2f} {cd_s:>4}  "
+              f"{r['thr_b']:>6.2f} {r['thr_t']:>6.2f} {cdb_s:>4} {cdt_s:>4}  "
               f"{pnl_s:>9} {abh_s:>9}  {bs_s:>9}  {r['win_rate']:>5.1f}%")
     print(sep)
     print("  * = predictor individual (sin combinación)")
     print(f"  B&H referencia: {bh_pnl:+.2f}%")
 
-    # ── Tabla TOP: ídem ───────────────────────────────────────────────────────
+    # ── Tabla TOP ─────────────────────────────────────────────────────────────
     by_top: Dict[str, List[dict]] = defaultdict(list)
     for r in results:
         by_top[r["top_combo"]].append(r)
@@ -571,13 +606,13 @@ def _build_predictor_table(results: List[dict], bh_pnl: float) -> None:
         best_by_top.append({
             "combo":    top_c,
             "abbrev":   _abbrev(top_c.split("+")),
-            "n_pred":   len(top_c.split("+")),
             "is_solo":  len(top_c.split("+")) == 1,
             "pnl":      best["pnl_pct"],
             "alpha_bh": best["alpha_vs_bh"],
             "thr_b":    best["umbral_bot"],
             "thr_t":    best["umbral_top"],
-            "cooldown": best["cooldown"],
+            "cd_b":     best["cooldown_bot"],
+            "cd_t":     best["cooldown_top"],
             "n_buy":    best["n_buy"],
             "n_sell":   best["n_sell"],
             "win_rate": best["win_rate"],
@@ -587,58 +622,59 @@ def _build_predictor_table(results: List[dict], bh_pnl: float) -> None:
 
     print(f"\n{sep2}")
     print("  RANKING TOP — mejor PnL por combinación de predictores de TOP")
-    print(f"  (optimizando bot_combo, umbrales y cooldown)")
+    print(f"  (optimizando bot_combo, umbrales y cooldowns independientes)")
     print(sep2)
     print(f"  {'#':>2}  {'TOP':>14}  {'mejor_bot':>14}  "
-          f"{'thr_b':>6} {'thr_t':>6} {'cd':>4}  "
+          f"{'thr_b':>6} {'thr_t':>6} {'cd_b':>4} {'cd_t':>4}  "
           f"{'PnL%':>8} {'α_BH':>8}  {'B/S':>9}  {'WR%':>5}")
     print(sep)
     for i, r in enumerate(best_by_top, 1):
         solo_tag = " *" if r["is_solo"] else "  "
         pnl_s = f"{'+' if r['pnl']>=0 else ''}{r['pnl']:.2f}%"
         abh_s = f"{'+' if r['alpha_bh']>=0 else ''}{r['alpha_bh']:.2f}%"
-        cd_s  = str(int(r["cooldown"])) if r["cooldown"] else "off"
+        cdb_s = str(int(r["cd_b"])) if r["cd_b"] else "off"
+        cdt_s = str(int(r["cd_t"])) if r["cd_t"] else "off"
         bs_s  = f"{r['n_buy']}B/{r['n_sell']}S"
         print(f"  {i:>2}.{solo_tag}{r['abbrev']:>14}  {r['best_bot']:>14}  "
-              f"{r['thr_b']:>6.2f} {r['thr_t']:>6.2f} {cd_s:>4}  "
+              f"{r['thr_b']:>6.2f} {r['thr_t']:>6.2f} {cdb_s:>4} {cdt_s:>4}  "
               f"{pnl_s:>9} {abh_s:>9}  {bs_s:>9}  {r['win_rate']:>5.1f}%")
     print(sep)
     print("  * = predictor individual (sin combinación)")
 
-    # ── Tabla de predictores individuales únicos ──────────────────────────────
+    # ── Tabla de predictores individuales ─────────────────────────────────────
     print(f"\n{sep2}")
     print("  PREDICTORES INDIVIDUALES — comparación directa (solo predictor único activo)")
     print(sep2)
     print(f"  {'tipo':>4}  {'predictor':>16}  {'mejor_contraparte':>18}  "
-          f"{'thr_b':>6} {'thr_t':>6} {'cd':>4}  "
+          f"{'thr_b':>6} {'thr_t':>6} {'cd_b':>4} {'cd_t':>4}  "
           f"{'PnL%':>8} {'α_BH':>8}  {'WR%':>5}")
     print(sep)
 
-    # Solos de BOT
     for r in best_by_bot:
         if not r["is_solo"]:
             continue
         pnl_s = f"{'+' if r['pnl']>=0 else ''}{r['pnl']:.2f}%"
         abh_s = f"{'+' if r['alpha_bh']>=0 else ''}{r['alpha_bh']:.2f}%"
-        cd_s  = str(int(r["cooldown"])) if r["cooldown"] else "off"
+        cdb_s = str(int(r["cd_b"])) if r["cd_b"] else "off"
+        cdt_s = str(int(r["cd_t"])) if r["cd_t"] else "off"
         print(f"  {'BOT':>4}  {r['abbrev']:>16}  {r['best_top']:>18}  "
-              f"{r['thr_b']:>6.2f} {r['thr_t']:>6.2f} {cd_s:>4}  "
+              f"{r['thr_b']:>6.2f} {r['thr_t']:>6.2f} {cdb_s:>4} {cdt_s:>4}  "
               f"{pnl_s:>9} {abh_s:>9}  {r['win_rate']:>5.1f}%")
 
-    # Solos de TOP
     for r in best_by_top:
         if not r["is_solo"]:
             continue
         pnl_s = f"{'+' if r['pnl']>=0 else ''}{r['pnl']:.2f}%"
         abh_s = f"{'+' if r['alpha_bh']>=0 else ''}{r['alpha_bh']:.2f}%"
-        cd_s  = str(int(r["cooldown"])) if r["cooldown"] else "off"
+        cdb_s = str(int(r["cd_b"])) if r["cd_b"] else "off"
+        cdt_s = str(int(r["cd_t"])) if r["cd_t"] else "off"
         print(f"  {'TOP':>4}  {r['abbrev']:>16}  {r['best_bot']:>18}  "
-              f"{r['thr_b']:>6.2f} {r['thr_t']:>6.2f} {cd_s:>4}  "
+              f"{r['thr_b']:>6.2f} {r['thr_t']:>6.2f} {cdb_s:>4} {cdt_s:>4}  "
               f"{pnl_s:>9} {abh_s:>9}  {r['win_rate']:>5.1f}%")
 
     print(sep)
     print("  Abreviaciones: cp=close_position  bb=bb_position  "
-          "rc=recovery_pct  dw=drawdown_pct")
+          "rc=recovery_pct  dw=drawdown_pct  cd_b/cd_t=cooldown bot/top (velas)")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -670,6 +706,9 @@ def grid_analysis(json_path: str) -> None:
     print(f"  Período        : {summary_in.get('fecha_inicio')} → {summary_in.get('fecha_fin')}")
     print(f"  PnL original   : {orig_pnl:+.2f}%   |   B&H: {bh_pnl:+.2f}%")
     print(f"  Trades totales : {len(trades_raw):,}")
+    print(f"  Cooldown       : medido en índice de vela (replica cooldown real)")
+    print(f"  Cooldowns BOT/TOP barridos de forma INDEPENDIENTE")
+    print(f"  Acción/vela    : scores BOT y TOP calculados en cada candle (SELL priority)")
 
     # Verificar campos pred_*
     required = ["pred_close_position", "pred_bb_position",
@@ -686,6 +725,14 @@ def grid_analysis(json_path: str) -> None:
         print("  3. python backtest_predictive_candles.py --grid")
         return
 
+    # Verificar que los trades tienen información temporal resoluble.
+    # JSONWallet guarda 'datetime' (ISO string), no 'ts' (epoch int) — ambos sirven.
+    trades_sin_dt = [t for t in action_trades
+                     if not t.get("ts") and not t.get("datetime")]
+    if trades_sin_dt:
+        print(f"\n⚠ {len(trades_sin_dt)} trades sin campo de tiempo ('ts' o 'datetime') "
+              f"— el cooldown temporal no funcionará correctamente.")
+
     trades = [t for t in action_trades
               if t.get("pred_close_position") is not None]
     n_sin_pred = len(action_trades) - len(trades)
@@ -693,18 +740,12 @@ def grid_analysis(json_path: str) -> None:
         print(f"  ⚠ {n_sin_pred} trades sin pred_values — se excluyen del grid")
     print(f"  Trades con pred_values: {len(trades):,}  ✓")
 
-    # ── Pre-computar ventanas rolling causales por trade ──────────────────────
-    # Replica exactamente el historial h_rec / h_dra de la estrategia real:
-    # rec_windows[i] = lista ORDENADA de los últimos N_NORM valores de
-    # recovery_pct vistos hasta el trade i inclusive.
-    # Esto elimina el look-ahead bias que causaba la discrepancia entre
-    # el grid (distribución global del período completo) y el backtest real
-    # (ventana rolling de n_norm=200 observaciones).
+    # ── Pre-computar ventanas rolling causales ────────────────────────────────
     N_NORM = 200
     print(f"  Precomputando ventanas causales (n_norm={N_NORM})...", end=" ", flush=True)
     rec_windows: List[List[float]] = []
     dra_windows: List[List[float]] = []
-    h_rec_roll: List[float] = []   # ventana FIFO sin ordenar
+    h_rec_roll: List[float] = []
     h_dra_roll: List[float] = []
 
     for t_roll in trades:
@@ -718,7 +759,6 @@ def grid_analysis(json_path: str) -> None:
             h_dra_roll.append(dv)
             if len(h_dra_roll) > N_NORM:
                 h_dra_roll.pop(0)
-        # Guardar copia ordenada para bisect rápido en _grid_score
         rec_windows.append(sorted(h_rec_roll))
         dra_windows.append(sorted(h_dra_roll))
 
@@ -729,17 +769,21 @@ def grid_analysis(json_path: str) -> None:
                   .get("max_posiciones", CL.MAX_POSICIONES))
     commission = CL.COMMISSION_PCT
 
-    bot_combos  = _nonempty_subsets(ALL_BOT_PREDICTORS)   # 7 subconjuntos
-    top_combos  = _nonempty_subsets(ALL_TOP_PREDICTORS)   # 7 subconjuntos
-    thresholds  = GRID_THRESHOLDS
-    cooldowns   = GRID_COOLDOWNS
-    total_combos = len(bot_combos) * len(top_combos) * len(thresholds) ** 2 * len(cooldowns)
+    bot_combos = _nonempty_subsets(ALL_BOT_PREDICTORS)   # 7 subconjuntos
+    top_combos = _nonempty_subsets(ALL_TOP_PREDICTORS)   # 7 subconjuntos
+    thresholds = GRID_THRESHOLDS
+    cooldowns  = GRID_COOLDOWNS
+
+    # Con cooldowns independientes: cd_bot × cd_top
+    total_combos = (len(bot_combos) * len(top_combos)
+                    * len(thresholds) ** 2
+                    * len(cooldowns) ** 2)
 
     print(f"\n  Combinaciones  : {len(bot_combos)} BOT × {len(top_combos)} TOP"
-          f" × {len(thresholds)}² umbrales × {len(cooldowns)} cooldowns"
+          f" × {len(thresholds)}² umbrales × {len(cooldowns)}² cooldowns"
           f" = {total_combos:,}")
     print(f"  Umbrales       : {thresholds}")
-    print(f"  Cooldowns      : {cooldowns} (velas; 0=off)")
+    print(f"  Cooldowns      : {cooldowns} (velas; 0=off, independiente por BOT/TOP)")
     print(f"\n  Ejecutando simulaciones...")
 
     t0      = time.time()
@@ -750,23 +794,27 @@ def grid_analysis(json_path: str) -> None:
         for tc in top_combos:
             for thr_b in thresholds:
                 for thr_t in thresholds:
-                    for cd in cooldowns:
-                        metrics = _simulate_combo(
-                            trades, bc, tc, thr_b, thr_t, cd,
-                            rec_windows, dra_windows,
-                            usdt_ini, max_pos, commission,
-                        )
-                        results.append({
-                            "bot_combo": "+".join(bc),
-                            "top_combo": "+".join(tc),
-                            "umbral_bot": thr_b,
-                            "umbral_top": thr_t,
-                            "cooldown":   cd,
-                            **metrics,
-                            "alpha_vs_bh":   round(metrics["pnl_pct"] - bh_pnl,   2),
-                            "alpha_vs_orig": round(metrics["pnl_pct"] - orig_pnl, 2),
-                        })
-                        done += 1
+                    for cd_b in cooldowns:
+                        for cd_t in cooldowns:
+                            metrics = _simulate_combo(
+                                trades, bc, tc, thr_b, thr_t,
+                                cd_b, cd_t,
+                                rec_windows, dra_windows,
+                                usdt_ini, max_pos, commission,
+                                CANDLE_SECONDS,
+                            )
+                            results.append({
+                                "bot_combo":   "+".join(bc),
+                                "top_combo":   "+".join(tc),
+                                "umbral_bot":  thr_b,
+                                "umbral_top":  thr_t,
+                                "cooldown_bot": cd_b,
+                                "cooldown_top": cd_t,
+                                **metrics,
+                                "alpha_vs_bh":   round(metrics["pnl_pct"] - bh_pnl,   2),
+                                "alpha_vs_orig": round(metrics["pnl_pct"] - orig_pnl, 2),
+                            })
+                            done += 1
 
             elapsed_so_far = time.time() - t0
             pct = done / total_combos * 100
@@ -778,13 +826,9 @@ def grid_analysis(json_path: str) -> None:
 
     results.sort(key=lambda x: -x["pnl_pct"])
 
-    # ── Top-15 general ────────────────────────────────────────────────────────
     _print_top15(results[:15], orig_pnl, bh_pnl)
-
-    # ── Tabla de ranking por predictor ────────────────────────────────────────
     _build_predictor_table(results, bh_pnl)
 
-    # ── Guardar outputs ───────────────────────────────────────────────────────
     print("\n[Guardando resultados...]")
     _save_grid_csv(results, GRID_CSV)
     _save_grid_json(results, GRID_JSON_OUT, summary_in, elapsed)
@@ -793,14 +837,14 @@ def grid_analysis(json_path: str) -> None:
 
 
 def _print_top15(results: List[dict], orig_pnl: float, bh_pnl: float) -> None:
-    sep  = "─" * 96
-    sep2 = "═" * 96
+    sep  = "─" * 104
+    sep2 = "═" * 104
     print(f"\n{sep2}")
     print("  TOP-15 COMBINACIONES — ordenadas por PnL")
     print(sep2)
     print(
         f"  {'#':>2}  {'BOT':>8} {'TOP':>12}  "
-        f"{'thr_b':>6} {'thr_t':>6} {'cd':>4}  "
+        f"{'thr_b':>6} {'thr_t':>6} {'cd_b':>4} {'cd_t':>4}  "
         f"{'PnL%':>8} {'α_BH':>8} {'α_orig':>8}  "
         f"{'B/S':>9}  {'WR%':>5}"
     )
@@ -809,13 +853,14 @@ def _print_top15(results: List[dict], orig_pnl: float, bh_pnl: float) -> None:
         pnl_s  = f"{'+' if r['pnl_pct']>=0 else ''}{r['pnl_pct']:.2f}%"
         abh_s  = f"{'+' if r['alpha_vs_bh']>=0 else ''}{r['alpha_vs_bh']:.2f}%"
         aor_s  = f"{'+' if r['alpha_vs_orig']>=0 else ''}{r['alpha_vs_orig']:.2f}%"
-        cd_s   = str(int(r["cooldown"])) if r["cooldown"] else "off"
+        cdb_s  = str(int(r["cooldown_bot"])) if r["cooldown_bot"] else "off"
+        cdt_s  = str(int(r["cooldown_top"])) if r["cooldown_top"] else "off"
         bc_s   = _abbrev(r["bot_combo"].split("+"))
         tc_s   = _abbrev(r["top_combo"].split("+"))
         bs_s   = f"{r['n_buy']}B/{r['n_sell']}S"
         print(
             f"  {i:>2}.  {bc_s:>8} {tc_s:>12}  "
-            f"{r['umbral_bot']:>6.2f} {r['umbral_top']:>6.2f} {cd_s:>4}  "
+            f"{r['umbral_bot']:>6.2f} {r['umbral_top']:>6.2f} {cdb_s:>4} {cdt_s:>4}  "
             f"{pnl_s:>9} {abh_s:>9} {aor_s:>9}  "
             f"{bs_s:>9}  {r['win_rate']:>5.1f}%"
         )
@@ -823,7 +868,7 @@ def _print_top15(results: List[dict], orig_pnl: float, bh_pnl: float) -> None:
     print(f"  Original → PnL: {orig_pnl:+.2f}%   B&H: {bh_pnl:+.2f}%")
     print(sep2)
     print("  Abreviaciones: cp=close_position  bb=bb_position  "
-          "rc=recovery_pct  dw=drawdown_pct  cd=cooldown (velas)")
+          "rc=recovery_pct  dw=drawdown_pct  cd_b/cd_t=cooldown bot/top (velas)")
 
 
 def _save_grid_csv(results: List[dict], path: str) -> None:
@@ -843,14 +888,16 @@ def _save_grid_json(
 ) -> None:
     output = {
         "meta": {
-            "fecha_inicio":    orig_summary.get("fecha_inicio"),
-            "fecha_fin":       orig_summary.get("fecha_fin"),
-            "pnl_original":    orig_summary.get("pnl_pct"),
-            "bh_original":     orig_summary.get("buy_hold_pnl_pct"),
-            "grid_thresholds": GRID_THRESHOLDS,
-            "grid_cooldowns":  GRID_COOLDOWNS,
-            "n_combinaciones": len(results),
-            "elapsed_s":       round(elapsed, 1),
+            "fecha_inicio":     orig_summary.get("fecha_inicio"),
+            "fecha_fin":        orig_summary.get("fecha_fin"),
+            "pnl_original":     orig_summary.get("pnl_pct"),
+            "bh_original":      orig_summary.get("buy_hold_pnl_pct"),
+            "grid_thresholds":  GRID_THRESHOLDS,
+            "grid_cooldowns":   GRID_COOLDOWNS,
+            "candle_seconds":   CANDLE_SECONDS,
+            "cooldown_mode":    "timestamp_real_independiente",
+            "n_combinaciones":  len(results),
+            "elapsed_s":        round(elapsed, 1),
         },
         "top_10": results[:10],
         "all":    results,
@@ -877,8 +924,12 @@ Ejemplos:
 Flujo recomendado para --grid:
   1. Todos los USE_* = True, UMBRAL_BOT/TOP = 0.3, COOLDOWN_BOT/TOP = 0
   2. python backtest_predictive_candles.py        (genera JSON con pred_*)
-  3. python backtest_predictive_candles.py --grid (10,584 combinaciones)
-  4. Configurar la combo óptima encontrada y re-correr el backtest definitivo
+  3. python backtest_predictive_candles.py --grid (barre todas las combos)
+  4. Configurar la combo óptima y re-correr el backtest definitivo
+
+NOTA: el grid ahora usa cooldown en tiempo real (segundos de timestamp)
+y barre cooldown_bot y cooldown_top de forma INDEPENDIENTE.
+El resultado del backtest definitivo debería coincidir con el grid.
 """,
     )
     parser.add_argument(

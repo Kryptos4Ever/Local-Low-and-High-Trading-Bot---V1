@@ -315,6 +315,7 @@ class JSONWallet(MemoryWallet):
     def _trade_to_dict(self, t: TradeRecord) -> dict:
         snap = self.snapshot(t.price)
         return {
+            "ts":                         t.ts, 
             "datetime":                   to_iso(t.ts),
             "type":                       t.side,
             "price":                      round(t.price, 8),
