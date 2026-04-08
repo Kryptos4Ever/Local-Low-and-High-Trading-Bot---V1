@@ -1,0 +1,14 @@
+  [ 78/176] kde|w10|jac|cmi3|ada|fil  12:49:29  INFO     [price_feed]  SQLiteFeed inicializado  db=C:\Estrategias de trading automatizado\DB\btc_hourly.db  table=btc_hourly
+12:49:29  INFO     [clock]  LocalClock inicializado  start=2021-11-10T00:00:00Z  end=2025-10-06T00:00:00Z  symbol=BTCUSDT
+12:49:29  INFO     [wallet]  JSONWallet inicializado  path=C:\Users\Bernardo\AppData\Local\Temp\tmps7jj3p8g.json  append=False
+12:49:29  INFO     [order_book]  SimulatedOrderBook inicializado  commission=0.1%  max_pos=10
+12:49:29  INFO     [risk_manager]  RiskManager inicializado  max_dd=desactivado  max_daily=desactivado  max_order=desactivado
+12:49:29  INFO     [strategy]  estrategia inicializada  nombre=DivergenceField-v1
+12:49:30  INFO     [divergence_field]  DivergenceFieldStrategy configurada  te_estimator=kde  window_mode=fixed  window_size=10  field_def=jacobian  cmi_regimes=3  threshold_mode=adaptive_percentile  te_threshold=0.7  cmi_threshold=0.6  field_threshold=0.5  sink_mode=filter_and  sink_threshold=1.2  score_threshold_bot=0.55  score_threshold_top=0.55  cooldown=0  k_bins=4  k_nn=3
+12:49:30  INFO     [divergence_field]  DivergenceFieldStrategy iniciada
+12:49:30  INFO     [price_feed]  velas cargadas  count=34247  start=2021-11-10T00:00:00Z  end=2025-10-06T00:00:00Z
+12:49:30  INFO     [clock]  velas cargadas en LocalClock  total=34247  symbol=BTCUSDT
+12:53:34  INFO     [divergence_field]  DivergenceFieldStrategy detenida  velas_procesadas=34247
+12:53:34  INFO     [price_feed]  velas cargadas  count=24  start=2021-11-10T00:00:00Z  end=2021-11-10T00:00:00Z
+12:53:34  INFO     [wallet]  JSON guardado  path=C:\Users\Bernardo\AppData\Local\Temp\tmps7jj3p8g.json  trades=4832
+PnL= +195.36%  α=+109.29%  B=0.45/S=0.7  246.5s

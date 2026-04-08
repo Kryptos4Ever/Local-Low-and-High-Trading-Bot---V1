@@ -65,7 +65,7 @@ except ImportError:
 # ══════════════════════════════════════════════════════════════════════════════
 
 VENTANA_ORACULO   = 6                   # debe coincidir con backtest_irreal.py
-VENTANAS_ANALISIS = list(range(6, 10))  # [10, 11, ..., 24]
+VENTANAS_ANALISIS = list(range(4, 5))  # [10, 11, ..., 24]
 
 # Cuántos candles neutros muestrear (para equilibrar vs N eventos, evitar OOM)
 MAX_NEUTROS = 600
