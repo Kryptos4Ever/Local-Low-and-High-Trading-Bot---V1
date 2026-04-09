@@ -1,740 +1,434 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta http-equiv="refresh" content="10">
-<title>Divergence Field — Live Dashboard</title>
-<style>
-  :root {
-    --bg:      #0d1117; --bg2: #161b22; --bg3: #21262d;
-    --border:  #30363d; --text: #e6edf3; --muted: #8b949e;
-    --green:   #3fb950; --red: #f85149; --yellow: #d29922;
-    --blue:    #58a6ff; --purple: #a371f7; --orange: #fb8500;
-    --cyan:    #39d353; --teal: #1f6feb;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', monospace; font-size: 13px; }
-  h1   { font-size: 16px; font-weight: 600; color: var(--blue); }
-  h2   { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-
-  .header { background: var(--bg2); border-bottom: 1px solid var(--border);
-             padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; }
-  .header-meta { display: flex; gap: 20px; font-size: 11px; color: var(--muted); }
-  .header-meta span { display: flex; align-items: center; gap: 4px; }
-  .dot-live { width: 8px; height: 8px; border-radius: 50%; background: var(--green);
-               animation: pulse 1.5s infinite; display: inline-block; }
-  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
-
-  .layout { display: grid; grid-template-columns: 280px 1fr 280px; gap: 0; height: calc(100vh - 47px); overflow: hidden; }
-  .col-left  { border-right: 1px solid var(--border); overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-  .col-mid   { overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-  .col-right { border-left: 1px solid var(--border); overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-
-  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
-  .card-accent-bot { border-left: 3px solid var(--green); }
-  .card-accent-top { border-left: 3px solid var(--red); }
-  .card-accent-blue{ border-left: 3px solid var(--blue); }
-  .card-accent-purple{ border-left: 3px solid var(--purple); }
-
-  /* Portfolio cards */
-  .pf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .pf-card  { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px;
-               padding: 8px 10px; }
-  .pf-card .label { font-size: 10px; color: var(--muted); margin-bottom: 2px; }
-  .pf-card .value { font-size: 16px; font-weight: 700; }
-  .pf-card .value.pos { color: var(--green); }
-  .pf-card .value.neg { color: var(--red); }
-  .pf-card .value.neu { color: var(--text); }
-
-  /* Gauge bars */
-  .metric-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-  .metric-label { width: 80px; font-size: 11px; color: var(--muted); flex-shrink: 0; }
-  .metric-bar-bg { flex: 1; background: var(--bg3); border-radius: 3px; height: 14px; position: relative; overflow: hidden; }
-  .metric-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
-  .metric-val { width: 44px; text-align: right; font-size: 11px; font-family: monospace; flex-shrink: 0; }
-  .metric-threshold { position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,0.4); }
-
-  .bar-te    { background: linear-gradient(90deg, #1f6feb, #58a6ff); }
-  .bar-cmi   { background: linear-gradient(90deg, #6e40c9, #a371f7); }
-  .bar-field { background: linear-gradient(90deg, #fb8500, #ffd166); }
-  .bar-sink  { background: linear-gradient(90deg, #0e9c6c, #3fb950); }
-  .bar-sbot  { background: linear-gradient(90deg, #0e9c6c, #3fb950); }
-  .bar-stop  { background: linear-gradient(90deg, #b31d28, #f85149); }
-
-  /* Pattern indicator */
-  .pattern-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .pattern-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px;
-                   padding: 8px; text-align: center; }
-  .pattern-card.active-bot { border-color: var(--green); background: rgba(63,185,80,0.08); }
-  .pattern-card.active-top { border-color: var(--red);   background: rgba(248,81,73,0.08);  }
-  .pattern-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
-  .pattern-icon  { font-size: 22px; }
-  .pattern-desc  { font-size: 9px; color: var(--muted); margin-top: 2px; }
-
-  /* Signal badge */
-  .signal-badge { display: inline-block; padding: 4px 12px; border-radius: 12px;
-                   font-size: 12px; font-weight: 700; letter-spacing: 1px; }
-  .signal-BUY  { background: rgba(63,185,80,0.2);  color: var(--green); border: 1px solid var(--green); }
-  .signal-SELL { background: rgba(248,81,73,0.2);  color: var(--red);   border: 1px solid var(--red);   }
-  .signal-HOLD { background: rgba(139,148,158,0.1); color: var(--muted); border: 1px solid var(--border); }
-
-  /* Field vector display */
-  .field-vector { display: flex; align-items: center; justify-content: space-around;
-                   background: var(--bg3); border-radius: 4px; padding: 8px; margin-top: 6px; }
-  .fv-comp { text-align: center; }
-  .fv-label { font-size: 9px; color: var(--muted); }
-  .fv-value { font-size: 15px; font-weight: 700; margin: 2px 0; }
-  .fv-arrow { font-size: 18px; }
-  .pos { color: var(--green); }
-  .neg { color: var(--red);   }
-  .neu { color: var(--muted); }
-
-  /* Charts */
-  canvas { width: 100% !important; }
-  .chart-container { position: relative; }
-
-  /* Trade table */
-  table { width: 100%; border-collapse: collapse; font-size: 11px; }
-  th    { text-align: left; color: var(--muted); padding: 4px 6px; border-bottom: 1px solid var(--border); font-weight: 400; }
-  td    { padding: 3px 6px; border-bottom: 1px solid rgba(48,54,61,0.5); }
-  tr:last-child td { border-bottom: none; }
-  .td-buy  { color: var(--green); font-weight: 600; }
-  .td-sell { color: var(--red);   font-weight: 600; }
-  .td-ign  { color: var(--muted); }
-
-  /* Config table */
-  .cfg-row { display: flex; justify-content: space-between; padding: 3px 0;
-              border-bottom: 1px solid rgba(48,54,61,0.3); font-size: 11px; }
-  .cfg-key { color: var(--muted); }
-  .cfg-val { color: var(--blue); font-family: monospace; }
-
-  /* Positions */
-  .pos-row { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px;
-              padding: 8px 10px; margin-bottom: 6px; }
-  .pos-header { display: flex; justify-content: space-between; align-items: center; }
-  .pos-detail { font-size: 10px; color: var(--muted); margin-top: 3px; }
-
-  /* Warmup overlay */
-  .warmup-badge { background: rgba(210,153,34,0.15); border: 1px solid var(--yellow);
-                   border-radius: 4px; padding: 6px 10px; color: var(--yellow); font-size: 11px;
-                   display: flex; align-items: center; gap: 6px; }
-
-  /* Info tooltip area */
-  .info-box { background: rgba(88,166,255,0.05); border: 1px solid rgba(88,166,255,0.2);
-               border-radius: 4px; padding: 8px; font-size: 10px; color: var(--muted); line-height: 1.6; }
-  .kv { display: flex; justify-content: space-between; }
-  .kv .k { color: var(--muted); }
-  .kv .v { color: var(--text); font-family: monospace; }
-
-  ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-</style>
-</head>
-<body>
-<div class="header">
-  <div style="display:flex;align-items:center;gap:10px;">
-    <span class="dot-live"></span>
-    <h1>Divergence Field — Live Trader</h1>
+<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'><meta http-equiv='refresh' content='10'><title>📄 PAPER — Divergence Field</title><style>
+:root{--bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--bd:#30363d;--tx:#e6edf3;--mu:#8b949e;
+      --g:#3fb950;--r:#f85149;--y:#d29922;--b:#58a6ff;--p:#a371f7;--o:#fb8500;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--tx);font-family:'Segoe UI',monospace;font-size:13px;}
+h1{font-size:15px;font-weight:600;color:var(--b);}
+h2{font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;}
+.hdr{background:var(--bg2);border-bottom:1px solid var(--bd);padding:8px 14px;
+     display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.hdr-meta{display:flex;gap:14px;font-size:10px;color:var(--mu);flex-wrap:wrap;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.layout{display:grid;grid-template-columns:265px 1fr 265px;gap:0;height:calc(100vh - 50px);overflow:hidden;}
+.col{overflow-y:auto;padding:9px;display:flex;flex-direction:column;gap:7px;}
+.col-l{border-right:1px solid var(--bd);}
+.col-r{border-left:1px solid var(--bd);}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:5px;padding:9px;}
+.cb{border-left:3px solid var(--g);} .ct{border-left:3px solid var(--r);}
+.cbl{border-left:3px solid var(--b);} .cp{border-left:3px solid var(--p);}
+.cy{border-left:3px solid var(--y);}
+.pg{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.pc{background:var(--bg3);border:1px solid var(--bd);border-radius:4px;padding:6px 8px;}
+.pc .lb{font-size:9px;color:var(--mu);margin-bottom:1px;}
+.pc .vl{font-size:14px;font-weight:700;}
+.pos{color:var(--g);}.neg{color:var(--r);}.neu{color:var(--tx);}
+.mr{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.ml{width:68px;font-size:10px;color:var(--mu);flex-shrink:0;}
+.mb{flex:1;background:var(--bg3);border-radius:3px;height:12px;position:relative;overflow:hidden;}
+.mf{height:100%;border-radius:3px;transition:width .4s;}
+.mv{width:40px;text-align:right;font-size:10px;font-family:monospace;flex-shrink:0;}
+.mt{position:absolute;top:0;bottom:0;width:2px;background:rgba(255,255,255,.3);}
+.bte{background:linear-gradient(90deg,#1f6feb,#58a6ff);}
+.bci{background:linear-gradient(90deg,#6e40c9,#a371f7);}
+.bfd{background:linear-gradient(90deg,#fb8500,#ffd166);}
+.bsk{background:linear-gradient(90deg,#0e9c6c,#3fb950);}
+.bsb{background:linear-gradient(90deg,#0e9c6c,#3fb950);}
+.bst{background:linear-gradient(90deg,#b31d28,#f85149);}
+.sb{display:inline-block;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:1px;}
+.sb-BUY{background:rgba(63,185,80,.2);color:var(--g);border:1px solid var(--g);}
+.sb-SELL{background:rgba(248,81,73,.2);color:var(--r);border:1px solid var(--r);}
+.sb-HOLD{background:rgba(139,148,158,.1);color:var(--mu);border:1px solid var(--bd);}
+.fvr{display:flex;align-items:center;justify-content:space-around;background:var(--bg3);border-radius:4px;padding:6px;margin-top:5px;}
+.fvc{text-align:center;}
+.fvl{font-size:9px;color:var(--mu);}
+.fva{font-size:14px;}
+.fvv{font-size:13px;font-weight:700;}
+.ib{background:rgba(88,166,255,.05);border:1px solid rgba(88,166,255,.15);border-radius:4px;
+    padding:6px;font-size:10px;color:var(--mu);line-height:1.8;}
+.kv{display:flex;justify-content:space-between;}
+.kv .k{color:var(--mu);}.kv .v{color:var(--tx);font-family:monospace;}
+table{width:100%;border-collapse:collapse;font-size:10px;}
+th{text-align:left;color:var(--mu);padding:3px 4px;border-bottom:1px solid var(--bd);font-weight:400;}
+td{padding:3px 4px;border-bottom:1px solid rgba(48,54,61,.4);}
+tr:last-child td{border-bottom:none;}
+.tbu{color:var(--g);font-weight:600;}.tse{color:var(--r);font-weight:600;}.tig{color:var(--mu);}
+.cfg-r{display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid rgba(48,54,61,.3);font-size:10px;}
+.cfg-k{color:var(--mu);}.cfg-v{color:var(--b);font-family:monospace;}
+.pr{background:var(--bg3);border:1px solid var(--bd);border-radius:4px;padding:6px 8px;margin-bottom:5px;}
+.prh{display:flex;justify-content:space-between;align-items:center;}
+.prd{font-size:9px;color:var(--mu);margin-top:2px;}
+.rr{display:flex;align-items:center;gap:7px;padding:3px 0;font-size:11px;}
+.rl{width:100px;color:var(--mu);flex-shrink:0;}
+.rv{color:var(--tx);font-family:monospace;}
+.rok{color:var(--g);}.rwn{color:var(--y);}.rbd{color:var(--r);}
+canvas{width:100%!important;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px;}
+</style></head><body>
+<div class="hdr">
+  <div style="display:flex;align-items:center;gap:9px;">
+    <span style="width:8px;height:8px;border-radius:50%;background:#d29922;display:inline-block;"></span>
+    <h1 id="title-h1">📄 PAPER — Divergence Field</h1>
+    <span style='background:rgba(210,153,34,.15);border:1px solid #d29922;border-radius:4px;padding:3px 10px;color:#d29922;font-size:11px;font-weight:600;'>📄 PAPER TRADING — Precios reales · Sin dinero real</span>
   </div>
-  <div class="header-meta">
-    <span>🕐 Próxima vela: <b id="hdr-next">—</b></span>
-    <span>📊 Velas procesadas: <b id="hdr-candles">0</b></span>
-    <span>🔁 Señales emitidas: <b id="hdr-signals">0</b></span>
-    <span>⏱ Iniciado: <b id="hdr-started">—</b></span>
-    <span style="color:var(--muted)">Refresh: 10s</span>
+  <div class="hdr-meta">
+    <span>🕐 Prox.vela: <b id="h-next">—</b></span>
+    <span>📊 Velas: <b id="h-cv">0</b></span>
+    <span>🔁 Señales: <b id="h-sg">0</b></span>
+    <span>💰 Slot: <b id="h-slot">—</b></span>
+    <span>⏱ <b id="h-start">—</b></span>
   </div>
 </div>
 
 <div class="layout">
+<div class="col col-l">
 
-  <!-- ══ COLUMNA IZQUIERDA: Portfolio + Señal + Posiciones ══ -->
-  <div class="col-left">
-
-    <!-- Portfolio -->
-    <div class="card card-accent-blue">
-      <h2>Portfolio</h2>
-      <div class="pf-grid">
-        <div class="pf-card">
-          <div class="label">Portfolio Total</div>
-          <div class="value neu" id="pf-total">$0.00</div>
-        </div>
-        <div class="pf-card">
-          <div class="label">P&L Sesión</div>
-          <div class="value" id="pf-pnl">+0.00%</div>
-        </div>
-        <div class="pf-card">
-          <div class="label">USDT Libre</div>
-          <div class="value neu" id="pf-usdt">$0.00</div>
-        </div>
-        <div class="pf-card">
-          <div class="label">Posiciones</div>
-          <div class="value neu" id="pf-pos">0</div>
-        </div>
-      </div>
-      <div style="margin-top:8px;" class="info-box">
-        <div class="kv"><span class="k">Precio BTC</span><span class="v" id="pf-price">—</span></div>
-        <div class="kv"><span class="k">BTC en posic.</span><span class="v" id="pf-btc">—</span></div>
-        <div class="kv"><span class="k">P&L USDT</span><span class="v" id="pf-pnl-usdt">—</span></div>
-        <div class="kv"><span class="k">Capital inicial</span><span class="v" id="pf-cap-ini">—</span></div>
-      </div>
+  <div class="card cbl">
+    <h2>Portfolio</h2>
+    <div class="pg">
+      <div class="pc"><div class="lb">Total</div><div class="vl neu" id="pf-t">$0</div></div>
+      <div class="pc"><div class="lb">P&L Sesión</div><div class="vl" id="pf-pnl">+0%</div></div>
+      <div class="pc"><div class="lb">USDT Libre</div><div class="vl neu" id="pf-u">$0</div></div>
+      <div class="pc"><div class="lb">Posiciones</div><div class="vl neu" id="pf-ps">0</div></div>
     </div>
-
-    <!-- Señal activa -->
-    <div class="card" id="signal-card">
-      <h2>Última Señal</h2>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-        <span class="signal-badge signal-HOLD" id="sig-badge">HOLD</span>
-        <span style="font-size:11px;color:var(--muted)" id="sig-at">—</span>
-      </div>
-      <div class="info-box" style="font-size:10px;">
-        <div class="kv"><span class="k">Precio</span><span class="v" id="sig-price">—</span></div>
-        <div class="kv"><span class="k">Motivo</span><span class="v" id="sig-reason" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">—</span></div>
-        <div class="kv"><span class="k">score_bot</span><span class="v" id="sig-sbot">—</span></div>
-        <div class="kv"><span class="k">score_top</span><span class="v" id="sig-stop">—</span></div>
-      </div>
+    <div style="margin-top:6px;" class="ib">
+      <div class="kv"><span class="k">BTC precio</span><span class="v" id="pf-p">—</span></div>
+      <div class="kv"><span class="k">BTC posic.</span><span class="v" id="pf-b">—</span></div>
+      <div class="kv"><span class="k">P&L USDT</span><span class="v" id="pf-pu">—</span></div>
+      <div class="kv"><span class="k">Slot actual</span><span class="v" id="pf-sl">—</span></div>
+      <div class="kv"><span class="k">Capital base</span><span class="v" id="pf-cap">—</span></div>
     </div>
-
-    <!-- Posiciones abiertas -->
-    <div class="card">
-      <h2>Posiciones Abiertas</h2>
-      <div id="positions-container">
-        <div style="color:var(--muted);font-size:11px;">Sin posiciones</div>
-      </div>
-    </div>
-
-    <!-- Warmup -->
-    <div id="warmup-container" style="display:none;">
-      <div class="warmup-badge">
-        ⏳ Warmup en progreso — acumulando <b id="warmup-progress">0</b>/<b>10</b> velas
-      </div>
-    </div>
-
-    <!-- Últimas operaciones -->
-    <div class="card">
-      <h2>Últimas Operaciones</h2>
-      <table>
-        <thead><tr>
-          <th>Tipo</th><th>Precio</th><th>USDT</th><th>Hora</th>
-        </tr></thead>
-        <tbody id="trades-body">
-          <tr><td colspan="4" style="color:var(--muted)">Sin operaciones</td></tr>
-        </tbody>
-      </table>
-    </div>
-
   </div>
 
-  <!-- ══ COLUMNA CENTRAL: Gráficos ══ -->
-  <div class="col-mid">
-
-    <!-- Gráfico precio + señales -->
-    <div class="card chart-container" style="height:280px;">
-      <h2>BTC/USDT — Precio + Señales</h2>
-      <canvas id="chart-price" height="240"></canvas>
-    </div>
-
-    <!-- Gráfico scores -->
-    <div class="card chart-container" style="height:180px;">
-      <h2>Score BOT (verde) vs Score TOP (rojo) + Umbrales</h2>
-      <canvas id="chart-scores" height="140"></canvas>
-    </div>
-
-    <!-- Gráfico métricas IT normalizadas -->
-    <div class="card chart-container" style="height:180px;">
-      <h2>Métricas IT Normalizadas — TE · CMI · Field · Sink</h2>
-      <canvas id="chart-metrics" height="140"></canvas>
-    </div>
-
-    <!-- Gráfico taker ratio + volumen relativo -->
-    <div class="card chart-container" style="height:160px;">
-      <h2>Taker Ratio (azul) + Vol. Relativo al Promedio (gris)</h2>
-      <canvas id="chart-taker" height="120"></canvas>
-    </div>
-
+  <div class="card cy">
+    <h2>Risk Monitor</h2>
+    <div class="rr"><span class="rl">Max/orden</span><span class="rv" id="r-mo">—</span></div>
+    <div class="rr"><span class="rl">Max/día</span><span class="rv" id="r-md">—</span></div>
+    <div class="rr"><span class="rl">Drawdown actual</span><span class="rv" id="r-dd">—</span></div>
+    <div class="rr"><span class="rl">Drawdown límite</span><span class="rv">15.0%</span></div>
+    <div class="rr"><span class="rl">Slot margin</span><span class="rv">×1.05</span></div>
   </div>
 
-  <!-- ══ COLUMNA DERECHA: Métricas IT detalle + Config ══ -->
-  <div class="col-right">
-
-    <!-- Transfer Entropy -->
-    <div class="card card-accent-blue">
-      <h2>Transfer Entropy  TE(taker→precio)</h2>
-      <div class="metric-row">
-        <div class="metric-label">TE norm.</div>
-        <div class="metric-bar-bg">
-          <div class="metric-bar-fill bar-te" id="bar-te" style="width:0%"></div>
-          <div class="metric-threshold" id="thr-te" style="left:55%"></div>
-        </div>
-        <div class="metric-val" id="val-te">0.00</div>
-      </div>
-      <div class="info-box" style="font-size:10px;margin-top:6px;">
-        <div class="kv"><span class="k">TE crudo (bits)</span><span class="v" id="te-raw-val">—</span></div>
-        <div class="kv"><span class="k">Estimador</span><span class="v" id="te-estimator">kde</span></div>
-        <div class="kv"><span class="k">Ventana</span><span class="v">10 (fixed)</span></div>
-        <div class="kv"><span class="k">Interpretación</span><span class="v">↑ = vol causa precio</span></div>
-      </div>
+  <div class="card">
+    <h2>Última Señal</h2>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <span class="sb sb-HOLD" id="sig-b">HOLD</span>
+      <span style="font-size:10px;color:var(--mu)" id="sig-t">—</span>
     </div>
-
-    <!-- CMI -->
-    <div class="card card-accent-purple">
-      <h2>CMI(RSI; vol_accel | price_vs_MA3)</h2>
-      <div class="metric-row">
-        <div class="metric-label">CMI norm.</div>
-        <div class="metric-bar-bg">
-          <div class="metric-bar-fill bar-cmi" id="bar-cmi" style="width:0%"></div>
-          <div class="metric-threshold" id="thr-cmi" style="left:55%"></div>
-        </div>
-        <div class="metric-val" id="val-cmi">0.00</div>
-      </div>
-      <div class="info-box" style="font-size:10px;margin-top:6px;">
-        <div class="kv"><span class="k">CMI crudo (bits)</span><span class="v" id="cmi-raw-val">—</span></div>
-        <div class="kv"><span class="k">Regímenes MA</span><span class="v">3 (ternario)</span></div>
-        <div class="kv"><span class="k">Interpretación</span><span class="v">↑ = RSI/vol acoplados</span></div>
-      </div>
+    <div class="ib">
+      <div class="kv"><span class="k">Precio</span><span class="v" id="sig-p">—</span></div>
+      <div class="kv"><span class="k">Motivo</span><span class="v" id="sig-r" style="max-width:145px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">—</span></div>
+      <div class="kv"><span class="k">score_bot</span><span class="v" id="sig-sb">—</span></div>
+      <div class="kv"><span class="k">score_top</span><span class="v" id="sig-st">—</span></div>
     </div>
-
-    <!-- Divergence Field -->
-    <div class="card card-accent-blue" id="field-card">
-      <h2>Divergence Field (jacobian)</h2>
-      <div class="metric-row">
-        <div class="metric-label">|Div| norm.</div>
-        <div class="metric-bar-bg">
-          <div class="metric-bar-fill bar-field" id="bar-field" style="width:0%"></div>
-          <div class="metric-threshold" id="thr-field" style="left:55%"></div>
-        </div>
-        <div class="metric-val" id="val-field">0.00</div>
-      </div>
-      <div class="field-vector">
-        <div class="fv-comp">
-          <div class="fv-label">Δprice</div>
-          <div class="fv-arrow" id="fv-price-arrow">→</div>
-          <div class="fv-value" id="fv-price-val">0.00</div>
-        </div>
-        <div style="color:var(--border);font-size:18px;">⊕</div>
-        <div class="fv-comp">
-          <div class="fv-label">Δvol</div>
-          <div class="fv-arrow" id="fv-vol-arrow">→</div>
-          <div class="fv-value" id="fv-vol-val">0.00</div>
-        </div>
-        <div style="color:var(--border);font-size:18px;">⊕</div>
-        <div class="fv-comp">
-          <div class="fv-label">curl</div>
-          <div class="fv-arrow" id="fv-curl-arrow">→</div>
-          <div class="fv-value" id="fv-curl-val">0.00</div>
-        </div>
-      </div>
-      <div style="margin-top:6px;" class="info-box" style="font-size:10px;">
-        <div class="kv" style="font-size:10px;"><span class="k">BOTTOM pattern</span><span class="v" id="pattern-bot-lbl">—</span></div>
-        <div class="kv" style="font-size:10px;"><span class="k">TOP pattern</span><span class="v" id="pattern-top-lbl">—</span></div>
-        <div class="kv" style="font-size:10px;"><span class="k">Esperado BOTTOM</span><span class="v" style="color:var(--muted)">Δprice↓ + Δvol↑</span></div>
-        <div class="kv" style="font-size:10px;"><span class="k">Esperado TOP</span><span class="v" style="color:var(--muted)">Δprice↑ + Δvol↓</span></div>
-      </div>
-    </div>
-
-    <!-- Sink -->
-    <div class="card">
-      <h2>Sink Condition  (vol_last5 / vol_avg)</h2>
-      <div class="metric-row">
-        <div class="metric-label">Sink norm.</div>
-        <div class="metric-bar-bg">
-          <div class="metric-bar-fill bar-sink" id="bar-sink" style="width:0%"></div>
-          <div class="metric-threshold" id="thr-sink" style="left:55%"></div>
-        </div>
-        <div class="metric-val" id="val-sink">0.00</div>
-      </div>
-      <div class="info-box" style="font-size:10px;margin-top:6px;">
-        <div class="kv"><span class="k">Ratio crudo</span><span class="v" id="sink-raw-val">—</span></div>
-        <div class="kv"><span class="k">Modo</span><span class="v">filter_and</span></div>
-        <div class="kv"><span class="k">Threshold</span><span class="v">1.20x</span></div>
-        <div class="kv"><span class="k">Interpretación</span><span class="v">>1 = vol activo</span></div>
-      </div>
-    </div>
-
-    <!-- Score compuesto -->
-    <div class="card">
-      <h2>Score Compuesto Final</h2>
-      <div class="metric-row">
-        <div class="metric-label">score_bot</div>
-        <div class="metric-bar-bg">
-          <div class="metric-bar-fill bar-sbot" id="bar-sbot" style="width:0%"></div>
-          <div class="metric-threshold" id="thr-sbot" style="left:55%"></div>
-        </div>
-        <div class="metric-val" id="val-sbot">0.00</div>
-      </div>
-      <div class="metric-row">
-        <div class="metric-label">score_top</div>
-        <div class="metric-bar-bg">
-          <div class="metric-bar-fill bar-stop" id="bar-stop" style="width:0%"></div>
-          <div class="metric-threshold" id="thr-stop" style="left:55%"></div>
-        </div>
-        <div class="metric-val" id="val-stop">0.00</div>
-      </div>
-      <div class="info-box" style="font-size:10px;margin-top:6px;">
-        <div class="kv"><span class="k">Pesos (TE/CMI/Field/Sink)</span>
-          <span class="v">40%/30%/20%/10%</span></div>
-        <div class="kv"><span class="k">Umbral BOT</span><span class="v" style="color:var(--green)">0.55</span></div>
-        <div class="kv"><span class="k">Umbral TOP</span><span class="v" style="color:var(--red)">0.55</span></div>
-        <div class="kv"><span class="k">Cooldown</span><span class="v">off</span></div>
-      </div>
-    </div>
-
-    <!-- Config completa -->
-    <div class="card">
-      <h2>Configuración Activa</h2>
-      <div id="config-container"></div>
-    </div>
-
   </div>
+
+  <div class="card">
+    <h2>Posiciones Abiertas</h2>
+    <div id="pos-c"><div style="color:var(--mu);font-size:10px;">Sin posiciones</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Últimas Operaciones</h2>
+    <table><thead><tr><th>Tipo</th><th>Precio</th><th>USDT</th><th>Hora</th></tr></thead>
+    <tbody id="tr-body"><tr><td colspan="4" style="color:var(--mu)">—</td></tr></tbody></table>
+  </div>
+
+  <div id="wu-div" style="display:none;">
+    <div style="background:rgba(210,153,34,.15);border:1px solid var(--y);border-radius:4px;
+                padding:5px 9px;color:var(--y);font-size:10px;">
+      ⏳ Warmup: <b id="wu-n">0</b>/10 velas
+    </div>
+  </div>
+
 </div>
 
+<div class="col">
+  <div class="card" style="height:265px;position:relative;"><h2>BTC/USDT — Precio + Señales</h2><canvas id="c-price" height="225"></canvas></div>
+  <div class="card" style="height:165px;position:relative;"><h2>Score BOT (verde) · Score TOP (rojo) · Umbrales</h2><canvas id="c-score" height="125"></canvas></div>
+  <div class="card" style="height:165px;position:relative;"><h2>Métricas IT Normalizadas — TE · CMI · Field · Sink</h2><canvas id="c-metr" height="125"></canvas></div>
+  <div class="card" style="height:145px;position:relative;"><h2>Taker Ratio (azul) · Volumen relativo (gris)</h2><canvas id="c-takr" height="105"></canvas></div>
+</div>
+
+<div class="col col-r">
+
+  <div class="card cbl">
+    <h2>Transfer Entropy — TE(taker→precio)</h2>
+    <div class="mr"><div class="ml">TE norm.</div>
+      <div class="mb"><div class="mf bte" id="b-te" style="width:0%"></div><div class="mt" id="t-te" style="left:55%"></div></div>
+      <div class="mv" id="v-te">0.00</div></div>
+    <div class="ib" style="margin-top:4px;">
+      <div class="kv"><span class="k">TE crudo</span><span class="v" id="te-r">—</span></div>
+      <div class="kv"><span class="k">Estimador</span><span class="v">kde</span></div>
+      <div class="kv"><span class="k">Ventana</span><span class="v">10 (fixed)</span></div>
+    </div>
+  </div>
+
+  <div class="card cp">
+    <h2>CMI(RSI; vol_accel | price_vs_MA3)</h2>
+    <div class="mr"><div class="ml">CMI norm.</div>
+      <div class="mb"><div class="mf bci" id="b-ci" style="width:0%"></div><div class="mt" style="left:55%"></div></div>
+      <div class="mv" id="v-ci">0.00</div></div>
+    <div class="ib" style="margin-top:4px;">
+      <div class="kv"><span class="k">CMI crudo</span><span class="v" id="ci-r">—</span></div>
+      <div class="kv"><span class="k">Regímenes</span><span class="v">3 (ternario)</span></div>
+    </div>
+  </div>
+
+  <div class="card cbl">
+    <h2>Divergence Field (jacobian)</h2>
+    <div class="mr"><div class="ml">|Div| norm.</div>
+      <div class="mb"><div class="mf bfd" id="b-fd" style="width:0%"></div><div class="mt" style="left:55%"></div></div>
+      <div class="mv" id="v-fd">0.00</div></div>
+    <div class="fvr">
+      <div class="fvc"><div class="fvl">Δprice</div><div class="fva" id="fa-p">→</div><div class="fvv" id="fv-p">0.000</div></div>
+      <div style="color:var(--bd);font-size:14px;">⊕</div>
+      <div class="fvc"><div class="fvl">Δvol</div><div class="fva" id="fa-v">→</div><div class="fvv" id="fv-v">0.000</div></div>
+      <div style="color:var(--bd);font-size:14px;">⊕</div>
+      <div class="fvc"><div class="fvl">curl</div><div class="fva" id="fa-c">→</div><div class="fvv" id="fv-c">0.000</div></div>
+    </div>
+    <div class="ib" style="margin-top:4px;font-size:10px;">
+      <div class="kv"><span class="k">Patrón BOT</span><span class="v" id="pat-b">—</span></div>
+      <div class="kv"><span class="k">Patrón TOP</span><span class="v" id="pat-t">—</span></div>
+      <div class="kv"><span class="k">BOT espera</span><span class="v" style="color:var(--mu)">Δp↓+Δv↑</span></div>
+      <div class="kv"><span class="k">TOP espera</span><span class="v" style="color:var(--mu)">Δp↑+Δv↓</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Sink Condition (vol_last5/vol_avg)</h2>
+    <div class="mr"><div class="ml">Sink norm.</div>
+      <div class="mb"><div class="mf bsk" id="b-sk" style="width:0%"></div><div class="mt" style="left:55%"></div></div>
+      <div class="mv" id="v-sk">0.00</div></div>
+    <div class="ib" style="margin-top:4px;">
+      <div class="kv"><span class="k">Ratio crudo</span><span class="v" id="sk-r">—</span></div>
+      <div class="kv"><span class="k">Modo</span><span class="v">filter_and</span></div>
+      <div class="kv"><span class="k">Threshold</span><span class="v">1.20×</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Score Compuesto Final</h2>
+    <div class="mr"><div class="ml">score_bot</div>
+      <div class="mb"><div class="mf bsb" id="b-sb" style="width:0%"></div>
+        <div class="mt" id="t-sb" style="left:55%"></div></div>
+      <div class="mv" id="v-sb">0.00</div></div>
+    <div class="mr"><div class="ml">score_top</div>
+      <div class="mb"><div class="mf bst" id="b-st" style="width:0%"></div>
+        <div class="mt" id="t-st" style="left:55%"></div></div>
+      <div class="mv" id="v-st">0.00</div></div>
+    <div class="ib" style="margin-top:4px;">
+      <div class="kv"><span class="k">Pesos TE/CMI/Fld/Snk</span>
+        <span class="v">40%/30%/20%/10%</span></div>
+      <div class="kv"><span class="k">Umbral BOT</span><span class="v" style="color:var(--g)">0.55</span></div>
+      <div class="kv"><span class="k">Umbral TOP</span><span class="v" style="color:var(--r)">0.55</span></div>
+      <div class="kv"><span class="k">Cooldown</span><span class="v">off</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Config Activa</h2>
+    <div id="cfg-c"></div>
+  </div>
+
+</div>
+</div>
 <script>
-const D = {"started_at": "2026-04-08 13:08:46", "last_tick_at": "\u2014", "next_candle_at": "\u2014", "candles_seen": 0, "signals_total": 0, "warmup_complete": false, "te_raw": null, "te_norm": 0.0, "cmi_raw": null, "cmi_norm": 0.0, "field_price_div": null, "field_vol_div": null, "field_curl": null, "field_norm": 0.0, "sink_raw": null, "sink_norm": 0.0, "is_bot_pattern": false, "is_top_pattern": false, "score_bot": 0.0, "score_top": 0.0, "last_signal": "HOLD", "last_signal_price": null, "last_signal_at": "\u2014", "last_signal_reason": "\u2014", "last_price": 0.0, "portfolio_value": 0.0, "usdt_balance": 0.0, "btc_in_positions": 0.0, "positions_count": 0, "pnl_pct": 0.0, "pnl_usdt": 0.0, "capital_inicial": 10000.0, "thr_bot": 0.55, "thr_top": 0.55, "sink_threshold": 1.2, "candles": [], "metrics": [], "trades": [], "config": {"te_estimator": "kde", "window_mode": "fixed", "window_size": 10, "field_def": "jacobian", "cmi_regimes": 3, "threshold_mode": "adaptive_percentile", "te_threshold": 0.7, "cmi_threshold": 0.6, "field_threshold": 0.5, "sink_mode": "filter_and", "sink_threshold": 1.2, "score_threshold_bot": 0.55, "score_threshold_top": 0.55, "cooldown": 0, "k_bins": 4, "k_nn": 3}, "refresh_s": 10};
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
+const D = {"paper_mode": true, "started_at": "2026-04-08 19:52:43", "last_tick_at": "2026-04-09 11:00:01", "next_candle_at": "59m 59s", "candles_seen": 84, "signals_total": 0, "warmup_complete": true, "warmup_size": 10, "te_raw": 0.75, "te_norm": 0.56, "cmi_raw": 0.0, "cmi_norm": 1.0, "field_price_div": -0.5637220978334734, "field_vol_div": -1.1547019280283939, "field_curl": 0.19674390411492257, "field_norm": 0.1867, "sink_raw": 1.0131870097369104, "sink_norm": 0.4933, "is_bot_pattern": false, "is_top_pattern": false, "score_bot": 0.0, "score_top": 0.0, "last_signal": "HOLD", "last_signal_price": 71276.45, "last_signal_at": "2026-04-09 11:00:01", "last_signal_reason": "sin se\u00f1al", "last_price": 71276.45, "portfolio_value": 1000.0, "usdt_balance": 1000.0, "btc_in_positions": 0, "positions_count": 0, "slot_usdt": 100.0, "pnl_pct": 0.0, "pnl_usdt": 0.0, "capital_inicial": 1000.0, "thr_bot": 0.55, "thr_top": 0.55, "sink_thr": 1.2, "risk_max_order": 105.0, "risk_max_daily": 300.0, "risk_max_dd": 15.0, "candles": [{"ts": 1775674800, "open": 71099.63, "high": 71372.22, "low": 71019.0, "close": 71318.48, "vol": 473.49397, "taker": 0.5476799208234902}, {"ts": 1775678400, "open": 71318.47, "high": 71481.7, "low": 71267.91, "close": 71372.93, "vol": 226.24698, "taker": 0.49914924831261837}, {"ts": 1775682000, "open": 71372.94, "high": 71748.0, "low": 71330.86, "close": 71551.39, "vol": 367.89907, "taker": 0.596007649598027}, {"ts": 1775685600, "open": 71551.4, "high": 71571.6, "low": 71064.84, "close": 71064.84, "vol": 374.67564, "taker": 0.3646194345594499}, {"ts": 1775689200, "open": 71064.84, "high": 71204.0, "low": 70901.89, "close": 71069.93, "vol": 517.86174, "taker": 0.5282252556444891}, {"ts": 1775692800, "open": 71069.93, "high": 71133.71, "low": 70650.0, "close": 70815.5, "vol": 677.85142, "taker": 0.3627192667089198}, {"ts": 1775696400, "open": 70815.5, "high": 70956.7, "low": 70466.0, "close": 70928.89, "vol": 495.03665, "taker": 0.4547482494477934}, {"ts": 1775700000, "open": 70928.9, "high": 71198.8, "low": 70816.36, "close": 71060.64, "vol": 664.15391, "taker": 0.5448886538965042}, {"ts": 1775703600, "open": 71060.64, "high": 71124.05, "low": 70845.27, "close": 70992.39, "vol": 808.25356, "taker": 0.5016022818383874}, {"ts": 1775707200, "open": 70992.37, "high": 71006.13, "low": 70734.77, "close": 70782.0, "vol": 304.15042, "taker": 0.4810775536657158}, {"ts": 1775710800, "open": 70781.99, "high": 71087.12, "low": 70689.38, "close": 70984.0, "vol": 495.401, "taker": 0.5699655430651128}, {"ts": 1775714400, "open": 70983.99, "high": 71082.71, "low": 70809.94, "close": 71031.84, "vol": 538.94746, "taker": 0.5610920775097447}, {"ts": 1775718000, "open": 71031.83, "high": 71116.0, "low": 70955.4, "close": 70982.01, "vol": 922.88611, "taker": 0.6268465455612936}, {"ts": 1775721600, "open": 70982.01, "high": 71380.0, "low": 70865.42, "close": 71249.51, "vol": 562.42694, "taker": 0.6092026815073973}, {"ts": 1775725200, "open": 71249.51, "high": 71575.0, "low": 71109.99, "close": 71534.68, "vol": 512.0201, "taker": 0.6676543362262537}, {"ts": 1775728800, "open": 71534.69, "high": 71534.69, "low": 71276.44, "close": 71276.45, "vol": 304.66693, "taker": 0.5034651775300982}], "metrics": [{"ts": 1775674800, "te_norm": 0.7833333333333333, "cmi_norm": 1.0, "field_norm": 0.4666666666666667, "sink_norm": 0.08333333333333333, "score_bot": 0.0, "score_top": 0.0, "is_bot": false, "is_top": false}, {"ts": 1775678400, "te_norm": 0.7868852459016393, "cmi_norm": 1.0, "field_norm": 0.22950819672131148, "sink_norm": 0.01639344262295082, "score_bot": 0.0, "score_top": 0.0, "is_bot": false, "is_top": false}, {"ts": 1775682000, "te_norm": 0.7903225806451613, "cmi_norm": 1.0, "field_norm": 0.5483870967741935, "sink_norm": 0.016129032258064516, "score_bot": 0.0, "score_top": 0.0, "is_bot": false, "is_top": false}, {"ts": 1775685600, "te_norm": 0.5396825396825397, "cmi_norm": 1.0, "field_norm": 0.5238095238095238, "sink_norm": 0.06349206349206349, "score_bot": 0.0, "score_top": 0.0, "is_bot": false, "is_top": false}, {"ts": 1775689200, "te_norm": 0.359375, "cmi_norm": 1.0, "field_norm": 0.8125, "sink_norm": 0.203125, "score_bot": 0.0, "score_top": 0.0, "is_bot": false, "is_top": false}, {"ts": 1775692800, "te_norm": 0.8307692307692308, "cmi_norm": 1.0, "field_norm": 0.7230769230769231, "sink_norm": 0.27692307692307694, "score_bot": 0.0, "score_top": 0.0, "is_bot": false, "is_top": false}, {"ts": 1775696400, "te_norm": 1.0, "cmi_norm": 1.0, "field_norm": 0.7121212121212122, "sink_norm": 0.4696969696969697, "score_bot": 0.0, "score_top": 0.0, "is_bot": false, "is_top": false}, {"ts": 1775700000, "te_norm": 0.3582089552238806, "cmi_norm": 1.0, "field_norm": 0.7910447761194029, "sink_norm": 0.6417910447761194, "score_bot": 0.0, "score_top": 0.0, "is_bot": false, "is_top": false}, {"ts": 1775703600, "te_norm": 0.11764705882352941, "cmi_norm": 1.0, "field_norm": 0.9558823529411765, "sink_norm": 0.8529411764705882, "score_bot": 0.38562091503267976, "score_top": 0.38562091503267976, "is_bot": false, "is_top": false}, {"ts": 1775707200, "te_norm": 0.13043478260869565, "cmi_norm": 1.0, "field_norm": 0.8985507246376812, "sink_norm": 0.7536231884057971, "score_bot": 0.391304347826087, "score_top": 0.391304347826087, "is_bot": false, "is_top": false}, {"ts": 1775710800, "te_norm": 0.05714285714285714, "cmi_norm": 1.0, "field_norm": 0.8714285714285714, "sink_norm": 0.6428571428571429, "score_bot": 0.0, "score_top": 0.0, "is_bot": false, "is_top": false}, {"ts": 1775714400, "te_norm": 0.7887323943661971, "cmi_norm": 1.0, "field_norm": 0.9154929577464789, "sink_norm": 0.6056338028169014, "score_bot": 0.0, "score_top": 0.0, "is_bot": false, "is_top": false}, {"ts": 1775718000, "te_norm": 0.7916666666666666, "cmi_norm": 1.0, "field_norm": 0.7916666666666666, "sink_norm": 0.5972222222222222, "score_bot": 0.0, "score_top": 0.0, "is_bot": false, "is_top": false}, {"ts": 1775721600, "te_norm": 0.3835616438356164, "cmi_norm": 1.0, "field_norm": 0.9178082191780822, "sink_norm": 0.3835616438356164, "score_bot": 0.0, "score_top": 0.0, "is_bot": false, "is_top": false}, {"ts": 1775725200, "te_norm": 0.3918918918918919, "cmi_norm": 1.0, "field_norm": 0.14864864864864866, "sink_norm": 0.5, "score_bot": 0.0, "score_top": 0.0, "is_bot": false, "is_top": false}, {"ts": 1775728800, "te_norm": 0.56, "cmi_norm": 1.0, "field_norm": 0.18666666666666668, "sink_norm": 0.49333333333333335, "score_bot": 0.0, "score_top": 0.0, "is_bot": false, "is_top": false}], "trades": [], "config": {"te_estimator": "kde", "window_mode": "fixed", "window_size": 10, "field_def": "jacobian", "cmi_regimes": 3, "threshold_mode": "adaptive_percentile", "te_threshold": 0.7, "cmi_threshold": 0.6, "field_threshold": 0.5, "sink_mode": "filter_and", "sink_threshold": 1.2, "score_threshold_bot": 0.55, "score_threshold_top": 0.55, "cooldown": 0, "k_bins": 4, "k_nn": 3}};
 const $ = id => document.getElementById(id);
-const fmt2  = v => v == null ? '—' : Number(v).toFixed(2);
-const fmt4  = v => v == null ? '—' : Number(v).toFixed(4);
-const fmtUSD= v => '$' + Number(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-const fmtPct= v => (v >= 0 ? '+' : '') + Number(v).toFixed(2) + '%';
-const fmtTS = ts => ts ? new Date(ts * 1000).toLocaleTimeString('es') : '—';
+const f2=v=>v==null?'—':Number(v).toFixed(2);
+const f4=v=>v==null?'—':Number(v).toFixed(4);
+const fU=v=>'$'+Number(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fP=v=>(v>=0?'+':'')+Number(v).toFixed(2)+'%';
+function bar(id,v){const e=$(id);if(e)e.style.width=Math.round(Math.min(Math.max(v,0),1)*100)+'%';}
+function arw(v){if(v==null)return{a:'→',c:'neu'};if(v>0.05)return{a:'↑',c:'pos'};if(v<-0.05)return{a:'↓',c:'neg'};return{a:'→',c:'neu'};}
 
-function setBar(id, pct, min=0, max=1) {
-  const el = $(id);
-  if (el) el.style.width = Math.round(Math.min(Math.max((pct - min) / (max - min), 0), 1) * 100) + '%';
-}
+// Header
+$('h-next').textContent   = D.next_candle_at;
+$('h-cv').textContent     = D.candles_seen;
+$('h-sg').textContent     = D.signals_total;
+$('h-slot').textContent   = fU(D.slot_usdt);
+$('h-start').textContent  = (D.started_at||'').slice(11,19)||'—';
 
-function arrowSign(val) {
-  if (val == null) return {arrow:'→', cls:'neu'};
-  if (val  >  0.05) return {arrow:'↑', cls:'pos'};
-  if (val  < -0.05) return {arrow:'↓', cls:'neg'};
-  return {arrow:'→', cls:'neu'};
-}
+// Portfolio
+$('pf-t').textContent  = fU(D.portfolio_value);
+$('pf-u').textContent  = fU(D.usdt_balance);
+$('pf-ps').textContent = D.positions_count;
+$('pf-p').textContent  = fU(D.last_price);
+$('pf-b').textContent  = (D.btc_in_positions||0).toFixed(8)+' BTC';
+$('pf-pu').textContent = (D.pnl_usdt>=0?'+':'')+fU(D.pnl_usdt);
+$('pf-sl').textContent = fU(D.slot_usdt);
+$('pf-cap').textContent= fU(D.capital_inicial);
+const pe=$('pf-pnl');pe.textContent=fP(D.pnl_pct);
+pe.className='vl '+(D.pnl_pct>0?'pos':D.pnl_pct<0?'neg':'neu');
 
-// ── Header ────────────────────────────────────────────────────────────────────
-$('hdr-next').textContent    = D.next_candle_at;
-$('hdr-candles').textContent = D.candles_seen;
-$('hdr-signals').textContent = D.signals_total;
-$('hdr-started').textContent = D.started_at.slice(11,19) || '—';
+// Risk
+$('r-mo').textContent = fU(D.risk_max_order||D.slot_usdt*1.05);
+$('r-md').textContent = fU(D.risk_max_daily||D.slot_usdt*3);
+const ddA=D.capital_inicial>0?(1-D.portfolio_value/D.capital_inicial)*100:0;
+const dde=$('r-dd');dde.textContent=fP(-ddA);
+dde.className='rv '+(ddA<5?'rok':ddA<10?'rwn':'rbd');
 
-// ── Portfolio ─────────────────────────────────────────────────────────────────
-$('pf-total').textContent  = fmtUSD(D.portfolio_value);
-$('pf-usdt').textContent   = fmtUSD(D.usdt_balance);
-$('pf-pos').textContent    = D.positions_count;
-$('pf-price').textContent  = fmtUSD(D.last_price);
-$('pf-btc').textContent    = (D.btc_in_positions || 0).toFixed(8) + ' BTC';
-$('pf-pnl-usdt').textContent = (D.pnl_usdt >= 0 ? '+' : '') + fmtUSD(D.pnl_usdt);
-$('pf-cap-ini').textContent = fmtUSD(D.capital_inicial);
-const pnlEl = $('pf-pnl');
-pnlEl.textContent = fmtPct(D.pnl_pct);
-pnlEl.className   = 'value ' + (D.pnl_pct > 0 ? 'pos' : D.pnl_pct < 0 ? 'neg' : 'neu');
+// Signal
+const sb=$('sig-b');sb.textContent=D.last_signal;sb.className='sb sb-'+D.last_signal;
+$('sig-t').textContent = (D.last_signal_at||'').slice(11,19)||'—';
+$('sig-p').textContent = D.last_signal_price?fU(D.last_signal_price):'—';
+$('sig-r').textContent = D.last_signal_reason||'—';
+$('sig-sb').textContent= f4(D.score_bot)+' ≥ '+D.thr_bot+'?';
+$('sig-st').textContent= f4(D.score_top)+' ≥ '+D.thr_top+'?';
 
-// ── Signal ────────────────────────────────────────────────────────────────────
-const sigBadge = $('sig-badge');
-sigBadge.textContent = D.last_signal;
-sigBadge.className   = 'signal-badge signal-' + D.last_signal;
-$('sig-at').textContent     = D.last_signal_at.slice(11,19) || '—';
-$('sig-price').textContent  = D.last_signal_price ? fmtUSD(D.last_signal_price) : '—';
-$('sig-reason').textContent = D.last_signal_reason || '—';
-$('sig-sbot').textContent   = fmt4(D.score_bot) + ' (thr=' + D.thr_bot + ')';
-$('sig-stop').textContent   = fmt4(D.score_top) + ' (thr=' + D.thr_top + ')';
+// Warmup
+if(!D.warmup_complete){$('wu-div').style.display='block';$('wu-n').textContent=D.candles_seen;}
 
-// ── Warmup ────────────────────────────────────────────────────────────────────
-const wc = $('warmup-container');
-if (!D.warmup_complete) {
-  wc.style.display = 'block';
-  $('warmup-progress').textContent = D.candles_seen;
-}
+// Metric bars
+bar('b-te',D.te_norm);bar('b-ci',D.cmi_norm);bar('b-fd',D.field_norm);
+bar('b-sk',D.sink_norm);bar('b-sb',D.score_bot);bar('b-st',D.score_top);
+$('v-te').textContent=f4(D.te_norm);$('v-ci').textContent=f4(D.cmi_norm);
+$('v-fd').textContent=f4(D.field_norm);$('v-sk').textContent=f4(D.sink_norm);
+$('v-sb').textContent=f4(D.score_bot);$('v-st').textContent=f4(D.score_top);
+$('te-r').textContent=D.te_raw!=null?f4(D.te_raw)+' bits':'—';
+$('ci-r').textContent=D.cmi_raw!=null?f4(D.cmi_raw)+' bits':'—';
+$('sk-r').textContent=D.sink_raw!=null?f2(D.sink_raw)+'×':'—';
 
-// ── Métricas IT — barras ──────────────────────────────────────────────────────
-setBar('bar-te',    D.te_norm);
-setBar('bar-cmi',   D.cmi_norm);
-setBar('bar-field', D.field_norm);
-setBar('bar-sink',  D.sink_norm);
-setBar('bar-sbot',  D.score_bot);
-setBar('bar-stop',  D.score_top);
+// Field vector
+[['fa-p','fv-p',D.field_price_div],['fa-v','fv-v',D.field_vol_div],['fa-c','fv-c',D.field_curl]]
+.forEach(([a,v,val])=>{const i=arw(val);$(a).textContent=i.a;$(a).className='fva '+i.c;$(v).textContent=val!=null?Number(val).toFixed(3):'—';$(v).className='fvv '+i.c;});
+$('pat-b').textContent=D.is_bot_pattern?'✅ Activo':'⭕ Inactivo';
+$('pat-b').style.color=D.is_bot_pattern?'var(--g)':'var(--mu)';
+$('pat-t').textContent=D.is_top_pattern?'✅ Activo':'⭕ Inactivo';
+$('pat-t').style.color=D.is_top_pattern?'var(--r)':'var(--mu)';
 
-$('val-te').textContent    = fmt4(D.te_norm);
-$('val-cmi').textContent   = fmt4(D.cmi_norm);
-$('val-field').textContent = fmt4(D.field_norm);
-$('val-sink').textContent  = fmt4(D.sink_norm);
-$('val-sbot').textContent  = fmt4(D.score_bot);
-$('val-stop').textContent  = fmt4(D.score_top);
+// Positions
+const pc=$('pos-c');
+const buys=D.trades.filter(t=>t.type==='BUY'&&!t.ignorado);
+pc.innerHTML=buys.length?buys.slice(-5).map(t=>{
+  const pp=D.last_price>0?((D.last_price-t.price)/t.price*100):0;
+  return `<div class="pr"><div class="prh"><span style="color:var(--g);font-weight:600">BUY @ ${Number(t.price).toLocaleString()}</span>
+  <span class="${pp>=0?'pos':'neg'}">${pp>=0?'+':''}${pp.toFixed(2)}%</span></div>
+  <div class="prd">${(t.datetime||'').slice(0,16)} ${t.paper_trade?'[P]':''} · ${t.usdt_spent?'$'+Number(t.usdt_spent).toFixed(0):'—'}</div></div>`;
+}).join(''):'<div style="color:var(--mu);font-size:10px;">Sin posiciones</div>';
 
-$('te-raw-val').textContent  = D.te_raw  != null ? fmt4(D.te_raw)  + ' bits' : '—';
-$('cmi-raw-val').textContent = D.cmi_raw != null ? fmt4(D.cmi_raw) + ' bits' : '—';
-$('sink-raw-val').textContent= D.sink_raw != null ? fmt2(D.sink_raw) + 'x' : '—';
+// Trades
+const tb=$('tr-body');
+const trs=[...D.trades].reverse().slice(0,10);
+tb.innerHTML=trs.length?trs.map(t=>{
+  const cls=t.ignorado?'tig':t.type==='BUY'?'tbu':'tse';
+  const u=t.usdt_spent||t.usdt_received||0;
+  return `<tr><td class="${cls}">${t.ignorado?'✗':''}${t.type}${t.paper_trade?' [P]':''}</td>
+  <td>${Number(t.price||0).toLocaleString('en-US',{maximumFractionDigits:0})}</td>
+  <td>${u?'$'+Number(u).toFixed(0):'—'}</td>
+  <td>${(t.datetime||'').slice(11,16)||'—'}</td></tr>`;
+}).join(''):'<tr><td colspan="4" style="color:var(--mu)">—</td></tr>';
 
-// ── Field vector ──────────────────────────────────────────────────────────────
-const pa = arrowSign(D.field_price_div);
-const va = arrowSign(D.field_vol_div);
-const ca = arrowSign(D.field_curl);
-[['fv-price-arrow','fv-price-val', D.field_price_div, pa],
- ['fv-vol-arrow',  'fv-vol-val',   D.field_vol_div,   va],
- ['fv-curl-arrow', 'fv-curl-val',  D.field_curl,       ca]
-].forEach(([aId, vId, val, info]) => {
-  const aEl = $(aId), vEl = $(vId);
-  if (aEl) { aEl.textContent = info.arrow; aEl.className = 'fv-arrow ' + info.cls; }
-  if (vEl) { vEl.textContent = val != null ? Number(val).toFixed(3) : '—'; vEl.className = 'fv-value ' + info.cls; }
-});
+// Config
+$('cfg-c').innerHTML=Object.entries(D.config)
+  .map(([k,v])=>`<div class="cfg-r"><span class="cfg-k">${k}</span><span class="cfg-v">${v}</span></div>`).join('');
 
-// Pattern labels
-$('pattern-bot-lbl').textContent = D.is_bot_pattern ? '✅ Activo (Δp↓+Δv↑)' : '⭕ Inactivo';
-$('pattern-top-lbl').textContent = D.is_top_pattern ? '✅ Activo (Δp↑+Δv↓)' : '⭕ Inactivo';
-$('pattern-bot-lbl').style.color = D.is_bot_pattern ? 'var(--green)' : 'var(--muted)';
-$('pattern-top-lbl').style.color = D.is_top_pattern ? 'var(--red)'   : 'var(--muted)';
+// ── GRÁFICOS ──────────────────────────────────────────────────────────────────
+function rC(c){c.width=c.parentElement.clientWidth-18;c.height=parseInt(c.getAttribute('height'));}
 
-// ── Positions ────────────────────────────────────────────────────────────────
-// (rendered from trade_history BUY entries not yet paired with SELL)
-const posContainer = $('positions-container');
-const openBuys = D.trades.filter(t => t.type === 'BUY' && !t.ignorado);
-if (openBuys.length === 0) {
-  posContainer.innerHTML = '<div style="color:var(--muted);font-size:11px;">Sin posiciones</div>';
-} else {
-  posContainer.innerHTML = openBuys.slice(-5).map(t => {
-    const entryPrice = t.price || 0;
-    const pnlPos = D.last_price > 0 ? ((D.last_price - entryPrice) / entryPrice * 100) : 0;
-    return `<div class="pos-row">
-      <div class="pos-header">
-        <span style="color:var(--green);font-weight:600">BUY @ ${entryPrice.toLocaleString()}</span>
-        <span class="${pnlPos>=0?'pos':'neg'}">${pnlPos>=0?'+':''}${pnlPos.toFixed(2)}%</span>
-      </div>
-      <div class="pos-detail">${t.datetime ? t.datetime.slice(0,16) : '—'} · ${t.usdt_spent ? '$'+Number(t.usdt_spent).toFixed(2) : '—'}</div>
-    </div>`;
-  }).join('');
-}
-
-// ── Trades table ──────────────────────────────────────────────────────────────
-const tbody = $('trades-body');
-const trades = [...D.trades].reverse().slice(0, 10);
-if (trades.length === 0) {
-  tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted)">Sin operaciones</td></tr>';
-} else {
-  tbody.innerHTML = trades.map(t => {
-    const cls = t.ignorado ? 'td-ign' : (t.type==='BUY' ? 'td-buy' : 'td-sell');
-    const usd = t.usdt_spent || t.usdt_received || 0;
-    return `<tr>
-      <td class="${cls}">${t.ignorado ? '✗ '+t.type : t.type}</td>
-      <td>${Number(t.price||0).toLocaleString('en-US',{maximumFractionDigits:0})}</td>
-      <td>${usd ? '$'+Number(usd).toFixed(2) : '—'}</td>
-      <td>${t.datetime ? t.datetime.slice(11,16) : '—'}</td>
-    </tr>`;
-  }).join('');
-}
-
-// ── Config ────────────────────────────────────────────────────────────────────
-const cfgContainer = $('config-container');
-cfgContainer.innerHTML = Object.entries(D.config).map(([k,v]) =>
-  `<div class="cfg-row"><span class="cfg-key">${k}</span><span class="cfg-val">${v}</span></div>`
-).join('');
-
-// ══════════════════════════════════════════════════════════════════════════════
-// GRÁFICOS (Canvas 2D puro — sin dependencias externas)
-// ══════════════════════════════════════════════════════════════════════════════
-
-function resizeCanvas(canvas) {
-  canvas.width  = canvas.parentElement.clientWidth - 24;
-  canvas.height = parseInt(canvas.getAttribute('height'));
-}
-
-// ── Gráfico precio ─────────────────────────────────────────────────────────────
-(function() {
-  const canvas = $('chart-price');
-  resizeCanvas(canvas);
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  const candles = D.candles;
-  if (!candles || candles.length < 2) return;
-
-  ctx.fillStyle = '#0d1117'; ctx.fillRect(0,0,W,H);
-
-  const prices = candles.flatMap(c => [c.high, c.low]);
-  const minP = Math.min(...prices), maxP = Math.max(...prices);
-  const rangeP = maxP - minP || 1;
-  const padL=50, padR=20, padT=10, padB=20;
-  const cW = Math.max(3, (W - padL - padR) / candles.length - 1);
-
-  const py = p => padT + (1 - (p - minP) / rangeP) * (H - padT - padB);
-  const cx = i => padL + (i + 0.5) * (W - padL - padR) / candles.length;
-
-  // Grid lines
-  ctx.strokeStyle = '#21262d'; ctx.lineWidth = 0.5;
-  for (let g=0; g<4; g++) {
-    const y = padT + g * (H-padT-padB)/3;
-    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
-    const price = maxP - g * rangeP/3;
-    ctx.fillStyle='#8b949e'; ctx.font='9px monospace';
-    ctx.fillText('$'+Math.round(price).toLocaleString(), 2, y+3);
+// Precio
+(function(){
+  const cv=$('c-price');rC(cv);
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height,cs=D.candles;
+  if(!cs||cs.length<2)return;
+  ctx.fillStyle='#0d1117';ctx.fillRect(0,0,W,H);
+  const ps=cs.flatMap(c=>[c.high,c.low]),mn=Math.min(...ps),mx=Math.max(...ps),rng=mx-mn||1;
+  const pL=46,pR=8,pT=7,pB=16;
+  const py=p=>pT+(1-(p-mn)/rng)*(H-pT-pB);
+  const cx=i=>pL+(i+.5)*(W-pL-pR)/cs.length;
+  const cW=Math.max(2,(W-pL-pR)/cs.length-1);
+  for(let g=0;g<4;g++){
+    const y=pT+g*(H-pT-pB)/3;
+    ctx.strokeStyle='#21262d';ctx.lineWidth=.5;ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(W-pR,y);ctx.stroke();
+    ctx.fillStyle='#8b949e';ctx.font='9px monospace';
+    ctx.fillText('$'+Math.round(mx-g*rng/3).toLocaleString(),1,y+3);
   }
-
-  // Velas
-  candles.forEach((c, i) => {
-    const x = cx(i);
-    const isGreen = c.close >= c.open;
-    const color = isGreen ? '#3fb950' : '#f85149';
-    ctx.strokeStyle = color; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(x, py(c.high)); ctx.lineTo(x, py(c.low)); ctx.stroke();
-    const bodyY = py(Math.max(c.open, c.close));
-    const bodyH = Math.max(1, Math.abs(py(c.open) - py(c.close)));
-    ctx.fillStyle = color; ctx.fillRect(x - cW/2, bodyY, cW, bodyH);
+  cs.forEach((c,i)=>{
+    const x=cx(i),col=c.close>=c.open?'#3fb950':'#f85149';
+    ctx.strokeStyle=col;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,py(c.high));ctx.lineTo(x,py(c.low));ctx.stroke();
+    const bY=py(Math.max(c.open,c.close)),bH=Math.max(1,Math.abs(py(c.open)-py(c.close)));
+    ctx.fillStyle=col;ctx.fillRect(x-cW/2,bY,cW,bH);
   });
-
-  // Señales del trade_history
-  D.trades.forEach(t => {
-    if (t.ignorado) return;
-    const ts = t.ts;
-    const idx = candles.findIndex(c => Math.abs(c.ts - ts) < 7200);
-    if (idx < 0) return;
-    const x = cx(idx), price = t.price || 0;
-    const y = py(price);
+  D.trades.forEach(t=>{
+    if(t.ignorado)return;
+    const idx=D.candles.findIndex(c=>Math.abs(c.ts-t.ts)<7200);
+    if(idx<0)return;
+    const x=cx(idx),y=py(t.price||0);
     ctx.beginPath();
-    if (t.type === 'BUY') {
-      ctx.fillStyle = '#3fb950';
-      ctx.moveTo(x, y+12); ctx.lineTo(x-7, y+22); ctx.lineTo(x+7, y+22); ctx.closePath();
-    } else {
-      ctx.fillStyle = '#f85149';
-      ctx.moveTo(x, y-12); ctx.lineTo(x-7, y-22); ctx.lineTo(x+7, y-22); ctx.closePath();
-    }
-    ctx.fill();
+    if(t.type==='BUY'){ctx.fillStyle='#3fb950';ctx.moveTo(x,y+9);ctx.lineTo(x-5,y+16);ctx.lineTo(x+5,y+16);}
+    else{ctx.fillStyle='#f85149';ctx.moveTo(x,y-9);ctx.lineTo(x-5,y-16);ctx.lineTo(x+5,y-16);}
+    ctx.closePath();ctx.fill();
   });
-
-  // Etiqueta última vela
-  if (candles.length > 0) {
-    const last = candles[candles.length-1];
-    const x = cx(candles.length-1);
-    ctx.strokeStyle='rgba(88,166,255,0.4)'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
-    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, H-padB); ctx.stroke();
-    ctx.setLineDash([]);
-  }
 })();
 
-// ── Gráfico scores ─────────────────────────────────────────────────────────────
-(function() {
-  const canvas = $('chart-scores');
-  resizeCanvas(canvas);
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  const mets = D.metrics;
-  if (!mets || mets.length < 2) return;
-
-  ctx.fillStyle = '#0d1117'; ctx.fillRect(0,0,W,H);
-  const padL=10, padR=10, padT=8, padB=15;
-  const IW = W-padL-padR, IH = H-padT-padB;
-  const px = i => padL + i * IW / (mets.length-1);
-  const py = v => padT + (1 - Math.min(Math.max(v,0),1)) * IH;
-
-  // Threshold lines
-  [['#3fb950', D.thr_bot], ['#f85149', D.thr_top]].forEach(([col, thr]) => {
-    ctx.strokeStyle = col+'66'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
-    const y = py(thr);
-    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle=col+'99'; ctx.font='9px monospace';
-    ctx.fillText(thr.toFixed(2), W-padR-24, y-2);
+// Scores
+(function(){
+  const cv=$('c-score');rC(cv);
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height,ms=D.metrics;
+  if(!ms||ms.length<2)return;
+  ctx.fillStyle='#0d1117';ctx.fillRect(0,0,W,H);
+  const pL=6,pR=28,pT=5,pB=13;
+  const px=i=>pL+i*(W-pL-pR)/(ms.length-1);
+  const py=v=>pT+(1-Math.min(Math.max(v,0),1))*(H-pT-pB);
+  [[D.thr_bot,'#3fb950'],[D.thr_top,'#f85149']].forEach(([thr,col])=>{
+    ctx.strokeStyle=col+'55';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(pL,py(thr));ctx.lineTo(W-pR,py(thr));ctx.stroke();
+    ctx.setLineDash([]);ctx.fillStyle=col+'99';ctx.font='9px monospace';
+    ctx.fillText(thr.toFixed(2),W-pR+2,py(thr)+3);
   });
-
-  // Lines
-  [['score_bot','#3fb950',2],['score_top','#f85149',2]].forEach(([key,col,lw]) => {
-    ctx.strokeStyle=col; ctx.lineWidth=lw; ctx.beginPath();
-    mets.forEach((m,i) => {
-      const x=px(i), y=py(m[key]||0);
-      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-    });
+  [['score_bot','#3fb950'],['score_top','#f85149']].forEach(([k,col])=>{
+    ctx.strokeStyle=col;ctx.lineWidth=2;ctx.beginPath();
+    ms.forEach((m,i)=>{const x=px(i),y=py(m[k]||0);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
     ctx.stroke();
   });
-
-  // X labels
-  ctx.fillStyle='#8b949e'; ctx.font='9px monospace';
-  [0, Math.floor(mets.length/2), mets.length-1].forEach(i => {
-    const ts = mets[i] && mets[i].ts;
-    if (ts) ctx.fillText(new Date(ts*1000).toLocaleTimeString('es').slice(0,5), px(i)-10, H-3);
+  ctx.fillStyle='#8b949e';ctx.font='9px monospace';
+  [0,Math.floor(ms.length/2),ms.length-1].forEach(i=>{
+    const ts=ms[i]&&ms[i].ts;
+    if(ts)ctx.fillText(new Date(ts*1000).toLocaleTimeString('es').slice(0,5),px(i)-10,H-2);
   });
 })();
 
-// ── Gráfico métricas IT ────────────────────────────────────────────────────────
-(function() {
-  const canvas = $('chart-metrics');
-  resizeCanvas(canvas);
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  const mets = D.metrics;
-  if (!mets || mets.length < 2) return;
-
-  ctx.fillStyle = '#0d1117'; ctx.fillRect(0,0,W,H);
-  const padL=10, padR=10, padT=8, padB=15;
-  const IW = W-padL-padR, IH = H-padT-padB;
-  const px = i => padL + i * IW / (mets.length-1);
-  const py = v => padT + (1 - Math.min(Math.max(v,0),1)) * IH;
-
-  const series = [
-    ['te_norm',   '#58a6ff', 'TE'],
-    ['cmi_norm',  '#a371f7', 'CMI'],
-    ['field_norm','#fb8500', 'Field'],
-    ['sink_norm', '#3fb950', 'Sink'],
-  ];
-
-  series.forEach(([key,col,label]) => {
-    ctx.strokeStyle=col; ctx.lineWidth=1.5; ctx.beginPath();
-    mets.forEach((m,i) => {
-      const x=px(i), y=py(m[key]||0);
-      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-    });
+// Métricas IT
+(function(){
+  const cv=$('c-metr');rC(cv);
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height,ms=D.metrics;
+  if(!ms||ms.length<2)return;
+  ctx.fillStyle='#0d1117';ctx.fillRect(0,0,W,H);
+  const pL=6,pR=6,pT=5,pB=18;
+  const px=i=>pL+i*(W-pL-pR)/(ms.length-1);
+  const py=v=>pT+(1-Math.min(Math.max(v,0),1))*(H-pT-pB);
+  [['te_norm','#58a6ff','TE'],['cmi_norm','#a371f7','CMI'],
+   ['field_norm','#fb8500','Field'],['sink_norm','#3fb950','Sink']].forEach(([k,col,lbl],i)=>{
+    ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.beginPath();
+    ms.forEach((m,j)=>{const x=px(j),y=py(m[k]||0);j===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
     ctx.stroke();
-  });
-
-  // Legend
-  series.forEach(([,col,label], i) => {
-    ctx.fillStyle=col; ctx.fillRect(padL+i*55, H-12, 8, 8);
-    ctx.fillStyle='#8b949e'; ctx.font='9px sans-serif';
-    ctx.fillText(label, padL+i*55+10, H-5);
+    ctx.fillStyle=col;ctx.fillRect(pL+i*50,H-13,6,6);
+    ctx.fillStyle='#8b949e';ctx.font='9px sans-serif';ctx.fillText(lbl,pL+i*50+8,H-5);
   });
 })();
 
-// ── Gráfico taker + vol relativo ───────────────────────────────────────────────
-(function() {
-  const canvas = $('chart-taker');
-  resizeCanvas(canvas);
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  const candles = D.candles;
-  if (!candles || candles.length < 2) return;
-
-  ctx.fillStyle = '#0d1117'; ctx.fillRect(0,0,W,H);
-  const padL=10, padR=10, padT=8, padB=15;
-  const IW = W-padL-padR, IH = H-padT-padB;
-  const px = i => padL + i * IW / (candles.length-1);
-
-  // Taker ratio [0,1]
-  ctx.strokeStyle='#58a6ff'; ctx.lineWidth=1.5; ctx.beginPath();
-  const py_t = v => padT + (1 - Math.min(Math.max(v,0),1)) * IH;
-  candles.forEach((c,i) => { i===0 ? ctx.moveTo(px(i),py_t(c.taker||0.5)) : ctx.lineTo(px(i),py_t(c.taker||0.5)); });
+// Taker
+(function(){
+  const cv=$('c-takr');rC(cv);
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height,cs=D.candles;
+  if(!cs||cs.length<2)return;
+  ctx.fillStyle='#0d1117';ctx.fillRect(0,0,W,H);
+  const pL=6,pR=6,pT=5,pB=15;
+  const px=i=>pL+i*(W-pL-pR)/(cs.length-1);
+  const pyt=v=>pT+(1-Math.min(Math.max(v,0),1))*(H-pT-pB);
+  const vls=cs.map(c=>c.vol||0),avg=vls.reduce((a,b)=>a+b,0)/vls.length||1;
+  const mxVR=Math.max(...vls.map(v=>v/avg),2);
+  vls.forEach((v,i)=>{
+    const x=px(i),y=pyt(v/avg/mxVR);
+    ctx.fillStyle='#8b949e22';ctx.fillRect(x-2,y,4,H-pB-y);
+  });
+  ctx.strokeStyle='#58a6ff';ctx.lineWidth=1.5;ctx.beginPath();
+  cs.forEach((c,i)=>{const x=px(i),y=pyt(c.taker||.5);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
   ctx.stroke();
-
-  // Vol relativo al promedio
-  const vols = candles.map(c=>c.vol||0);
-  const avgVol = vols.reduce((a,b)=>a+b,0)/vols.length || 1;
-  const maxVolRatio = Math.max(...vols.map(v=>v/avgVol), 2);
-  const py_v = v => padT + (1 - Math.min(v/maxVolRatio, 1)) * IH;
-  ctx.strokeStyle='#8b949e66'; ctx.lineWidth=1;
-  vols.forEach((v,i) => {
-    const x=px(i), y=py_v(v/avgVol);
-    ctx.fillStyle='#8b949e33';
-    ctx.fillRect(x-2, y, 4, H-padB-y);
-  });
-
-  // 0.5 line (neutral taker)
-  ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
-  const midY = padT + IH/2;
-  ctx.beginPath(); ctx.moveTo(padL, midY); ctx.lineTo(W-padR, midY); ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+  const mid=pyt(.5);ctx.beginPath();ctx.moveTo(pL,mid);ctx.lineTo(W-pR,mid);ctx.stroke();
   ctx.setLineDash([]);
-  ctx.fillStyle='#8b949e'; ctx.font='9px monospace'; ctx.fillText('0.5', 2, midY+3);
-
-  // Legend
-  ctx.fillStyle='#58a6ff'; ctx.fillRect(padL, H-12, 8,8);
-  ctx.fillStyle='#8b949e'; ctx.font='9px sans-serif'; ctx.fillText('Taker Ratio', padL+10, H-5);
-  ctx.fillStyle='#8b949e66'; ctx.fillRect(padL+90, H-12, 8,8);
-  ctx.fillText('Vol/Avg', padL+100, H-5);
+  ctx.fillStyle='#8b949e';ctx.font='9px monospace';ctx.fillText('0.5',1,mid+3);
 })();
-
-</script>
-</body>
-</html>
+</script></body></html>
