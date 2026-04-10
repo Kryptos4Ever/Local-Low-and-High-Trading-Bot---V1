@@ -79,15 +79,15 @@ log = get_logger("backtest_divfield")
 # ══════════════════════════════════════════════════════════════════════════════
 
 CONFIG = DFConfig(
-    te_estimator        = TEEstimator.BINNING,
+    te_estimator        = TEEstimator.KDE,
     window_mode         = WindowMode.FIXED,
-    window_size         = 15,
+    window_size         = 10,
     field_def           = FieldDefinition.JACOBIAN,
-    cmi_regimes         = CMIRegimes.BINARY,
-    threshold_mode      = ThresholdMode.FIXED,
-    sink_mode           = SinkMode.SCORE_COMPONENT,
-    score_threshold_bot = 0.55,
-    score_threshold_top = 0.55,
+    cmi_regimes         = CMIRegimes.TERNARY,
+    threshold_mode      = ThresholdMode.ADAPTIVE_PERCENTILE,
+    sink_mode           = SinkMode.FILTER_AND,
+    score_threshold_bot = 0.75,
+    score_threshold_top = 0.75,
     cooldown            = 0,
     k_bins              = 4,
     k_nn                = 3,

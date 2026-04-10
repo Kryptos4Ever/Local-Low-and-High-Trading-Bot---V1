@@ -50,9 +50,9 @@ log = get_logger("backtest_grid_extremes")
 # PARÁMETROS DE LA ESTRATEGIA
 # ══════════════════════════════════════════════════════════════════════════════
 
-VENTANA       = 20     # velas a cada lado para confirmar extremo local
-DROP_PCT_BUY  = 5.0    # % de caída por nivel BUY  desde el último top
-RISE_PCT_SELL = 10.0    # % de subida por nivel SELL desde el último bottom
+VENTANA       = 10    # velas a cada lado para confirmar extremo local
+DROP_PCT_BUY  = 3.0    # % de caída por nivel BUY  desde el último top
+RISE_PCT_SELL = 4.0    # % de subida por nivel SELL desde el último bottom
 RETROACTIVE   = False  # True = disparar niveles ya cruzados al confirmar extremo
 
 

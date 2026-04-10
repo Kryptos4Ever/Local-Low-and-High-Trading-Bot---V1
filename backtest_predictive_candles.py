@@ -76,11 +76,11 @@ log = get_logger("backtest_predictive_candles")
 # CONFIG — Editar aquí antes de cada ejecución
 # ══════════════════════════════════════════════════════════════════════════════
 
-VENTANA    = 6     # velas hacia atrás para calcular factores  [10, 16]
-UMBRAL_BOT = 0.75   # score mínimo para señal BUY               (0, 1]
-UMBRAL_TOP = 0.6   # score mínimo para señal SELL              (0, 1]
-COOLDOWN_BOT = 96    # velas mínimas entre señales BUY  (0 = desactivado)
-COOLDOWN_TOP = 72    # velas mínimas entre señales SELL (0 = desactivado)
+VENTANA    = 24     # velas hacia atrás para calcular factores  [10, 16]
+UMBRAL_BOT = 0.9   # score mínimo para señal BUY               (0, 1]
+UMBRAL_TOP = 0.9   # score mínimo para señal SELL              (0, 1]
+COOLDOWN_BOT = 0    # velas mínimas entre señales BUY  (0 = desactivado)
+COOLDOWN_TOP = 0    # velas mínimas entre señales SELL (0 = desactivado)
 
 # ── Predictores activos para BOTTOM (señal BUY) ───────────────────────────────
 USE_BOT_CLOSE_POSITION = True   # AUC=0.854 ▼
@@ -88,8 +88,8 @@ USE_BOT_BB_POSITION    = False   # AUC=0.833 ▼
 USE_BOT_RECOVERY_PCT   = False   # AUC=0.823 ▼
 
 # ── Predictores activos para TOP (señal SELL) ─────────────────────────────────
-USE_TOP_CLOSE_POSITION = False   # AUC=0.839 ▲
-USE_TOP_DRAWDOWN_PCT   = True   # AUC=0.826 ▼
+USE_TOP_CLOSE_POSITION = True   # AUC=0.839 ▲
+USE_TOP_DRAWDOWN_PCT   = False   # AUC=0.826 ▼
 USE_TOP_BB_POSITION    = False   # AUC=0.821 ▲
 
 # ── Salida ────────────────────────────────────────────────────────────────────
