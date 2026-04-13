@@ -31,7 +31,7 @@ FECHA_FIN    = '2026-04-07'
 # ── Parámetros compartidos de simulación ──────────────────────────────────────
 SYMBOL             = "BTCUSDT"
 SALDO_USDT_INICIAL = 1000.0
-MAX_POSICIONES     = 5
+MAX_POSICIONES     = 9
 COMMISSION_PCT     = 0.1       # % (Binance Spot maker/taker)
 
 # ── Salida ─────────────────────────────────────────────────────────────────────

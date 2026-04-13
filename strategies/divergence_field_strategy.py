@@ -98,8 +98,13 @@ class DFConfig:
     def validate(self) -> None:
         assert self.window_size >= 8,    "window_size >= 8"
         assert self.window_min  >= 5,    "window_min >= 5"
-        assert 0 < self.score_threshold_bot <= 1
-        assert 0 < self.score_threshold_top <= 1
+        # Se permite 0.0 para uso interno del optimizador (Fase 1 captura
+        # todos los scores sin filtrar; los umbrales reales se aplican en
+        # Fase 2 vía _replay_decision).
+        assert 0 <= self.score_threshold_bot <= 1, \
+            "score_threshold_bot debe estar en [0, 1]"
+        assert 0 <= self.score_threshold_top <= 1, \
+            "score_threshold_top debe estar en [0, 1]"
         assert self.te_estimator != TEEstimator.KNN or self.window_size >= 15, \
             "KNN requiere window_size >= 15"
 
