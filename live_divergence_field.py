@@ -72,15 +72,15 @@ log = get_logger("live_divfield")
 # ══════════════════════════════════════════════════════════════════════════════
 
 CONFIG = DFConfig(
-    te_estimator        = TEEstimator.KDE,
+    te_estimator        = TEEstimator.BINNING,
     window_mode         = WindowMode.FIXED,
-    window_size         = 10,
+    window_size         = 14,
     field_def           = FieldDefinition.JACOBIAN,
     cmi_regimes         = CMIRegimes.TERNARY,
-    threshold_mode      = ThresholdMode.ADAPTIVE_PERCENTILE,
+    threshold_mode      = ThresholdMode.FIXED,
     sink_mode           = SinkMode.FILTER_AND,
-    score_threshold_bot = 0.55,
-    score_threshold_top = 0.55,
+    score_threshold_bot = 0.70,
+    score_threshold_top = 0.65,
     cooldown            = 0,
     k_bins              = 4,
     k_nn                = 3,

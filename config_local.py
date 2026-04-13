@@ -14,8 +14,8 @@ STATE_PATH   = "state/trading_state.jsonl"
 
 # ── Rango de fechas ────────────────────────────────────────────────────────────
 # Formato: 'YYYY-MM-DD'  |  None = desde el inicio / hasta el final del dataset
-FECHA_INICIO = '2021-11-10'
-FECHA_FIN    = '2026-04-07'
+FECHA_INICIO = '2022-11-22'
+FECHA_FIN    = '2025-10-06'
 
 # Referencias útiles:
 #   Bottom Bear 2018  : '2018-12-10'

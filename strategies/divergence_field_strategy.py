@@ -15,6 +15,31 @@ OPTIMIZACIONES (sin cambio de resultados)
   · cmi_binning: Counter(zip(...)) → np.bincount  (~3× más rápido)
   · _push_history: list.pop(0) O(n) → deque(maxlen) O(1)
   · _normalize: compatible con deque y list
+
+BUG FIX — _compute_cmi (RSI de ventana corta)
+──────────────────────────────────────────────
+  Problema raíz:
+    _rsi(closes[:i+1]) devuelve 50.0 cuando len(closes[:i+1]) < period+1=15.
+    Con window_size=14, el loop i=0..13 nunca llega a 15 puntos → rsi_vals
+    es completamente [50, 50, ..., 50].
+    Al tener todos los valores iguales, _digitize_pct los asigna al mismo
+    bin y MI(RSI; vol_accel | price_vs_MA) = 0 → cmi_raw = 0 → cmi_n = 0.
+
+    Con cmi_n = 0 en modo FILTER_AND el score máximo teórico es:
+      (w_te·1 + w_cmi·0 + w_field·1) / (w_te+w_cmi+w_field)
+      = (0.40 + 0.20) / 0.90 = 0.667
+
+    Pero score_threshold_bot = 0.70  →  NUNCA se alcanza  →  0 trades.
+
+    El optimizador no tiene este problema porque _FastDivergenceField
+    sobreescribe _compute_cmi usando _W_RSI, precomputado sobre el dataset
+    completo (38 639 velas), donde todo índice >= 14 tiene RSI correcto.
+
+  Solución:
+    Calcular RSI sobre self._buf (deque de hasta window_max+10=50 velas)
+    en lugar de solo sobre la ventana. Con buf_len >= _RSI_PERIOD + n = 28,
+    los últimos n valores del RSI usan exactamente la misma ventana de 14
+    cierres que usa el optimizador → resultados numéricos idénticos.
 """
 
 from __future__ import annotations
@@ -32,6 +57,8 @@ from strategies.base_strategy import BaseStrategy, Signal, SignalSide, HOLD
 from support.logger           import get_logger
 
 log = get_logger("divergence_field")
+
+_RSI_PERIOD = 14  # constante de módulo; usada en _rsi, _rsi_series y _compute_cmi
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -96,8 +123,8 @@ class DFConfig:
     n_norm:              int              = 200
 
     def validate(self) -> None:
-        assert self.window_size >= 8,    "window_size >= 8"
-        assert self.window_min  >= 5,    "window_min >= 5"
+        assert self.window_size >= 8,   "window_size >= 8"
+        assert self.window_min  >= 5,   "window_min >= 5"
         # Se permite 0.0 para uso interno del optimizador (Fase 1 captura
         # todos los scores sin filtrar; los umbrales reales se aplican en
         # Fase 2 vía _replay_decision).
@@ -434,7 +461,8 @@ def field_jacobian(window: List[Candle]) -> Tuple[float, float, float]:
 # MATH — RSI
 # ══════════════════════════════════════════════════════════════════════════════
 
-def _rsi(closes: np.ndarray, period: int = 14) -> float:
+def _rsi(closes: np.ndarray, period: int = _RSI_PERIOD) -> float:
+    """RSI puntual sobre los últimos `period+1` cierres del array."""
     if len(closes) < period + 1:
         return 50.0
     deltas   = np.diff(closes[-(period + 1):])
@@ -445,6 +473,28 @@ def _rsi(closes: np.ndarray, period: int = 14) -> float:
     return 100.0 - 100.0 / (1.0 + avg_gain / avg_loss)
 
 
+def _rsi_series(closes: np.ndarray, period: int = _RSI_PERIOD) -> np.ndarray:
+    """
+    RSI rolling O(n) para todo el array de cierres.
+    Idéntico a [_rsi(closes[:i+1]) for i in range(len(closes))].
+    Devuelve 50.0 en las primeras `period` posiciones (historia insuficiente).
+    """
+    n      = len(closes)
+    result = np.full(n, 50.0, dtype=np.float64)
+    if n < period + 1:
+        return result
+    deltas = np.diff(closes)
+    gains  = np.where(deltas > 0, deltas, 0.0)
+    losses = np.where(deltas < 0, -deltas, 0.0)
+    cg     = np.concatenate([[0.0], np.cumsum(gains)])
+    cl     = np.concatenate([[0.0], np.cumsum(losses)])
+    for i in range(period, n):
+        ag        = (cg[i] - cg[i - period]) / period
+        al        = (cl[i] - cl[i - period]) / period
+        result[i] = 100.0 if al < 1e-10 else 100.0 - 100.0 / (1.0 + ag / al)
+    return result
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # ESTRATEGIA
 # ══════════════════════════════════════════════════════════════════════════════
@@ -453,11 +503,13 @@ class DivergenceFieldStrategy(BaseStrategy):
     """
     Estrategia TE + CMI + Divergence Field.
 
-    Cambios de rendimiento respecto a versión anterior (sin cambio de API):
-      · _h_te/_h_cmi/_h_field/_h_sink: deque(maxlen) en lugar de list.
-        Elimina list.pop(0) O(n) → O(1) por vela.
-      · cmi_binning: vectorizado con np.bincount (~3× por call).
-      · te_binning: vectorizado con np.bincount (~2–3× por call).
+    Optimizaciones de rendimiento (sin cambio de resultados):
+      · _h_te/_h_cmi/_h_field/_h_sink: deque(maxlen) — elimina pop(0) O(n).
+      · cmi_binning, te_binning: vectorizados con np.bincount (~2–3×).
+
+    Bug fix (ver docstring del módulo):
+      · _compute_cmi: usa self._buf completo para RSI en lugar de solo
+        la ventana. Elimina RSI=50 constante cuando window_size <= 14.
     """
 
     def __init__(self, config: DFConfig = None) -> None:
@@ -622,16 +674,45 @@ class DivergenceFieldStrategy(BaseStrategy):
             return te_knn(taker_series, price_slope, k=self.cfg.k_nn)
 
     def _compute_cmi(self, window: List[Candle]) -> float:
+        """
+        CMI(RSI; vol_accel | price_vs_MA20).
+
+        FIX: RSI se calcula ahora sobre self._buf completo (hasta 50 velas)
+        en lugar de solo sobre `window`. Esto resuelve el bug donde
+        window_size <= _RSI_PERIOD=14 producía RSI=50 constante → CMI=0.
+
+        Cuando buf_len >= _RSI_PERIOD + n (28 para window=14), los últimos
+        n valores de rsi_series usan exactamente la misma ventana de 14
+        cierres que el optimizador (_FastDivergenceField con _W_RSI global),
+        garantizando resultados numéricos idénticos.
+        """
         closes = np.array([c.close  for c in window], dtype=float)
         vols   = np.array([c.volume for c in window], dtype=float)
         n      = len(closes)
 
-        rsi_vals = np.array([_rsi(closes[:i + 1]) for i in range(n)], dtype=float)
+        # ── RSI usando buffer completo ─────────────────────────────────────
+        buf_candles = list(self._buf)   # hasta window_max + 10 = 50 velas
+        buf_len     = len(buf_candles)
 
+        if buf_len >= _RSI_PERIOD + n:
+            # Buffer tiene historia previa suficiente:
+            # rsi_series[-n:] usa los mismos 14 cierres que _W_RSI global.
+            buf_cls  = np.array([c.close for c in buf_candles], dtype=float)
+            rsi_vals = _rsi_series(buf_cls, _RSI_PERIOD)[-n:]
+        else:
+            # Fallback para las primeras ~28 velas del backtest.
+            # Comportamiento idéntico al código anterior.
+            rsi_vals = np.array([_rsi(closes[:i + 1]) for i in range(n)],
+                                 dtype=float)
+
+        # ── vol_accel ──────────────────────────────────────────────────────
         vol_accel = np.zeros(n, dtype=float)
         if n >= 3:
             vol_accel[2:] = np.diff(vols, 2)
 
+        # ── MA20 y price_vs_MA ─────────────────────────────────────────────
+        # Para n < 20 (e.g. window=14), el optimizador también usa solo
+        # la ventana (ma_p = min(20, n) = 14). Sin discrepancia aquí.
         ma_p = min(20, n)
         cum  = np.concatenate([[0.0], np.cumsum(closes)])
         ma20 = np.array([
@@ -663,7 +744,6 @@ class DivergenceFieldStrategy(BaseStrategy):
 
     def _push_history(self, te: float, cmi: float,
                       field_abs: float, sink: float) -> None:
-        # deque(maxlen=n_norm): append es O(1), descarte automático del extremo
         self._h_te.append(te)
         self._h_cmi.append(cmi)
         self._h_field.append(field_abs)
